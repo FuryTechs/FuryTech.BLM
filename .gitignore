@@ -1,0 +1,16 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/BLM/bin
+/BLM/obj
+/BLM.EF6/bin
+/BLM.EF6/obj
+/BLM.EF6.Tests/bin
+/BLM.EF6.Tests/obj
+/BLM.Tests/bin
+/BLM.Tests/obj
+/BLM/RageSoft.BLM.Base.1.0.1.nupkg
+/packages
+/BLM.EF6/RageSoft.BLM.EF6.1.0.0.nupkg
