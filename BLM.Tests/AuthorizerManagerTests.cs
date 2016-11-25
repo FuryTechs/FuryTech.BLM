@@ -95,6 +95,7 @@ namespace BLM.Tests
             Assert.IsInstanceOfType(auth, typeof(IAuthorizer<ClassWithOneAuthorizer>));
         }
 
+
         [TestMethod]
         [ExpectedException(typeof(AuthorizerMismatchException))]
         public void ShouldThrowExceptionOnMismatch()
