@@ -54,8 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthorizerManagerTests.cs" />
-    <Compile Include="EventListenerManagerTests.cs" />
+    <Compile Include="AuthorizerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeLoaderTests.cs" />
   </ItemGroup>
