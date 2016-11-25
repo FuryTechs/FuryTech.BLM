@@ -8,6 +8,7 @@ using System;
 using Effort.Provider;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using BLM.Authorization;
 using BLM.EventListeners;
 
 namespace BLM.EF6.Tests
@@ -23,6 +24,8 @@ namespace BLM.EF6.Tests
         public bool HasCreatedFlagTriggered { get; set; }
         public bool HasModifiedFlagTriggered { get; set; }
     }
+
+    class Fake2 { }
 
     class MockListener : IEventListener<FakeEntity>
     {
@@ -42,79 +45,83 @@ namespace BLM.EF6.Tests
         }
 
         public bool OnCreatedTriggered;
-        public void OnCreated(FakeEntity entity, IIdentity user)
+        public void OnCreated(FakeEntity entity, IContextInfo ctx)
         {
             OnCreatedTriggered = true;
         }
 
         public bool OnCreationValidationFailedTriggered;
-        public void OnCreationValidationFailed(FakeEntity entity, IIdentity user)
+        public void OnCreationValidationFailed(FakeEntity entity, IContextInfo ctx)
         {
             OnCreationValidationFailedTriggered = true;
         }
 
         public bool OnRemovedTriggered;
-        public void OnRemoved(FakeEntity entity, IIdentity user)
+        public void OnRemoved(FakeEntity entity, IContextInfo ctx)
         {
             OnRemovedTriggered = true;
         }
 
 
         public bool OnDeletionFailedTriggered;
-        public void OnRemoveFailed(FakeEntity entity, IIdentity user)
+        public void OnRemoveFailed(FakeEntity entity, IContextInfo ctx)
         {
             OnDeletionFailedTriggered = true;
         }
 
         public bool OnModificationFailedTriggered;
 
-        public void OnModificationFailed(FakeEntity originalEntity, FakeEntity modifiedEntity, IIdentity user)
+        public void OnModificationFailed(FakeEntity originalEntity, FakeEntity modifiedEntity, IContextInfo ctx)
         {
             OnModificationFailedTriggered = true;
         }
 
         public bool OnModifiedTriggered;
-        public void OnModified(FakeEntity originalEntity, FakeEntity modifiedEntity, IIdentity user)
+        public void OnModified(FakeEntity originalEntity, FakeEntity modifiedEntity, IContextInfo ctx)
         {
             OnModifiedTriggered = true;
+
+            var t = ctx.GetAuthorizedEntitySet<FakeEntity>().FirstOrDefault();
+            Assert.IsNotNull(t);
+
+            var fromDb = ctx.GetFullEntitySet<FakeEntity>().FirstOrDefault();
+            Assert.IsNotNull(fromDb);
+
+            Assert.AreEqual(ctx.Identity, Thread.CurrentPrincipal.Identity);
         }
 
-        public FakeEntity OnBeforeCreate(FakeEntity entity, IIdentity user)
+        public FakeEntity OnBeforeCreate(FakeEntity entity, IContextInfo user)
         {
             entity.HasCreatedFlagTriggered = true;
             return entity;
         }
 
-        public FakeEntity OnBeforeModify(FakeEntity original, FakeEntity modified, IIdentity user)
+        public FakeEntity OnBeforeModify(FakeEntity original, FakeEntity modified, IContextInfo ctx)
         {
             modified.HasModifiedFlagTriggered = true;
             return modified;
         }
     }
 
-    class FakeAuthorizer : BaseEfAuthorizer<FakeEntity>
+    class FakeAuthorizer : IAuthorizer<FakeEntity>
     {
-        public override IQueryable<FakeEntity> AuthorizeCollection(IIdentity usr, IQueryable<FakeEntity> entities)
+        public IQueryable<FakeEntity> AuthorizeCollection(IQueryable<FakeEntity> entities, IContextInfo context)
         {
-            Assert.IsNotNull(DbContext);
             return entities;
         }
 
-        public override bool CanRemove(IIdentity usr, FakeEntity entry)
+        public bool CanRemove(FakeEntity entry, IContextInfo context)
         {
-            Assert.IsNotNull(DbContext);
             return entry.IsValid;
         }
 
-        public override bool CanInsert(IIdentity usr, FakeEntity entry)
+        public bool CanInsert(FakeEntity entry, IContextInfo context)
         {
-            Assert.IsNotNull(DbContext);
             return entry.IsValid;
         }
 
-        public override bool CanUpdate(IIdentity usr, FakeEntity original, FakeEntity newEntity)
+        public bool CanUpdate(FakeEntity original, FakeEntity newEntity, IContextInfo context)
         {
-            Assert.IsNotNull(DbContext);
             return newEntity.IsValid;
         }
     }
@@ -153,7 +160,7 @@ namespace BLM.EF6.Tests
         [TestCleanup]
         public void Cleanup()
         {
-            _efRepo.Dispose();
+            _efRepo?.Dispose();
             _efforConnection?.Dispose();
         }
 
@@ -322,6 +329,17 @@ namespace BLM.EF6.Tests
             Assert.IsTrue(_db.FakeEntities.Any(a => a.Value == guid));
             Assert.IsFalse(_listener.OnRemovedTriggered);
             Assert.IsTrue(_listener.OnDeletionFailedTriggered);
+        }
+
+        [TestMethod]
+        public void SetEntityState()
+        {
+            var fake = new FakeEntity(){ Id = 666, IsValid = true };
+            _efRepo.Add(_identity, fake);
+            _efRepo.SetEntityState(fake, EntityState.Unchanged);
+            Assert.AreEqual(EntityState.Unchanged, _efRepo.GetEntityState(fake));
+
+            _efRepo.SaveChanges(_identity);
         }
 
     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Security.Principal;
 using BLM.Authorization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -14,22 +13,22 @@ namespace BLM.Tests
         class ClassWithOneAuthorizer { }
         class MockAuth1 : IAuthorizer<ClassWithOneAuthorizer>
         {
-            public IQueryable<ClassWithOneAuthorizer> AuthorizeCollection(IIdentity usr, IQueryable<ClassWithOneAuthorizer> entities)
+            public bool CanInsert(ClassWithOneAuthorizer entity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public bool CanRemove(IIdentity usr, ClassWithOneAuthorizer entry)
+            public bool CanUpdate(ClassWithOneAuthorizer originalEntity, ClassWithOneAuthorizer modifiedEntity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public bool CanInsert(IIdentity usr, ClassWithOneAuthorizer entry)
+            public bool CanRemove(ClassWithOneAuthorizer entity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public bool CanUpdate(IIdentity usr, ClassWithOneAuthorizer original, ClassWithOneAuthorizer modified)
+            public IQueryable<ClassWithOneAuthorizer> AuthorizeCollection(IQueryable<ClassWithOneAuthorizer> entities, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
@@ -39,44 +38,44 @@ namespace BLM.Tests
 
         class MockAuthMultiple1 : IAuthorizer<ClassWithTwoAuthorizers>
         {
-            public IQueryable<ClassWithTwoAuthorizers> AuthorizeCollection(IIdentity usr, IQueryable<ClassWithTwoAuthorizers> entities)
+            public bool CanInsert(ClassWithTwoAuthorizers entity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public bool CanRemove(IIdentity usr, ClassWithTwoAuthorizers entry)
+            public bool CanUpdate(ClassWithTwoAuthorizers originalEntity, ClassWithTwoAuthorizers modifiedEntity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public bool CanInsert(IIdentity usr, ClassWithTwoAuthorizers entry)
+            public bool CanRemove(ClassWithTwoAuthorizers entity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public bool CanUpdate(IIdentity usr, ClassWithTwoAuthorizers original, ClassWithTwoAuthorizers modified)
+            public IQueryable<ClassWithTwoAuthorizers> AuthorizeCollection(IQueryable<ClassWithTwoAuthorizers> entities, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
         }
         class MockAuthMultiple2 : IAuthorizer<ClassWithTwoAuthorizers>
         {
-            public IQueryable<ClassWithTwoAuthorizers> AuthorizeCollection(IIdentity usr, IQueryable<ClassWithTwoAuthorizers> entities)
+            public bool CanInsert(ClassWithTwoAuthorizers entity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public bool CanRemove(IIdentity usr, ClassWithTwoAuthorizers entry)
+            public bool CanUpdate(ClassWithTwoAuthorizers originalEntity, ClassWithTwoAuthorizers modifiedEntity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public bool CanInsert(IIdentity usr, ClassWithTwoAuthorizers entry)
+            public bool CanRemove(ClassWithTwoAuthorizers entity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public bool CanUpdate(IIdentity usr, ClassWithTwoAuthorizers original, ClassWithTwoAuthorizers modified)
+            public IQueryable<ClassWithTwoAuthorizers> AuthorizeCollection(IQueryable<ClassWithTwoAuthorizers> entities, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
