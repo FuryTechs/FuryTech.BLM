@@ -4,27 +4,22 @@ using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Security.Principal;
-using BLM.Authorization;
-using BLM.EventListeners;
+
 using BLM.Repository;
 
 namespace BLM.EF6
 {
     public class EfRepository<T> : IRepository<T> where T: class, new()
     {
-        public IAuthorizer<T> Authorizer { get; private set; }
 
         private readonly DbContext _dbcontext;
         private readonly DbSet<T> _dbset;
-        private readonly EventListenerManager _listenerManager;
 
         public EfRepository(DbContext db)
         {
             _dbcontext = db;
             _dbset = db.Set<T>();
 
-            Authorizer = AuthorizerManager.GetAuthorizer<T>();
-            _listenerManager = EventListenerManager.Current;
         }
 
         private EfContextInfo GetContextInfo(IIdentity user)

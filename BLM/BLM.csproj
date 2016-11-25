@@ -47,16 +47,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Authorization\AuthorizerManager.cs" />
-    <Compile Include="Authorization\AuthorizerMismatchException.cs" />
-    <Compile Include="Authorization\AuthorizerNotFoundException.cs" />
-    <Compile Include="Authorization\IAuthorizer.cs" />
-    <Compile Include="BlmTypeLoader.cs" />
-    <Compile Include="EventListeners\EventListenerManager.cs" />
-    <Compile Include="EventListeners\IEventListener.cs" />
+    <Compile Include="Authorize.cs" />
+    <Compile Include="GenericContextInfo.cs" />
+    <Compile Include="Interpret.cs" />
+    <Compile Include="Listen.cs" />
+    <Compile Include="Loader.cs" />
+    <Compile Include="IAuthorizeCollection.cs" />
+    <Compile Include="IAuthorizeCreate.cs" />
+    <Compile Include="IAuthorizeRemove.cs" />
+    <Compile Include="IAuthorizeModify.cs" />
+    <Compile Include="IBlmEntry.cs" />
     <Compile Include="IContextInfo.cs" />
+    <Compile Include="IInterpretBeforeCreate.cs" />
+    <Compile Include="IInterpretBeforeModify.cs" />
+    <Compile Include="IListenCreated.cs" />
+    <Compile Include="IListenCreateFailed.cs" />
+    <Compile Include="IListenModificationFailed.cs" />
+    <Compile Include="IListenModified.cs" />
+    <Compile Include="IListenRemoved.cs" />
+    <Compile Include="IListenRemoveFailed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repository\IRepository.cs" />
+    <Compile Include="IRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BLM.nuspec" />
