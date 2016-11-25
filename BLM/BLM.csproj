@@ -58,6 +58,7 @@
     <Compile Include="Repository\IRepository.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BLM.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
