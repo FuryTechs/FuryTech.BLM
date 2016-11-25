@@ -5,6 +5,22 @@ namespace BLM.EventListeners
     public interface IEventListener<T> : IEventListener
     {
         /// <summary>
+        /// Possibility to interpret an entity on creation before saving into the DB
+        /// </summary>
+        /// <param name="entity">The entity to be created</param>
+        /// <param name="user">The creator user</param>
+        /// <returns>The entity to be created</returns>
+        T OnBeforeCreate(T entity, IIdentity user);
+
+        /// <summary>
+        /// Possibility to interpret an entity on modification before saving into the DB
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="user"></param>
+        /// <returns>The entity to be modified</returns>
+        T OnBeforeModify(T originalEntity, T modifiedEntity, IIdentity user);
+
+        /// <summary>
         /// Triggered after the entity is validated, created and saved succesfully in the DB.
         /// </summary>
         /// <param name="entity">The created entity</param>
