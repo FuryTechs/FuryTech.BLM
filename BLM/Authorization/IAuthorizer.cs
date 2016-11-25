@@ -1,14 +1,12 @@
-﻿using System;
-using System.Linq;
-using System.Security.Principal;
+﻿using System.Linq;
 
 namespace BLM.Authorization
 {
     public interface IAuthorizer<T>
     {
-        bool CanInsert(IIdentity usr, T entity);
-        bool CanUpdate(IIdentity usr, T originalEntity, T modifiedEntity);
-        bool CanRemove(IIdentity usr, T entity);
-        IQueryable<T> AuthorizeCollection(IIdentity usr, IQueryable<T> entities);
+        bool CanInsert(T entity, IContextInfo ctx);
+        bool CanUpdate(T originalEntity, T modifiedEntity, IContextInfo ctx);
+        bool CanRemove(T entity, IContextInfo ctx);
+        IQueryable<T> AuthorizeCollection(IQueryable<T> entities, IContextInfo ctx);
     }
 }

@@ -27,49 +27,49 @@ namespace BLM.Tests
             }
 
             public bool OnCreatedTriggered;
-            public void OnCreated(MockClass entity, IIdentity user)
+            public void OnCreated(MockClass entity, IContextInfo ctx)
             {
                 OnCreatedTriggered = true;
             }
 
             public bool OnCreationValidationFailedTriggered;
-            public void OnCreationValidationFailed(MockClass entity, IIdentity user)
+            public void OnCreationValidationFailed(MockClass entity, IContextInfo ctx)
             {
                 OnCreationValidationFailedTriggered = true;
             }
 
             public bool OnRemovedTriggered;
-            public void OnRemoved(MockClass entity, IIdentity user)
+            public void OnRemoved(MockClass entity, IContextInfo ctx)
             {
                 OnRemovedTriggered = true;
             }
 
 
             public bool OnRemoveFailedTriggered;
-            public void OnRemoveFailed(MockClass entity, IIdentity user)
+            public void OnRemoveFailed(MockClass entity, IContextInfo ctx)
             {
                 OnRemoveFailedTriggered = true;
             }
 
             public bool OnModificationFailedTriggered;
 
-            public void OnModificationFailed(MockClass originalEntity, MockClass modifiedEntity, IIdentity user)
+            public void OnModificationFailed(MockClass originalEntity, MockClass modifiedEntity, IContextInfo ctx)
             {
                 OnModificationFailedTriggered = true;
             }
 
             public bool OnModifiedTriggered;
-            public void OnModified(MockClass originalEntity, MockClass modifiedEntity, IIdentity user)
+            public void OnModified(MockClass originalEntity, MockClass modifiedEntity, IContextInfo ctx)
             {
                 OnModifiedTriggered = true;
             }
 
-            public MockClass OnBeforeCreate(MockClass entity, IIdentity user)
+            public MockClass OnBeforeCreate(MockClass entity, IContextInfo ctx)
             {
                 return entity;
             }
 
-            public MockClass OnBeforeModify(MockClass original, MockClass modified, IIdentity user)
+            public MockClass OnBeforeModify(MockClass original, MockClass modified, IContextInfo ctx)
             {
                 return modified;
             }
@@ -81,42 +81,42 @@ namespace BLM.Tests
         class MockInterfacedListener : IEventListener<IMockInterface>
         {
             public bool OnCreatedTriggered = false;
-            public void OnCreated(IMockInterface entity, IIdentity user)
+            public void OnCreated(IMockInterface entity, IContextInfo ctx)
             {
                 OnCreatedTriggered = true;
             }
 
-            public void OnCreationValidationFailed(IMockInterface entity, IIdentity user)
+            public void OnCreationValidationFailed(IMockInterface entity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public void OnRemoved(IMockInterface entity, IIdentity user)
+            public void OnRemoved(IMockInterface entity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public void OnRemoveFailed(IMockInterface entity, IIdentity user)
+            public void OnRemoveFailed(IMockInterface entity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public void OnModificationFailed(IMockInterface originalEntity, IMockInterface modifiedEntity, IIdentity user)
+            public void OnModificationFailed(IMockInterface originalEntity, IMockInterface modifiedEntity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public void OnModified(IMockInterface originalEntity, IMockInterface modifiedEntity, IIdentity user)
+            public void OnModified(IMockInterface originalEntity, IMockInterface modifiedEntity, IContextInfo ctx)
             {
                 throw new NotImplementedException();
             }
 
-            public IMockInterface OnBeforeCreate(IMockInterface entity, IIdentity user)
+            public IMockInterface OnBeforeCreate(IMockInterface entity, IContextInfo ctx)
             {
                 return entity;
             }
 
-            public IMockInterface OnBeforeModify(IMockInterface original, IMockInterface modified, IIdentity user)
+            public IMockInterface OnBeforeModify(IMockInterface original, IMockInterface modified, IContextInfo ctx)
             {
                 return modified;
             }

@@ -78,63 +78,60 @@ namespace BLM.EventListeners
             }
         }
 
-
-
-
-        public object TriggerOnBeforeCreate(object obj, IIdentity user)
+        public object TriggerOnBeforeCreate(object obj, IContextInfo context)
         {
             var objType = obj.GetType();
             var methodName = "OnBeforeCreate";
             foreach (var listener in GetListenersForType(objType))
             {
                 var methodInfo = listener.GetType().GetMethod(methodName);
-                obj = methodInfo.Invoke(listener, new[] {obj, user});
+                obj = methodInfo.Invoke(listener, new[] {obj, context });
             }
 
             return obj;
         }
 
-        public object TriggerOnBeforeModify(object original, object modified, IIdentity user)
+        public object TriggerOnBeforeModify(object original, object modified, IContextInfo context)
         {
             var objType = modified.GetType();
             var methodName = "OnBeforeModify";
             foreach (var listener in GetListenersForType(objType))
             {
                 var methodInfo = listener.GetType().GetMethod(methodName);
-                modified = methodInfo.Invoke(listener, new[] { original, modified, user });
+                modified = methodInfo.Invoke(listener, new[] { original, modified, context });
             }
 
             return modified;
         }
 
-        public void TriggerOnCreated(object obj, IIdentity user)
+        public void TriggerOnCreated(object obj, IContextInfo context)
         {
-            TriggerMethod(obj.GetType(), "OnCreated", new[] { obj, user });
+            TriggerMethod(obj.GetType(), "OnCreated", new[] { obj, context });
         }
 
-        public void TriggerOnCreationFailed(object obj, IIdentity user)
+        public void TriggerOnCreationFailed(object obj, IContextInfo context)
         {
-            TriggerMethod(obj.GetType(), "OnCreationValidationFailed", new[] { obj, user });
+            TriggerMethod(obj.GetType(), "OnCreationValidationFailed", new[] { obj, context });
         }
 
-        public void TriggerOnModified(object originalObj, object modifiedObj, IIdentity user)
+        public void TriggerOnModified(object originalObj, object modifiedObj, IContextInfo context)
         {
-            TriggerMethod(originalObj.GetType(), "OnModified", new[] { originalObj, modifiedObj, user });
+            TriggerMethod(originalObj.GetType(), "OnModified", new[] { originalObj, modifiedObj, context });
         }
 
-        public void TriggerOnModificationFailed(object originalObj, object modifiedObj, IIdentity user)
+        public void TriggerOnModificationFailed(object originalObj, object modifiedObj, IContextInfo context)
         {
-            TriggerMethod(originalObj.GetType(), "OnModificationFailed", new[] { originalObj, modifiedObj, user });
+            TriggerMethod(originalObj.GetType(), "OnModificationFailed", new[] { originalObj, modifiedObj, context });
         }
 
-        public void TriggerOnRemoved(object removedObj, IIdentity user)
+        public void TriggerOnRemoved(object removedObj, IContextInfo context)
         {
-            TriggerMethod(removedObj.GetType(), "OnRemoved", new[] { removedObj, user });
+            TriggerMethod(removedObj.GetType(), "OnRemoved", new[] { removedObj, context });
         }
 
-        public void TriggerOnRemoveFailed(object removedObj, IIdentity user)
+        public void TriggerOnRemoveFailed(object removedObj, IContextInfo context)
         {
-            TriggerMethod(removedObj.GetType(), "OnRemoveFailed", new[] { removedObj, user });
+            TriggerMethod(removedObj.GetType(), "OnRemoveFailed", new[] { removedObj, context });
         }
 
     }
