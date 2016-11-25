@@ -8,7 +8,6 @@ using System;
 using Effort.Provider;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
-using BLM.Authorization;
 using BLM.EventListeners;
 
 namespace BLM.EF6.Tests
@@ -20,6 +19,9 @@ namespace BLM.EF6.Tests
         public string Value { get; set; }
 
         public bool IsValid { get; set; }
+
+        public bool HasCreatedFlagTriggered { get; set; }
+        public bool HasModifiedFlagTriggered { get; set; }
     }
 
     class MockListener : IEventListener<FakeEntity>
@@ -76,27 +78,43 @@ namespace BLM.EF6.Tests
         {
             OnModifiedTriggered = true;
         }
+
+        public FakeEntity OnBeforeCreate(FakeEntity entity, IIdentity user)
+        {
+            entity.HasCreatedFlagTriggered = true;
+            return entity;
+        }
+
+        public FakeEntity OnBeforeModify(FakeEntity original, FakeEntity modified, IIdentity user)
+        {
+            modified.HasModifiedFlagTriggered = true;
+            return modified;
+        }
     }
 
-    class FakeAuthorizer : IAuthorizer<FakeEntity>
+    class FakeAuthorizer : BaseEfAuthorizer<FakeEntity>
     {
-        public IQueryable<FakeEntity> AuthorizeCollection(IIdentity usr, IQueryable<FakeEntity> entities)
+        public override IQueryable<FakeEntity> AuthorizeCollection(IIdentity usr, IQueryable<FakeEntity> entities)
         {
+            Assert.IsNotNull(DbContext);
             return entities;
         }
 
-        public bool CanRemove(IIdentity usr, FakeEntity entry)
+        public override bool CanRemove(IIdentity usr, FakeEntity entry)
         {
+            Assert.IsNotNull(DbContext);
             return entry.IsValid;
         }
 
-        public bool CanInsert(IIdentity usr, FakeEntity entry)
+        public override bool CanInsert(IIdentity usr, FakeEntity entry)
         {
+            Assert.IsNotNull(DbContext);
             return entry.IsValid;
         }
 
-        public bool CanUpdate(IIdentity usr, FakeEntity original, FakeEntity newEntity)
+        public override bool CanUpdate(IIdentity usr, FakeEntity original, FakeEntity newEntity)
         {
+            Assert.IsNotNull(DbContext);
             return newEntity.IsValid;
         }
     }
@@ -148,6 +166,11 @@ namespace BLM.EF6.Tests
             _efRepo.SaveChanges(_identity);
             Assert.IsTrue(_listener.OnCreatedTriggered);
             Assert.IsTrue(_db.FakeEntities.Any());
+
+            var fake = _db.FakeEntities.FirstOrDefault(a => a.Value == guid);
+            Assert.IsNotNull(fake);
+            Assert.IsTrue(fake.HasCreatedFlagTriggered);
+
             Assert.AreEqual(guid, _db.FakeEntities.FirstOrDefault().Value);
         }
 
@@ -206,7 +229,9 @@ namespace BLM.EF6.Tests
 
             Assert.IsTrue(_listener.OnModifiedTriggered);
 
-            Assert.IsTrue(_db.FakeEntities.Any(a => a.Value == guid));
+            var fake = _db.FakeEntities.FirstOrDefault(a => a.Value == guid);
+            Assert.IsNotNull(fake);
+            Assert.IsTrue(fake.HasModifiedFlagTriggered);
         }
 
 

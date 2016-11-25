@@ -63,6 +63,16 @@ namespace BLM.Tests
             {
                 OnModifiedTriggered = true;
             }
+
+            public MockClass OnBeforeCreate(MockClass entity, IIdentity user)
+            {
+                return entity;
+            }
+
+            public MockClass OnBeforeModify(MockClass original, MockClass modified, IIdentity user)
+            {
+                return modified;
+            }
         }
 
         interface IMockInterface { }
@@ -99,6 +109,16 @@ namespace BLM.Tests
             public void OnModified(IMockInterface originalEntity, IMockInterface modifiedEntity, IIdentity user)
             {
                 throw new NotImplementedException();
+            }
+
+            public IMockInterface OnBeforeCreate(IMockInterface entity, IIdentity user)
+            {
+                return entity;
+            }
+
+            public IMockInterface OnBeforeModify(IMockInterface original, IMockInterface modified, IIdentity user)
+            {
+                return modified;
             }
         }
 

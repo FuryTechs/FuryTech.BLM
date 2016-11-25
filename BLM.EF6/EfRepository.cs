@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Reflection;
 using System.Security.Principal;
 using BLM.Authorization;
 using BLM.EventListeners;
@@ -114,9 +115,17 @@ namespace BLM.EF6
                 switch (ent.State)
                 {
                     case EntityState.Added:
-                        return Authorizer.CanInsert(user, casted.Entity);
+                        var createdInterpreted = _listenerManager.TriggerOnBeforeCreate(casted.Entity, user) as T;
+                        return Authorizer.CanInsert(user, createdInterpreted);
                     case EntityState.Modified:
-                        return Authorizer.CanUpdate(user, casted.Entity, CreateWithValues(casted.CurrentValues));
+                        var original = CreateWithValues(casted.OriginalValues);
+                        var modified = CreateWithValues(casted.CurrentValues);
+                        var modifiedInterpreted = _listenerManager.TriggerOnBeforeModify(original, modified, user) as T;
+                        foreach (var field in ent.CurrentValues.PropertyNames)
+                        {
+                            ent.CurrentValues[field] = modifiedInterpreted.GetType().GetProperty(field).GetValue(modifiedInterpreted, null);
+                        }
+                        return Authorizer.CanUpdate(user, original, modifiedInterpreted);
                     case EntityState.Deleted:
                         return Authorizer.CanRemove(user, casted.Entity);
                     default:

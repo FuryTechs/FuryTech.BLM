@@ -78,6 +78,35 @@ namespace BLM.EventListeners
             }
         }
 
+
+
+
+        public object TriggerOnBeforeCreate(object obj, IIdentity user)
+        {
+            var objType = obj.GetType();
+            var methodName = "OnBeforeCreate";
+            foreach (var listener in GetListenersForType(objType))
+            {
+                var methodInfo = listener.GetType().GetMethod(methodName);
+                obj = methodInfo.Invoke(listener, new[] {obj, user});
+            }
+
+            return obj;
+        }
+
+        public object TriggerOnBeforeModify(object original, object modified, IIdentity user)
+        {
+            var objType = modified.GetType();
+            var methodName = "OnBeforeModify";
+            foreach (var listener in GetListenersForType(objType))
+            {
+                var methodInfo = listener.GetType().GetMethod(methodName);
+                modified = methodInfo.Invoke(listener, new[] { original, modified, user });
+            }
+
+            return modified;
+        }
+
         public void TriggerOnCreated(object obj, IIdentity user)
         {
             TriggerMethod(obj.GetType(), "OnCreated", new[] { obj, user });
