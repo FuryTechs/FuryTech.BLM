@@ -6,11 +6,12 @@ namespace BLM
     {
         private AuthorizationResult() { }
 
-        public static AuthorizationResult Success()
+        public static AuthorizationResult Success(string message = null)
         {
             return new AuthorizationResult()
             {
-                HasSucceed = true
+                HasSucceed = true,
+                Message = message
             };
         }
 
