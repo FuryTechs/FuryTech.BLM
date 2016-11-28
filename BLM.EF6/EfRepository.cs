@@ -194,8 +194,8 @@ namespace BLM.EF6
 
             _dbcontext.SaveChanges();
 
-            added.ForEach(a => Listen.Created(a.Entity, contextInfo));
-            modified.ForEach(a => Listen.Modified( CreateWithValues(a.OriginalValues), a.Entity, contextInfo));
+            added.ForEach(a => Listen.Created(CreateWithValues(a.OriginalValues), contextInfo));
+            modified.ForEach(a => Listen.Modified( CreateWithValues(a.OriginalValues), CreateWithValues(a.CurrentValues), contextInfo));
             removed.ForEach(a => Listen.Removed(a, contextInfo));
         }
 
