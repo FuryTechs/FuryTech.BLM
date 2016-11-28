@@ -50,16 +50,6 @@ namespace BLM.Tests
         }
 
         [TestMethod]
-        public void CreateSuccessElevated()
-        {
-            using (new ElevatedContext())
-            {
-                var creationResult = Authorize.Create(invalid, ctx).CreateAggregateResult();
-                Assert.IsTrue(creationResult.HasSucceed);
-            }
-        }
-
-        [TestMethod]
         public void Modify()
         {
             var modResult = Authorize.Modify(valid, valid, ctx).CreateAggregateResult();
@@ -72,15 +62,6 @@ namespace BLM.Tests
         {
             var modResult = Authorize.Modify(invalid, invalid, ctx).CreateAggregateResult();
             Assert.IsFalse(modResult.HasSucceed);
-        }
-
-        public void ModifyElevated()
-        {
-            using (new ElevatedContext())
-            {
-                var modResult = Authorize.Modify(invalid, invalid, ctx).CreateAggregateResult();
-                Assert.IsTrue(modResult.HasSucceed);
-            }
         }
 
         [TestMethod]
@@ -99,16 +80,6 @@ namespace BLM.Tests
         }
 
         [TestMethod]
-        public void RemoveElevated()
-        {
-            using (new ElevatedContext())
-            {
-                var result = Authorize.Remove(invalid, ctx).CreateAggregateResult();
-                Assert.IsTrue(result.HasSucceed);
-            }
-        }
-
-        [TestMethod]
         public void AuthorizeCollection()
         {
             var list = new List<MockEntity>()
@@ -119,23 +90,6 @@ namespace BLM.Tests
             var authorizedCollection = Authorize.Collection(list, ctx);
 
             Assert.IsTrue(authorizedCollection.All(a=>a.IsVisible && a.IsVisible2));
-        }
-
-        [TestMethod]
-        public void AuthorizeCollectionElevated()
-        {
-            using (new ElevatedContext())
-            {
-                var list = new List<MockEntity>()
-            {
-                valid, invalid, invisible
-            }.AsQueryable();
-
-                var authorizedCollection = Authorize.Collection(list, ctx);
-
-                Assert.IsTrue(authorizedCollection.Any(a => a.IsVisible || a.IsVisible2));
-            }
-
         }
     }
 }
