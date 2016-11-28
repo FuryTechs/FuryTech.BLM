@@ -47,6 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthoriaztionResultExtension.cs" />
+    <Compile Include="AuthorizationFailedException.cs" />
+    <Compile Include="AuthorizationResult.cs" />
     <Compile Include="Authorize.cs" />
     <Compile Include="GenericContextInfo.cs" />
     <Compile Include="Interpret.cs" />

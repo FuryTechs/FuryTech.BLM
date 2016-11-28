@@ -27,31 +27,49 @@ namespace BLM.EF6
             return new EfContextInfo(user, _dbcontext);
         }
 
-        private void AuthorizeAdd(IIdentity usr, T newEntity)
+        private AuthorizationResult AuthorizeAdd(IIdentity usr, T newEntity)
         {
             _dbset.Attach(newEntity);
-            if (!Authorizer.CanInsert(newEntity, GetContextInfo(usr)))
+            var authResult = Authorize.Create(newEntity, GetContextInfo(usr)).CreateAggregateResult();
+            if (!authResult.HasSucceed)
             {
-                _listenerManager.TriggerOnCreationFailed(newEntity, GetContextInfo(usr));
-                
+                Listen.CreateFailed(newEntity, GetContextInfo(usr));
                 _dbcontext.Entry(newEntity).State = EntityState.Detached;
-                throw new UnauthorizedAccessException();
             }
+
+            return authResult;
         }
 
         public void Add(IIdentity user, T newItem)
         {
-            AuthorizeAdd(user, newItem);
+            var result = AuthorizeAdd(user, newItem);
+
+            if (!result.HasSucceed)
+            {
+                throw new AuthorizationFailedException(result); 
+            }
             _dbset.Add(newItem);
         }
 
         public void AddRange(IIdentity user, IEnumerable<T> newItems)
         {
+            var fails = new List<AuthorizationResult>();
+
             var newItemlist = newItems.ToList();
             foreach (var item in newItemlist)
             {
-                AuthorizeAdd(user, item);
+                var result = AuthorizeAdd(user, item);
+                if (!result.HasSucceed)
+                {
+                    fails.Add(result);
+                }
             }
+
+            if (fails.Any())
+            {
+                throw new AuthorizationFailedException(fails.CreateAggregateResult());
+            }
+
             _dbset.AddRange(newItemlist);
         }
 
@@ -62,40 +80,47 @@ namespace BLM.EF6
 
         public IQueryable<T> Entities(IIdentity user)
         {
-            return Authorizer.AuthorizeCollection(_dbset, GetContextInfo(user));
+            return Authorize.Collection(_dbset, GetContextInfo(user));
         }
 
-        private void AuthorizeRemove(IIdentity user, T item)
-        {
-            if (!Authorizer.CanRemove(item, GetContextInfo(user)))
-            {
-                _listenerManager.TriggerOnRemoveFailed(item, GetContextInfo(user));
-                throw new UnauthorizedAccessException();
-            }
-        }
 
         public void Remove(IIdentity user, T item)
         {
-            AuthorizeRemove(user, item);
+            var result = Authorize.Remove(item, GetContextInfo(user)).CreateAggregateResult();
+            if (!result.HasSucceed)
+            {
+                throw new AuthorizationFailedException(result);
+            }
             _dbset.Remove(item);
         }
 
         public void RemoveRange(IIdentity user, IEnumerable<T> items)
         {
+            var fails = new List<AuthorizationResult>();
             var entityList = items.ToList();
             foreach (var entity in entityList)
             {
-                AuthorizeRemove(user, entity);
-
+                var result = Authorize.Remove(entity, GetContextInfo(user)).CreateAggregateResult();
+                if (!result.HasSucceed)
+                {
+                    fails.Add(result);
+                }
             }
+
+            if (fails.Any())
+            {
+                var aggregated = fails.CreateAggregateResult();
+                throw new AuthorizationFailedException(aggregated);
+            }
+
             _dbset.RemoveRange(entityList);
         }
 
-        private bool AuthorizeEntityChange(IIdentity user, DbEntityEntry ent)
+        private AuthorizationResult AuthorizeEntityChange(IIdentity user, DbEntityEntry ent)
         {
 
             if (ent.State == EntityState.Unchanged || ent.State == EntityState.Detached)
-                return true;
+                return AuthorizationResult.Success();
 
             if (ent.Entity is T)
             {
@@ -103,25 +128,26 @@ namespace BLM.EF6
                 switch (ent.State)
                 {
                     case EntityState.Added:
-                        var createdInterpreted = _listenerManager.TriggerOnBeforeCreate(casted.Entity, GetContextInfo(user)) as T;
-                        return Authorizer.CanInsert(createdInterpreted, GetContextInfo(user));
+                        T interpreted = Interpret.BeforeCreate(casted.Entity, GetContextInfo(user));
+                        return Authorize.Create(interpreted, GetContextInfo(user)).CreateAggregateResult();
+
                     case EntityState.Modified:
                         var original = CreateWithValues(casted.OriginalValues);
                         var modified = CreateWithValues(casted.CurrentValues);
-                        var modifiedInterpreted = _listenerManager.TriggerOnBeforeModify(original, modified, GetContextInfo(user)) as T;
+                        var modifiedInterpreted = Interpret.BeforeModify(original, modified, GetContextInfo(user));
                         foreach (var field in ent.CurrentValues.PropertyNames)
                         {
                             ent.CurrentValues[field] = modifiedInterpreted.GetType().GetProperty(field).GetValue(modifiedInterpreted, null);
                         }
-                        return Authorizer.CanUpdate(original, modifiedInterpreted, GetContextInfo(user));
+                        return Authorize.Modify(original, modifiedInterpreted, GetContextInfo(user)).CreateAggregateResult();
                     case EntityState.Deleted:
-                        return Authorizer.CanRemove(casted.Entity, GetContextInfo(user));
+                        return Authorize.Remove(casted.Entity, GetContextInfo(user)).CreateAggregateResult();
                     default:
-                        throw new InvalidOperationException();
+                        return AuthorizationResult.Fail("The entity state is invalid");
                 }
             } else
             {
-                throw new InvalidOperationException($"Changes for entity type '{ent.Entity.GetType().FullName}' is not supported in a context of a repository with type '{typeof(T).FullName}'");
+                return AuthorizationResult.Fail($"Changes for entity type '{ent.Entity.GetType().FullName}' is not supported in a context of a repository with type '{typeof(T).FullName}'");
             }
         }
         private T CreateWithValues(DbPropertyValues values)
@@ -140,21 +166,25 @@ namespace BLM.EF6
 
         public void SaveChanges(IIdentity user)
         {
+
+            var contextInfo = GetContextInfo(user);
+
             _dbcontext.ChangeTracker.DetectChanges();
             var entries = _dbcontext.ChangeTracker.Entries().ToList();
             foreach (var entityChange in _dbcontext.ChangeTracker.Entries())
             {
-                if (!AuthorizeEntityChange(user, entityChange))
+                var authResult = AuthorizeEntityChange(user, entityChange);
+                if (!authResult.HasSucceed)
                 {
                     if (entityChange.State == EntityState.Modified)
                     {
-                        _listenerManager.TriggerOnModificationFailed(CreateWithValues(entityChange.OriginalValues), entityChange.Entity as T, GetContextInfo(user));
+                        Listen.ModificationFailed(CreateWithValues(entityChange.OriginalValues), entityChange.Entity as T, GetContextInfo(user));
                     }
                     else if (entityChange.State == EntityState.Deleted)
                     {
-                        _listenerManager.TriggerOnRemoveFailed(CreateWithValues(entityChange.OriginalValues), GetContextInfo(user));
+                        Listen.RemoveFailed(CreateWithValues(entityChange.OriginalValues), contextInfo);
                     }
-                    throw new UnauthorizedAccessException();
+                    throw new AuthorizationFailedException(authResult);
                 }
             }
 
@@ -164,9 +194,9 @@ namespace BLM.EF6
 
             _dbcontext.SaveChanges();
 
-            added.ForEach(a => _listenerManager.TriggerOnCreated(a.Entity, GetContextInfo(user)));
-            modified.ForEach(a => _listenerManager.TriggerOnModified( CreateWithValues(a.OriginalValues), a.Entity, GetContextInfo(user)));
-            removed.ForEach(a => _listenerManager.TriggerOnRemoved(a, GetContextInfo(user)));
+            added.ForEach(a => Listen.Created(a.Entity, contextInfo));
+            modified.ForEach(a => Listen.Modified( CreateWithValues(a.OriginalValues), a.Entity, contextInfo));
+            removed.ForEach(a => Listen.Removed(a, contextInfo));
         }
 
         public void SetEntityState(T entity, EntityState newState)

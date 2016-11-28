@@ -1,63 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BLM.Tests
 {
-
-    class MockEntity
-    {
-        public int Id { get; set; }
-        public bool IsValid { get; set; }
-        public bool IsVisible { get; set; }
-
-        public bool IsVisible2 { get; set; }
-
-        public string Guid { get; set; }
-    }
-
-    class MockCreateAuthorizer : IAuthorizeCreate<MockEntity> {
-        public bool CanCreate(MockEntity entity, IContextInfo ctx)
-        {
-            return entity.IsValid;
-        }
-    }
-
-    class MockModifyAuthorizer : IAuthorizeModify<MockEntity> {
-        public bool CanModify(MockEntity originalEntity, MockEntity modifiedEntity, IContextInfo ctx)
-        {
-            return modifiedEntity.IsValid;
-        }
-    }
-
-    class MockRemoveAuthorizer : IAuthorizeRemove<MockEntity>
-    {
-        public bool CanRemove(MockEntity entity, IContextInfo ctx)
-        {
-            return entity.IsValid;
-        }
-    }
-
-    class MockCollectionAuthorizer : IAuthorizeCollection<MockEntity>
-    {
-        public IQueryable<MockEntity> AuthorizeCollection(IQueryable<MockEntity> entities, IContextInfo ctx)
-        {
-            return entities.Where(a=>a.IsVisible);
-        }
-    }
-
-    class MockCollectionAuthorizer2 : IAuthorizeCollection<MockEntity>
-    {
-        public IQueryable<MockEntity> AuthorizeCollection(IQueryable<MockEntity> entities, IContextInfo ctx)
-        {
-            return entities.Where(a => a.IsVisible2);
-        }
-    }
-
-
     [TestClass]
     public class AuthorizerTests
     {
@@ -91,21 +38,21 @@ namespace BLM.Tests
         [TestMethod]
         public void CreateSuccess()
         {
-            var creationErrors = Authorize.Create(valid, ctx);
+            var creationErrors = Authorize.Create(valid, ctx).Where(a=>!a.HasSucceed);
             Assert.AreEqual(0, creationErrors.Count());
         }
 
         [TestMethod]
         public void CreateFail()
         {
-            var creationErrors = Authorize.Create(invalid, ctx);
+            var creationErrors = Authorize.Create(invalid, ctx).Where(a=>!a.HasSucceed);
             Assert.AreEqual(1, creationErrors.Count());
         }
 
         [TestMethod]
         public void Modify()
         {
-            var modErrors = Authorize.Modify(valid, valid, ctx);
+            var modErrors = Authorize.Modify(valid, valid, ctx).Where(a=>!a.HasSucceed);
             Assert.AreEqual(0, modErrors.Count());
 
         }
@@ -120,7 +67,7 @@ namespace BLM.Tests
         [TestMethod]
         public void Remove()
         {
-            var errors = Authorize.Remove(valid, ctx);
+            var errors = Authorize.Remove(valid, ctx).Where(a=>!a.HasSucceed);
             Assert.AreEqual(0, errors.Count());
 
         }
