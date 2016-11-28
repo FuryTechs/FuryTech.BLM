@@ -8,7 +8,7 @@ namespace BLM.Tests
             {
                 return AuthorizationResult.Success();
             }
-            return AuthorizationResult.Fail("The entity is not valid :( ");
+            return AuthorizationResult.Fail("The entity is not valid :( ", entity);
         }
     }
 }

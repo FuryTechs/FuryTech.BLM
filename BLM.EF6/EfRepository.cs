@@ -143,11 +143,11 @@ namespace BLM.EF6
                     case EntityState.Deleted:
                         return Authorize.Remove(casted.Entity, GetContextInfo(user)).CreateAggregateResult();
                     default:
-                        return AuthorizationResult.Fail("The entity state is invalid");
+                        return AuthorizationResult.Fail("The entity state is invalid", casted.Entity);
                 }
             } else
             {
-                return AuthorizationResult.Fail($"Changes for entity type '{ent.Entity.GetType().FullName}' is not supported in a context of a repository with type '{typeof(T).FullName}'");
+                return AuthorizationResult.Fail($"Changes for entity type '{ent.Entity.GetType().FullName}' is not supported in a context of a repository with type '{typeof(T).FullName}'", ent.Entity);
             }
         }
         private T CreateWithValues(DbPropertyValues values)

@@ -39,7 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Effort, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6a46696d54971e6d, processorArchitecture=MSIL">
-      <HintPath>..\packages\Effort.EF6.1.2.0\lib\net45\Effort.dll</HintPath>
+      <HintPath>..\packages\Effort.EF6.1.3.0\lib\net45\Effort.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -59,7 +59,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="NMemory, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6a46696d54971e6d, processorArchitecture=MSIL">
-      <HintPath>..\packages\NMemory.1.1.0\lib\net45\NMemory.dll</HintPath>
+      <HintPath>..\packages\NMemory.1.1.2\lib\net45\NMemory.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -84,6 +84,10 @@
     <ProjectReference Include="..\BLM.EF6\BLM.EF6.csproj">
       <Project>{a53cd538-4784-4a3d-a09e-a536e2bacbef}</Project>
       <Name>BLM.EF6</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BLM.Tests\BLM.Tests.csproj">
+      <Project>{D0A0CB4A-F053-470F-8D49-43CAA81B3EAB}</Project>
+      <Name>BLM.Tests</Name>
     </ProjectReference>
     <ProjectReference Include="..\BLM\BLM.csproj">
       <Project>{D5F2CC21-9001-4CB4-A7D6-56D826F6DC24}</Project>
