@@ -14,7 +14,7 @@ namespace BLM
             };
         }
 
-        public static AuthorizationResult Fail(string message)
+        public static AuthorizationResult Fail<T>(string message, T entity)
         {
             return new AuthorizationResult()
             {

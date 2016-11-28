@@ -10,7 +10,7 @@ namespace BLM
             var resultList = results.ToList();
             if (resultList.Any(a => !a.HasSucceed))
             {
-                var failResult = AuthorizationResult.Fail("");
+                var failResult = AuthorizationResult.Fail<object>("", null);
                 failResult.InnerResult.AddRange(resultList);
                 return failResult;
             }
