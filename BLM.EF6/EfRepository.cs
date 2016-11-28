@@ -141,7 +141,7 @@ namespace BLM.EF6
                         }
                         return Authorize.Modify(original, modifiedInterpreted, GetContextInfo(user)).CreateAggregateResult();
                     case EntityState.Deleted:
-                        return Authorize.Remove(casted.Entity, GetContextInfo(user)).CreateAggregateResult();
+                        return Authorize.Remove(CreateWithValues(casted.OriginalValues), GetContextInfo(user)).CreateAggregateResult();
                     default:
                         return AuthorizationResult.Fail("The entity state is invalid", casted.Entity);
                 }
