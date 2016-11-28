@@ -51,6 +51,7 @@
     <Compile Include="AuthorizationFailedException.cs" />
     <Compile Include="AuthorizationResult.cs" />
     <Compile Include="Authorize.cs" />
+    <Compile Include="ElevatedContext.cs" />
     <Compile Include="GenericContextInfo.cs" />
     <Compile Include="Interpret.cs" />
     <Compile Include="Listen.cs" />

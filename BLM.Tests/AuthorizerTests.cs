@@ -38,45 +38,74 @@ namespace BLM.Tests
         [TestMethod]
         public void CreateSuccess()
         {
-            var creationErrors = Authorize.Create(valid, ctx).Where(a=>!a.HasSucceed);
-            Assert.AreEqual(0, creationErrors.Count());
+            var createResult = Authorize.Create(valid, ctx).CreateAggregateResult();
+            Assert.IsTrue(createResult.HasSucceed);
         }
 
         [TestMethod]
         public void CreateFail()
         {
-            var creationErrors = Authorize.Create(invalid, ctx).Where(a=>!a.HasSucceed);
-            Assert.AreEqual(1, creationErrors.Count());
+            var createResult = Authorize.Create(invalid, ctx).CreateAggregateResult();
+            Assert.IsFalse(createResult.HasSucceed);
+        }
+
+        [TestMethod]
+        public void CreateSuccessElevated()
+        {
+            using (new ElevatedContext())
+            {
+                var creationResult = Authorize.Create(invalid, ctx).CreateAggregateResult();
+                Assert.IsTrue(creationResult.HasSucceed);
+            }
         }
 
         [TestMethod]
         public void Modify()
         {
-            var modErrors = Authorize.Modify(valid, valid, ctx).Where(a=>!a.HasSucceed);
-            Assert.AreEqual(0, modErrors.Count());
+            var modResult = Authorize.Modify(valid, valid, ctx).CreateAggregateResult();
+            Assert.IsTrue(modResult.HasSucceed);
 
         }
 
         [TestMethod]
         public void ModifyFails()
         {
-            var modErrors = Authorize.Modify(valid, invalid, ctx);
-            Assert.AreEqual(1, modErrors.Count());
+            var modResult = Authorize.Modify(invalid, invalid, ctx).CreateAggregateResult();
+            Assert.IsFalse(modResult.HasSucceed);
+        }
+
+        public void ModifyElevated()
+        {
+            using (new ElevatedContext())
+            {
+                var modResult = Authorize.Modify(invalid, invalid, ctx).CreateAggregateResult();
+                Assert.IsTrue(modResult.HasSucceed);
+            }
         }
 
         [TestMethod]
         public void Remove()
         {
-            var errors = Authorize.Remove(valid, ctx).Where(a=>!a.HasSucceed);
-            Assert.AreEqual(0, errors.Count());
+            var result = Authorize.Remove(valid, ctx).CreateAggregateResult();
+            Assert.IsTrue(result.HasSucceed);
 
         }
 
         [TestMethod]
         public void RemoveFails()
         {
-            var errors = Authorize.Remove(invalid, ctx);
-            Assert.AreEqual(1, errors.Count());
+            var result = Authorize.Remove(invalid, ctx).CreateAggregateResult();
+            Assert.IsFalse(result.HasSucceed);
+        }
+
+        [TestMethod]
+        public void RemoveElevated()
+        {
+            using (new ElevatedContext())
+            {
+                var result = Authorize.Remove(invalid, ctx).CreateAggregateResult();
+                Assert.IsTrue(result.HasSucceed);
+            }
         }
 
         [TestMethod]
@@ -90,6 +119,23 @@ namespace BLM.Tests
             var authorizedCollection = Authorize.Collection(list, ctx);
 
             Assert.IsTrue(authorizedCollection.All(a=>a.IsVisible && a.IsVisible2));
+        }
+
+        [TestMethod]
+        public void AuthorizeCollectionElevated()
+        {
+            using (new ElevatedContext())
+            {
+                var list = new List<MockEntity>()
+            {
+                valid, invalid, invisible
+            }.AsQueryable();
+
+                var authorizedCollection = Authorize.Collection(list, ctx);
+
+                Assert.IsTrue(authorizedCollection.Any(a => a.IsVisible || a.IsVisible2));
+            }
+
         }
     }
 }
