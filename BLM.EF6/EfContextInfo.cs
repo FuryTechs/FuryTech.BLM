@@ -1,7 +1,6 @@
 ﻿using System.Data.Entity;
 using System.Linq;
 using System.Security.Principal;
-using BLM.Authorization;
 
 namespace BLM.EF6
 {
@@ -24,7 +23,7 @@ namespace BLM.EF6
 
         public IQueryable<T> GetAuthorizedEntitySet<T>() where T: class
         {
-            return AuthorizerManager.GetAuthorizer<T>().AuthorizeCollection(_dbcontext.Set<T>(), new EfContextInfo(Identity, _dbcontext));
+            return Authorize.Collection(_dbcontext.Set<T>(), new EfContextInfo(Identity, _dbcontext));
         }
     }
 }
