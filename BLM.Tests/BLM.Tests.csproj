@@ -55,7 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthorizerTests.cs" />
-    <Compile Include="ElevatedContextTests.cs" />
     <Compile Include="MockCollectionAuthorizer.cs" />
     <Compile Include="MockCollectionAuthorizer2.cs" />
     <Compile Include="MockCreateAuthorizer.cs" />
