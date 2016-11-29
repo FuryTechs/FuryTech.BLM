@@ -195,7 +195,7 @@ namespace BLM.Tests
 
             List<Task> tasks = new List<Task>();
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 1000000; i++)
             {
                 tasks.Add(Listen.Modified(ent, ent, ctx));
             }
