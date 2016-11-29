@@ -54,7 +54,7 @@ namespace BLM
         }
 
         private static readonly Dictionary<string, List<IBlmEntry>> EntriesByTypeCache = new Dictionary<string, List<IBlmEntry>>();
-
+        
 
         private static List<Type> GetAllEntriesFor(Type entityType)
         {
@@ -63,9 +63,9 @@ namespace BLM
                 .ToList();
         }
 
-        public static List<IBlmEntry> GetEntriesFor<TBlmEntry>() where TBlmEntry : class, IBlmEntry
+        public static List<IBlmEntry> GetEntriesFor<T>() where T : class, IBlmEntry
         {
-            var key = typeof(TBlmEntry).FullName;
+            var key = typeof(T).FullName;
 
             List<IBlmEntry> entries;
             if (EntriesByTypeCache.TryGetValue(key, out entries))
@@ -74,12 +74,12 @@ namespace BLM
             }
 
             entries = new List<IBlmEntry>();
-            var typesForEntity = GetAllEntriesFor(typeof(TBlmEntry).GetGenericArguments()[0]);
-            var typesForBlmEntry = typesForEntity.Where(t => t.GetInterfaces().Any(intr => intr.IsGenericType && typeof(TBlmEntry).GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition())));
+            var typesForEntity = GetAllEntriesFor(typeof(T).GetGenericArguments()[0]);
+            var typesForBlmEntry = typesForEntity.Where(t => t.GetInterfaces().Any(intr => intr.IsGenericType && typeof(T).GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition())));
 
             foreach (var type in typesForBlmEntry)
             {
-                TBlmEntry instance = (TBlmEntry)typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null, null);
+                IBlmEntry instance = (IBlmEntry)typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null, null);
                 entries.Add(instance);
             }
 
