@@ -1,4 +1,6 @@
-﻿namespace BLM
+﻿using System.Threading.Tasks;
+
+namespace BLM.Interfaces.Authorize
 {
     public interface IAuthorizeRemove<T> : IBlmEntry
     {
@@ -8,6 +10,6 @@
         /// <param name="entity">The entity to be removed</param>
         /// <param name="ctx">The remove context info</param>
         /// <returns>If the entity can be removed or not</returns>
-        AuthorizationResult CanRemove(T entity, IContextInfo ctx);
+        Task<AuthorizationResult> CanRemoveAsync(T entity, IContextInfo ctx);
     }
 }
