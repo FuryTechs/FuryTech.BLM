@@ -1,4 +1,6 @@
-﻿namespace BLM
+﻿using System.Threading.Tasks;
+
+namespace BLM.Interfaces.Listen
 {
     public interface IListenModificationFailed<T> : IBlmEntry
     {
@@ -8,6 +10,7 @@
         /// <param name="originalEntity">The DbEntityEntry for the update.</param>
         /// <param name="modifiedEntity">The entity which has been failed to modify</param>
         /// <param name="context">The modification context</param>
-        void OnModificationFailed(T originalEntity, T modifiedEntity, IContextInfo context);
+
+        Task OnModificationFailedAsync(T originalEntity, T modifiedEntity, IContextInfo context);
     }
 }

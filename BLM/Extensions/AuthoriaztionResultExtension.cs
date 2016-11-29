@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace BLM
+namespace BLM.Extensions
 {
     public static class AuthoriaztionResultExtension
     {
@@ -16,9 +16,13 @@ namespace BLM
             }
             var successResult = AuthorizationResult.Success();
             successResult.InnerResult.AddRange(resultList);
-
             return successResult;
-
         }
+
+        public static bool HasSucceeded(this IEnumerable<AuthorizationResult> results)
+        {
+            return results.CreateAggregateResult().HasSucceed;
+        }
+
     }
 }

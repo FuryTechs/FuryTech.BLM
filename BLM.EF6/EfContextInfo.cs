@@ -1,6 +1,7 @@
 ﻿using System.Data.Entity;
 using System.Linq;
 using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace BLM.EF6
 {
@@ -21,9 +22,13 @@ namespace BLM.EF6
             return _dbcontext.Set<T>();
         }
 
-        public IQueryable<T> GetAuthorizedEntitySet<T>() where T: class
+        public IQueryable<T> GetAuthorizedEntitySet<T>() where T : class
         {
             return Authorize.Collection(_dbcontext.Set<T>(), new EfContextInfo(Identity, _dbcontext));
+        }
+        public async Task<IQueryable<T>> GetAuthorizedEntitySetAsync<T>() where T : class
+        {
+            return await Authorize.CollectionAsync(_dbcontext.Set<T>(), new EfContextInfo(Identity, _dbcontext));
         }
     }
 }

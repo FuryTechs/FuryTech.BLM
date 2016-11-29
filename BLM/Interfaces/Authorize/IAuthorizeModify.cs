@@ -1,4 +1,6 @@
-﻿namespace BLM
+﻿using System.Threading.Tasks;
+
+namespace BLM.Interfaces.Authorize
 {
     public interface IAuthorizeModify<T> : IBlmEntry
     {
@@ -9,6 +11,6 @@
         /// <param name="modifiedEntity">The modified entity</param>
         /// <param name="ctx">The insertion context info</param>
         /// <returns>If the entity can be updated / modified</returns>
-        AuthorizationResult CanModify(T originalEntity, T modifiedEntity, IContextInfo ctx);
+        Task<AuthorizationResult> CanModifyAsync(T originalEntity, T modifiedEntity, IContextInfo ctx);
     }
 }

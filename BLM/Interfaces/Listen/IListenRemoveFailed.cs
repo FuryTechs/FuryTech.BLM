@@ -1,4 +1,6 @@
-﻿namespace BLM
+﻿using System.Threading.Tasks;
+
+namespace BLM.Interfaces.Listen
 {
     public interface IListenRemoveFailed<T> : IBlmEntry
     {
@@ -7,6 +9,6 @@
         /// </summary>
         /// <param name="entity">The entity which has been failed to remove</param>
         /// <param name="context">The removal context</param>
-        void OnRemoveFailed(T entity, IContextInfo context);
+        Task OnRemoveFailedAsync(T entity, IContextInfo context);
     }
 }

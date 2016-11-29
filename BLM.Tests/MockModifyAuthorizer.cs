@@ -1,7 +1,11 @@
-﻿namespace BLM.Tests
+﻿using BLM.Interfaces.Authorize;
+using System.Threading.Tasks;
+
+namespace BLM.Tests
 {
     public class MockModifyAuthorizer : IAuthorizeModify<MockEntity> {
-        public AuthorizationResult CanModify(MockEntity originalEntity, MockEntity modifiedEntity, IContextInfo ctx)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async Task<AuthorizationResult> CanModifyAsync(MockEntity originalEntity, MockEntity modifiedEntity, IContextInfo ctx)
         {
             if (modifiedEntity.IsValid)
             {
@@ -9,5 +13,6 @@
             }
             return AuthorizationResult.Fail("The entity is not valid :( ", modifiedEntity);
         }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     }
 }
