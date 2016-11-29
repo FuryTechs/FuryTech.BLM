@@ -54,7 +54,7 @@ namespace BLM
         }
 
         private static readonly Dictionary<string, List<IBlmEntry>> EntriesByTypeCache = new Dictionary<string, List<IBlmEntry>>();
-        
+
 
         private static List<Type> GetAllEntriesFor(Type entityType)
         {
@@ -63,29 +63,41 @@ namespace BLM
                 .ToList();
         }
 
+        private static object EntryLoadLock = new object();
+
         public static List<IBlmEntry> GetEntriesFor<T>() where T : class, IBlmEntry
         {
             var key = typeof(T).FullName;
 
-            List<IBlmEntry> entries;
+            List<IBlmEntry> entries = null;
+
             if (EntriesByTypeCache.TryGetValue(key, out entries))
             {
                 return entries;
             }
 
-            entries = new List<IBlmEntry>();
-            var typesForEntity = GetAllEntriesFor(typeof(T).GetGenericArguments()[0]);
-            var typesForBlmEntry = typesForEntity.Where(t => t.GetInterfaces().Any(intr => intr.IsGenericType && typeof(T).GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition())));
-
-            foreach (var type in typesForBlmEntry)
+            lock (EntryLoadLock)
             {
-                IBlmEntry instance = (IBlmEntry)typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null, null);
-                entries.Add(instance);
+                if (EntriesByTypeCache.TryGetValue(key, out entries))
+                {
+                    return entries;
+                }
+
+
+                entries = new List<IBlmEntry>();
+                var typesForEntity = GetAllEntriesFor(typeof(T).GetGenericArguments()[0]);
+                var typesForBlmEntry = typesForEntity.Where(t => t.GetInterfaces().Any(intr => intr.IsGenericType && typeof(T).GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition())));
+
+                foreach (var type in typesForBlmEntry)
+                {
+                    IBlmEntry instance = (IBlmEntry)typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null, null);
+                    entries.Add(instance);
+                }
+
+                EntriesByTypeCache.Add(key, entries);
+
+                return entries;
             }
-
-            EntriesByTypeCache.Add(key, entries);
-
-            return entries;
         }
     }
 }

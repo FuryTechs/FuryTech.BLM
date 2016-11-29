@@ -1,4 +1,6 @@
-﻿namespace BLM
+﻿using BLM.Interfaces.Interpret;
+
+namespace BLM
 {
     public class Interpret
     {

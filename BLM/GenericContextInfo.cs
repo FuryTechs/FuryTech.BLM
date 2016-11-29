@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Principal;
-
+using System.Threading.Tasks;
 
 namespace BLM
 {
@@ -18,7 +18,7 @@ namespace BLM
             throw new NotImplementedException();
         }
 
-        public IQueryable<T> GetAuthorizedEntitySet<T>() where T : class
+        public Task<IQueryable<T>> GetAuthorizedEntitySetAsync<T>() where T : class
         {
             throw new NotImplementedException();
         }
