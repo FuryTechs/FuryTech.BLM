@@ -1,8 +1,12 @@
+using BLM.Interfaces.Authorize;
+using System.Threading.Tasks;
+
 namespace BLM.Tests
 {
     public class MockRemoveAuthorizer : IAuthorizeRemove<MockEntity>
     {
-        public AuthorizationResult CanRemove(MockEntity entity, IContextInfo ctx)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async Task<AuthorizationResult> CanRemoveAsync(MockEntity entity, IContextInfo ctx)
         {
             if (entity.IsValid)
             {
@@ -10,5 +14,6 @@ namespace BLM.Tests
             }
             return AuthorizationResult.Fail("The entity is not valid :( ", entity);
         }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     }
 }

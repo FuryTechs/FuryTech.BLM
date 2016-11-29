@@ -1,5 +1,8 @@
+using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using BLM.Interfaces.Authorize;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BLM.Tests
@@ -11,10 +14,12 @@ namespace BLM.Tests
 
     class DummyAuthorizeCollection : IAuthorizeCollection<DummyClass>
     {
-        public IQueryable<DummyClass> AuthorizeCollection(IQueryable<DummyClass> entities, IContextInfo ctx)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async Task<IQueryable<DummyClass>> AuthorizeCollectionAsync(IQueryable<DummyClass> entities, IContextInfo ctx)
         {
             return entities;
         }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     }
 
     [TestClass]

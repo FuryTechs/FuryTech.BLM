@@ -1,7 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using BLM.Extensions;
 
 namespace BLM.Tests
 {
@@ -36,47 +40,41 @@ namespace BLM.Tests
         IContextInfo ctx = new GenericContextInfo(Thread.CurrentPrincipal.Identity);
 
         [TestMethod]
-        public void CreateSuccess()
+        public async Task CreateSuccess()
         {
-            var createResult = Authorize.Create(valid, ctx).CreateAggregateResult();
-            Assert.IsTrue(createResult.HasSucceed);
+            Assert.IsTrue((await Authorize.CreateAsync(valid, ctx)).HasSucceeded());
         }
 
         [TestMethod]
-        public void CreateFail()
+        public async Task CreateFail()
         {
-            var createResult = Authorize.Create(invalid, ctx).CreateAggregateResult();
-            Assert.IsFalse(createResult.HasSucceed);
+            Assert.IsFalse((await Authorize.CreateAsync(invalid, ctx)).HasSucceeded());
         }
 
         [TestMethod]
-        public void Modify()
+        public async Task Modify()
         {
-            var modResult = Authorize.Modify(valid, valid, ctx).CreateAggregateResult();
-            Assert.IsTrue(modResult.HasSucceed);
-
-        }
-
-        [TestMethod]
-        public void ModifyFails()
-        {
-            var modResult = Authorize.Modify(invalid, invalid, ctx).CreateAggregateResult();
-            Assert.IsFalse(modResult.HasSucceed);
-        }
-
-        [TestMethod]
-        public void Remove()
-        {
-            var result = Authorize.Remove(valid, ctx).CreateAggregateResult();
-            Assert.IsTrue(result.HasSucceed);
+            Assert.IsTrue((await Authorize.ModifyAsync(valid, valid, ctx)).HasSucceeded());
 
         }
 
         [TestMethod]
-        public void RemoveFails()
+        public async Task ModifyFails()
         {
-            var result = Authorize.Remove(invalid, ctx).CreateAggregateResult();
-            Assert.IsFalse(result.HasSucceed);
+            Assert.IsFalse((await Authorize.ModifyAsync(invalid, invalid, ctx)).HasSucceeded());
+        }
+
+        [TestMethod]
+        public async Task Remove()
+        {
+            Assert.IsTrue((await Authorize.RemoveAsync(valid, ctx)).HasSucceeded());
+
+        }
+
+        [TestMethod]
+        public async Task RemoveFails()
+        {
+            Assert.IsFalse((await Authorize.RemoveAsync(invalid, ctx)).HasSucceeded());
         }
 
         [TestMethod]

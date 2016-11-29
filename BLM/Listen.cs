@@ -3,63 +3,82 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BLM.Interfaces.Listen;
 
 namespace BLM
 {
     public class Listen
-    { 
-        public static void Created<T>(T entity, IContextInfo context)
+    {
+        public static async Task Created<T>(T entity, IContextInfo context)
         {
-            var createListeners = Loader.GetEntriesFor<IListenCreated<T>>();
-            foreach (var createListener in createListeners)
+            await Task.Factory.StartNew(() =>
             {
-                ((dynamic)createListener).OnCreated(entity, context);
-            }
+                var createListeners = Loader.GetEntriesFor<IListenCreated<T>>();
+                foreach (var createListener in createListeners)
+                {
+                    ((dynamic)createListener).OnCreatedAsync(entity, context);
+                }
+            });
         }
 
-        public static void CreateFailed<T>(T entity, IContextInfo context)
+        public static async Task CreateFailed<T>(T entity, IContextInfo context)
         {
-            var createFailListeners = Loader.GetEntriesFor<IListenCreateFailed<T>>();
-            foreach (var listener in createFailListeners)
+            await Task.Factory.StartNew(() =>
             {
-                ((dynamic)listener).OnCreateFailed(entity, context);
-            }
+                var createFailListeners = Loader.GetEntriesFor<IListenCreateFailed<T>>();
+                foreach (var listener in createFailListeners)
+                {
+                    ((dynamic)listener).OnCreateFailedAsync(entity, context);
+                }
+            });
         }
 
-        public static void Modified<T>(T original, T modified, IContextInfo context)
+        public static async Task Modified<T>(T original, T modified, IContextInfo context)
         {
-            var modifyListeners = Loader.GetEntriesFor<IListenModified<T>>();
-            foreach (var listener in modifyListeners)
+            await Task.Factory.StartNew(() =>
             {
-                ((dynamic)listener).OnModified(original, modified, context);
-            }
+                var modifyListeners = Loader.GetEntriesFor<IListenModified<T>>();
+                foreach (var listener in modifyListeners)
+                {
+                    ((dynamic)listener).OnModifiedAsync(original, modified, context);
+                }
+            });
         }
 
-        public static void ModificationFailed<T>(T original, T modified, IContextInfo context)
+        public static async Task ModificationFailed<T>(T original, T modified, IContextInfo context)
         {
-            var modifyListeners = Loader.GetEntriesFor<IListenModificationFailed<T>>();
-            foreach (var listener in modifyListeners)
+            await Task.Factory.StartNew(() =>
             {
-                ((dynamic)listener).OnModificationFailed(original, modified, context);
-            }
+                var modifyListeners = Loader.GetEntriesFor<IListenModificationFailed<T>>();
+                foreach (var listener in modifyListeners)
+                {
+                    ((dynamic)listener).OnModificationFailedAsync(original, modified, context);
+                }
+            });
         }
 
-        public static void Removed<T>(T entity, IContextInfo context)
+        public static async Task Removed<T>(T entity, IContextInfo context)
         {
-            var modifyListeners = Loader.GetEntriesFor<IListenRemoved<T>>();
-            foreach (var listener in modifyListeners)
+            await Task.Factory.StartNew(() =>
             {
-                ((dynamic)listener).OnRemoved(entity, context);
-            }
+                var modifyListeners = Loader.GetEntriesFor<IListenRemoved<T>>();
+                foreach (var listener in modifyListeners)
+                {
+                    ((dynamic)listener).OnRemovedAsync(entity, context);
+                }
+            });
         }
 
-        public static void RemoveFailed<T>(T entity, IContextInfo context)
+        public static async Task RemoveFailed<T>(T entity, IContextInfo context)
         {
-            var modifyListeners = Loader.GetEntriesFor<IListenRemoveFailed<T>>();
-            foreach (var listener in modifyListeners)
+            await Task.Factory.StartNew(() =>
             {
-                ((dynamic)listener).OnRemoveFailed(entity, context);
-            }
+                var modifyListeners = Loader.GetEntriesFor<IListenRemoveFailed<T>>();
+                foreach (var listener in modifyListeners)
+                {
+                    ((dynamic)listener).OnRemoveFailedAsync(entity, context);
+                }
+            });
         }
     }
 }
