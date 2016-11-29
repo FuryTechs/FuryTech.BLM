@@ -1,4 +1,6 @@
-﻿namespace BLM
+﻿using System.Threading.Tasks;
+
+namespace BLM.Interfaces.Listen
 {
     public interface IListenModified<T> : IBlmEntry
     {
@@ -8,6 +10,6 @@
         /// <param name="originalEntity">The DbEntityEntry for the update.</param>
         /// <param name="modifiedEntity">The succesfully modified entity</param>
         /// <param name="context">The modification context</param>
-        void OnModified(T originalEntity, T modifiedEntity, IContextInfo context);
+        Task OnModifiedAsync(T originalEntity, T modifiedEntity, IContextInfo context);
     }
 }

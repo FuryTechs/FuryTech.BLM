@@ -1,4 +1,6 @@
-﻿namespace BLM
+﻿using System.Threading.Tasks;
+
+namespace BLM.Interfaces.Listen
 {
     public interface IListenCreated<T> : IBlmEntry
     {
@@ -7,6 +9,6 @@
         /// </summary>
         /// <param name="entity">The created entity</param>
         /// <param name="context">The creation context</param>
-        void OnCreated(T entity, IContextInfo context);
+        Task OnCreatedAsync(T entity, IContextInfo context);
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace BLM
+﻿using System.Threading.Tasks;
+
+namespace BLM.Interfaces.Authorize
 {
     public interface IAuthorizeCreate<T> : IBlmEntry
     {
@@ -8,7 +10,7 @@
         /// <param name="entity">The entity to be inserted</param>
         /// <param name="ctx">The insertion context info</param>
         /// <returns>If the entity can be inserted</returns>
-        AuthorizationResult CanCreate(T entity, IContextInfo ctx);
+        Task<AuthorizationResult> CanCreateAsync(T entity, IContextInfo ctx);
 
     }
 }

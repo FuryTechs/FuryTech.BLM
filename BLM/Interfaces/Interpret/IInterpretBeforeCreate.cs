@@ -1,4 +1,4 @@
-﻿namespace BLM
+﻿namespace BLM.Interfaces.Interpret
 {
     public interface IInterpretBeforeCreate<T> : IBlmEntry
     {

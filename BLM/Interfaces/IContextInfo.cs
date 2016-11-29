@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace BLM
 {
@@ -22,6 +23,6 @@ namespace BLM
         /// </summary>
         /// <typeparam name="T">The entity type parameter</typeparam>
         /// <returns>The authorized queryable entity set</returns>
-        IQueryable<T> GetAuthorizedEntitySet<T>() where T : class;
+        Task<IQueryable<T>> GetAuthorizedEntitySetAsync<T>() where T : class;
     }
 }
