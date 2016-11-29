@@ -1,4 +1,6 @@
-﻿namespace BLM
+﻿using System.Threading.Tasks;
+
+namespace BLM.Interfaces.Listen
 {
     public interface IListenCreateFailed<T> : IBlmEntry
     {
@@ -7,6 +9,6 @@
         /// </summary>
         /// <param name="entity">The entity which has failed to create</param>
         /// <param name="context">The creation context</param>
-        void OnCreateFailed(T entity, IContextInfo context);
+        Task OnCreateFailedAsync(T entity, IContextInfo context);
     }
 }

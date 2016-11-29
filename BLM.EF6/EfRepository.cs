@@ -4,12 +4,13 @@ using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Security.Principal;
+using System.Threading.Tasks;
 
-using BLM.Repository;
+using BLM.Extensions;
 
 namespace BLM.EF6
 {
-    public class EfRepository<T> : IRepository<T> where T: class, new()
+    public class EfRepository<T> : IRepository<T> where T : class, new()
     {
 
         private readonly DbContext _dbcontext;
@@ -27,38 +28,38 @@ namespace BLM.EF6
             return new EfContextInfo(user, _dbcontext);
         }
 
-        private AuthorizationResult AuthorizeAdd(IIdentity usr, T newEntity)
+        private async Task<AuthorizationResult> AuthorizeAdd(IIdentity usr, T newEntity)
         {
             _dbset.Attach(newEntity);
-            var authResult = Authorize.Create(newEntity, GetContextInfo(usr)).CreateAggregateResult();
+            var authResult = (await Authorize.CreateAsync(newEntity, GetContextInfo(usr))).CreateAggregateResult();
             if (!authResult.HasSucceed)
             {
-                Listen.CreateFailed(newEntity, GetContextInfo(usr));
+                await Listen.CreateFailed(newEntity, GetContextInfo(usr));
                 _dbcontext.Entry(newEntity).State = EntityState.Detached;
             }
 
             return authResult;
         }
 
-        public void Add(IIdentity user, T newItem)
+        public async Task AddAsync(IIdentity user, T newItem)
         {
-            var result = AuthorizeAdd(user, newItem);
+            var result = await AuthorizeAdd(user, newItem);
 
             if (!result.HasSucceed)
             {
-                throw new AuthorizationFailedException(result); 
+                throw new AuthorizationFailedException(result);
             }
             _dbset.Add(newItem);
         }
 
-        public void AddRange(IIdentity user, IEnumerable<T> newItems)
+        public async Task AddRangeAsync(IIdentity user, IEnumerable<T> newItems)
         {
             var fails = new List<AuthorizationResult>();
 
             var newItemlist = newItems.ToList();
             foreach (var item in newItemlist)
             {
-                var result = AuthorizeAdd(user, item);
+                var result = await AuthorizeAdd(user, item);
                 if (!result.HasSucceed)
                 {
                     fails.Add(result);
@@ -84,9 +85,9 @@ namespace BLM.EF6
         }
 
 
-        public void Remove(IIdentity user, T item)
+        public async Task RemoveAsync(IIdentity user, T item)
         {
-            var result = Authorize.Remove(item, GetContextInfo(user)).CreateAggregateResult();
+            var result = (await Authorize.RemoveAsync(item, GetContextInfo(user))).CreateAggregateResult();
             if (!result.HasSucceed)
             {
                 throw new AuthorizationFailedException(result);
@@ -94,13 +95,13 @@ namespace BLM.EF6
             _dbset.Remove(item);
         }
 
-        public void RemoveRange(IIdentity user, IEnumerable<T> items)
+        public async Task RemoveRangeAsync(IIdentity user, IEnumerable<T> items)
         {
             var fails = new List<AuthorizationResult>();
             var entityList = items.ToList();
             foreach (var entity in entityList)
             {
-                var result = Authorize.Remove(entity, GetContextInfo(user)).CreateAggregateResult();
+                var result = (await Authorize.RemoveAsync(entity, GetContextInfo(user))).CreateAggregateResult();
                 if (!result.HasSucceed)
                 {
                     fails.Add(result);
@@ -116,7 +117,7 @@ namespace BLM.EF6
             _dbset.RemoveRange(entityList);
         }
 
-        private AuthorizationResult AuthorizeEntityChange(IIdentity user, DbEntityEntry ent)
+        private async Task<AuthorizationResult> AuthorizeEntityChange(IIdentity user, DbEntityEntry ent)
         {
 
             if (ent.State == EntityState.Unchanged || ent.State == EntityState.Detached)
@@ -129,7 +130,7 @@ namespace BLM.EF6
                 {
                     case EntityState.Added:
                         T interpreted = Interpret.BeforeCreate(casted.Entity, GetContextInfo(user));
-                        return Authorize.Create(interpreted, GetContextInfo(user)).CreateAggregateResult();
+                        return (await Authorize.CreateAsync(interpreted, GetContextInfo(user))).CreateAggregateResult();
 
                     case EntityState.Modified:
                         var original = CreateWithValues(casted.OriginalValues);
@@ -139,13 +140,14 @@ namespace BLM.EF6
                         {
                             ent.CurrentValues[field] = modifiedInterpreted.GetType().GetProperty(field).GetValue(modifiedInterpreted, null);
                         }
-                        return Authorize.Modify(original, modifiedInterpreted, GetContextInfo(user)).CreateAggregateResult();
+                        return (await Authorize.ModifyAsync(original, modifiedInterpreted, GetContextInfo(user))).CreateAggregateResult();
                     case EntityState.Deleted:
-                        return Authorize.Remove(CreateWithValues(casted.OriginalValues), GetContextInfo(user)).CreateAggregateResult();
+                        return (await Authorize.RemoveAsync(CreateWithValues(casted.OriginalValues), GetContextInfo(user))).CreateAggregateResult();
                     default:
                         return AuthorizationResult.Fail("The entity state is invalid", casted.Entity);
                 }
-            } else
+            }
+            else
             {
                 return AuthorizationResult.Fail($"Changes for entity type '{ent.Entity.GetType().FullName}' is not supported in a context of a repository with type '{typeof(T).FullName}'", ent.Entity);
             }
@@ -164,25 +166,24 @@ namespace BLM.EF6
             return entity;
         }
 
-        public void SaveChanges(IIdentity user)
+        public async Task SaveChangesAsync(IIdentity user)
         {
-
             var contextInfo = GetContextInfo(user);
 
             _dbcontext.ChangeTracker.DetectChanges();
             var entries = _dbcontext.ChangeTracker.Entries().ToList();
             foreach (var entityChange in _dbcontext.ChangeTracker.Entries())
             {
-                var authResult = AuthorizeEntityChange(user, entityChange);
+                var authResult = await AuthorizeEntityChange(user, entityChange);
                 if (!authResult.HasSucceed)
                 {
                     if (entityChange.State == EntityState.Modified)
                     {
-                        Listen.ModificationFailed(CreateWithValues(entityChange.OriginalValues), entityChange.Entity as T, GetContextInfo(user));
+                        await Listen.ModificationFailed(CreateWithValues(entityChange.OriginalValues), entityChange.Entity as T, GetContextInfo(user));
                     }
                     else if (entityChange.State == EntityState.Deleted)
                     {
-                        Listen.RemoveFailed(CreateWithValues(entityChange.OriginalValues), contextInfo);
+                        await Listen.RemoveFailed(CreateWithValues(entityChange.OriginalValues), contextInfo);
                     }
                     throw new AuthorizationFailedException(authResult);
                 }
@@ -190,13 +191,13 @@ namespace BLM.EF6
 
             var added = entries.Where(a => a.State == EntityState.Added).ToList();
             var modified = entries.Where(a => a.State == EntityState.Modified).ToList();
-            var removed = entries.Where(a => a.State == EntityState.Deleted).Select(a=>CreateWithValues(a.OriginalValues)).ToList();
+            var removed = entries.Where(a => a.State == EntityState.Deleted).Select(a => CreateWithValues(a.OriginalValues)).ToList();
 
             _dbcontext.SaveChanges();
 
-            added.ForEach(a => Listen.Created(CreateWithValues(a.OriginalValues), contextInfo));
-            modified.ForEach(a => Listen.Modified( CreateWithValues(a.OriginalValues), CreateWithValues(a.CurrentValues), contextInfo));
-            removed.ForEach(a => Listen.Removed(a, contextInfo));
+            added.ForEach(async a => await Listen.Created(CreateWithValues(a.OriginalValues), contextInfo));
+            modified.ForEach(async a => await Listen.Modified(CreateWithValues(a.OriginalValues), CreateWithValues(a.CurrentValues), contextInfo));
+            removed.ForEach(async a => await Listen.Removed(a, contextInfo));
         }
 
         public void SetEntityState(T entity, EntityState newState)

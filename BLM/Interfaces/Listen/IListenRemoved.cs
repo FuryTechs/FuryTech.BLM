@@ -1,4 +1,6 @@
-﻿namespace BLM
+﻿using System.Threading.Tasks;
+
+namespace BLM.Interfaces.Listen
 {
     public interface IListenRemoved<T> : IBlmEntry
     {
@@ -7,6 +9,6 @@
         /// </summary>
         /// <param name="entity">The removed entity (with original properties).</param>
         /// <param name="}">The context info.</param>
-        void OnRemoved(T entity, IContextInfo context);
+        Task OnRemovedAsync(T entity, IContextInfo context);
     }
 }

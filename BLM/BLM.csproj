@@ -47,7 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuthoriaztionResultExtension.cs" />
+    <Compile Include="Extensions\AuthoriaztionResultExtension.cs" />
     <Compile Include="AuthorizationFailedException.cs" />
     <Compile Include="AuthorizationResult.cs" />
     <Compile Include="Authorize.cs" />
@@ -55,22 +55,22 @@
     <Compile Include="Interpret.cs" />
     <Compile Include="Listen.cs" />
     <Compile Include="Loader.cs" />
-    <Compile Include="IAuthorizeCollection.cs" />
-    <Compile Include="IAuthorizeCreate.cs" />
-    <Compile Include="IAuthorizeRemove.cs" />
-    <Compile Include="IAuthorizeModify.cs" />
-    <Compile Include="IBlmEntry.cs" />
-    <Compile Include="IContextInfo.cs" />
-    <Compile Include="IInterpretBeforeCreate.cs" />
-    <Compile Include="IInterpretBeforeModify.cs" />
-    <Compile Include="IListenCreated.cs" />
-    <Compile Include="IListenCreateFailed.cs" />
-    <Compile Include="IListenModificationFailed.cs" />
-    <Compile Include="IListenModified.cs" />
-    <Compile Include="IListenRemoved.cs" />
-    <Compile Include="IListenRemoveFailed.cs" />
+    <Compile Include="Interfaces\Authorize\IAuthorizeCollection.cs" />
+    <Compile Include="Interfaces\Authorize\IAuthorizeCreate.cs" />
+    <Compile Include="Interfaces\Authorize\IAuthorizeRemove.cs" />
+    <Compile Include="Interfaces\Authorize\IAuthorizeModify.cs" />
+    <Compile Include="Interfaces\IBlmEntry.cs" />
+    <Compile Include="Interfaces\IContextInfo.cs" />
+    <Compile Include="Interfaces\Interpret\IInterpretBeforeCreate.cs" />
+    <Compile Include="Interfaces\Interpret\IInterpretBeforeModify.cs" />
+    <Compile Include="Interfaces\Listen\IListenCreated.cs" />
+    <Compile Include="Interfaces\Listen\IListenCreateFailed.cs" />
+    <Compile Include="Interfaces\Listen\IListenModificationFailed.cs" />
+    <Compile Include="Interfaces\Listen\IListenModified.cs" />
+    <Compile Include="Interfaces\Listen\IListenRemoved.cs" />
+    <Compile Include="Interfaces\Listen\IListenRemoveFailed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="IRepository.cs" />
+    <Compile Include="Interfaces\IRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BLM.nuspec" />
