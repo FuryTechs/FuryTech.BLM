@@ -24,7 +24,7 @@ namespace BLM
                             foreach (var assembly in assemblies)
                             {
                                 _loadedTypes.AddRange(
-                                    assembly.GetTypes().Where(a => 
+                                    assembly.GetTypes().Where(a =>
                                         a.GetInterfaces().Contains(typeof(IBlmEntry))
                                         && a.IsClass
                                         && !a.IsAbstract
@@ -46,36 +46,52 @@ namespace BLM
             IBlmEntry currentInstance;
             if (BlmInstances.TryGetValue(key, out currentInstance))
             {
-                return (T) currentInstance;
+                return (T)currentInstance;
             }
             var instance = new T();
             BlmInstances.Add(key, instance);
             return instance;
         }
 
-        private static readonly Dictionary<string, List<IBlmEntry>> EntriesByTypeCache = new Dictionary<string,List<IBlmEntry>>();
+        private static readonly Dictionary<string, List<IBlmEntry>> EntriesByTypeCache = new Dictionary<string, List<IBlmEntry>>();
 
-        public static List<IBlmEntry> GetEntriesFor<T>() where T: class, IBlmEntry
+
+        private static List<Type> GetAllEntriesFor(Type entityType)
         {
-            var key = typeof(T).FullName;
+            return Types.Where(t =>
+                t.GetInterfaces().Any(intr => intr.GenericTypeArguments.Any(gt => gt.IsAssignableFrom(entityType))))
+                .ToList();
+        }
+
+        public static List<IBlmEntry> GetEntriesFor<TBlmEntry>() where TBlmEntry : class, IBlmEntry
+        {
+            var key = typeof(TBlmEntry).FullName;
 
             List<IBlmEntry> entries;
             if (EntriesByTypeCache.TryGetValue(key, out entries))
             {
                 return entries;
             }
-            
+
             entries = new List<IBlmEntry>();
-            foreach (var type in Types)
+            var typesForEntity = GetAllEntriesFor(typeof(TBlmEntry).GetGenericArguments()[0]);
+            //typesForEntity[1].GetInterfaces()[0].GetGenericTypeDefinition().IsAssignableFrom(typeof(TBlmEntry).GetGenericTypeDefinition())
+            var typesForBlmEntry = typesForEntity.Where(t => t.GetInterfaces().Any(intr => intr.IsGenericType && typeof(TBlmEntry).GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition())));
+
+            foreach (var type in typesForBlmEntry)
             {
-                if (typeof(T).IsAssignableFrom(type))
-                {
-                    T instance = (T)typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null,null);
-                    entries.Add(instance);
-                }
+                //var isAssignable = typeof(TBlmEntry).IsAssignableFrom(type);
+
+                //var hasAssignableInterface = type.GetInterfaces().Any(i => typeof(TBlmEntry).IsAssignableFrom(i));
+
+                //if (isAssignable || hasAssignableInterface)
+                //{
+                TBlmEntry instance = (TBlmEntry)typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null, null);
+                entries.Add(instance);
+                //}
             }
-            
-            EntriesByTypeCache.Add(key,entries);
+
+            EntriesByTypeCache.Add(key, entries);
 
             return entries;
         }
