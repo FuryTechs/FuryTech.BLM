@@ -75,20 +75,12 @@ namespace BLM
 
             entries = new List<IBlmEntry>();
             var typesForEntity = GetAllEntriesFor(typeof(TBlmEntry).GetGenericArguments()[0]);
-            //typesForEntity[1].GetInterfaces()[0].GetGenericTypeDefinition().IsAssignableFrom(typeof(TBlmEntry).GetGenericTypeDefinition())
             var typesForBlmEntry = typesForEntity.Where(t => t.GetInterfaces().Any(intr => intr.IsGenericType && typeof(TBlmEntry).GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition())));
 
             foreach (var type in typesForBlmEntry)
             {
-                //var isAssignable = typeof(TBlmEntry).IsAssignableFrom(type);
-
-                //var hasAssignableInterface = type.GetInterfaces().Any(i => typeof(TBlmEntry).IsAssignableFrom(i));
-
-                //if (isAssignable || hasAssignableInterface)
-                //{
                 TBlmEntry instance = (TBlmEntry)typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null, null);
                 entries.Add(instance);
-                //}
             }
 
             EntriesByTypeCache.Add(key, entries);
