@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 namespace BLM
 {
     public class Listen
-    {
+    { 
         public static void Created<T>(T entity, IContextInfo context)
         {
             var createListeners = Loader.GetEntriesFor<IListenCreated<T>>();
             foreach (var createListener in createListeners)
             {
-                ((IListenCreated<T>)createListener).OnCreated(entity, context);
+                ((dynamic)createListener).OnCreated(entity, context);
             }
         }
 
@@ -22,7 +22,7 @@ namespace BLM
             var createFailListeners = Loader.GetEntriesFor<IListenCreateFailed<T>>();
             foreach (var listener in createFailListeners)
             {
-                ((IListenCreateFailed<T>)listener).OnCreateFailed(entity, context);
+                ((dynamic)listener).OnCreateFailed(entity, context);
             }
         }
 
@@ -31,7 +31,7 @@ namespace BLM
             var modifyListeners = Loader.GetEntriesFor<IListenModified<T>>();
             foreach (var listener in modifyListeners)
             {
-                ((IListenModified<T>)listener).OnModified(original, modified, context);
+                ((dynamic)listener).OnModified(original, modified, context);
             }
         }
 
@@ -40,7 +40,7 @@ namespace BLM
             var modifyListeners = Loader.GetEntriesFor<IListenModificationFailed<T>>();
             foreach (var listener in modifyListeners)
             {
-                ((IListenModificationFailed<T>)listener).OnModificationFailed(original, modified, context);
+                ((dynamic)listener).OnModificationFailed(original, modified, context);
             }
         }
 
@@ -49,7 +49,7 @@ namespace BLM
             var modifyListeners = Loader.GetEntriesFor<IListenRemoved<T>>();
             foreach (var listener in modifyListeners)
             {
-                ((IListenRemoved<T>)listener).OnRemoved(entity, context);
+                ((dynamic)listener).OnRemoved(entity, context);
             }
         }
 
@@ -58,7 +58,7 @@ namespace BLM
             var modifyListeners = Loader.GetEntriesFor<IListenRemoveFailed<T>>();
             foreach (var listener in modifyListeners)
             {
-                ((IListenRemoveFailed<T>)listener).OnRemoveFailed(entity, context);
+                ((dynamic)listener).OnRemoveFailed(entity, context);
             }
         }
     }
