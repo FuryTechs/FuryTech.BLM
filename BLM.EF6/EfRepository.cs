@@ -221,13 +221,13 @@ namespace BLM.EF6
                 }
             }
 
-            var added = entries.Where(a => a.State == EntityState.Added).ToList();
-            var modified = entries.Where(a => a.State == EntityState.Modified).ToList();
+            var added = entries.Where(a => a.State == EntityState.Added).Select(a => new { CurrentValues = a.CurrentValues.Clone() }).ToList();
+            var modified = entries.Where(a => a.State == EntityState.Modified).Select(a => new { OriginalValues = a.OriginalValues.Clone(), CurrentValues = a.CurrentValues.Clone() }).ToList();
             var removed = entries.Where(a => a.State == EntityState.Deleted).Select(a => CreateWithValues(a.OriginalValues)).ToList();
 
             _dbcontext.SaveChanges();
 
-            added.ForEach(async a => await Listen.CreatedAsync(CreateWithValues(a.OriginalValues), contextInfo));
+            added.ForEach(async a => await Listen.CreatedAsync(CreateWithValues(a.CurrentValues), contextInfo));
             modified.ForEach(async a => await Listen.ModifiedAsync(CreateWithValues(a.OriginalValues), CreateWithValues(a.CurrentValues), contextInfo));
             removed.ForEach(async a => await Listen.RemovedAsync(a, contextInfo));
         }
