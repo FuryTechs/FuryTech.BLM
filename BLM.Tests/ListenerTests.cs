@@ -5,6 +5,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BLM.Interfaces.Listen;
 
+#pragma warning disable 1998
+#pragma warning disable IDE1006 // Naming Styles
+// ReSharper disable UnusedMember.Global
+// ReSharper disable StaticMemberInGenericType
+
 namespace BLM.Tests
 {
     #region GENERIC Listener
@@ -13,42 +18,37 @@ namespace BLM.Tests
         IListenRemoved<T>, IListenRemoveFailed<T>
     {
         public static bool WasOnCreatedCalled;
+        public static bool WasOnCreationValidationFailedCalled;
+        public static bool WasOnModifiedCalled;
+        public static bool WasOnModificationFailedCalled;
+        public static bool WasOnDeletedCalled;
+        public static bool WasOnDeletionFailedCalled;
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task OnCreatedAsync(T entity, IContextInfo user)
         {
             WasOnCreatedCalled = true;
         }
-
-        public static bool WasOnCreationValidationFailedCalled;
 
         public async Task OnCreateFailedAsync(T entity, IContextInfo user)
         {
             WasOnCreationValidationFailedCalled = true;
         }
 
-        public static bool WasOnModifiedCalled;
-
         public async Task OnModifiedAsync(T original, T modified, IContextInfo user)
         {
             WasOnModifiedCalled = true;
         }
-
-        public static bool WasOnModificationFailedCalled;
-
         public async Task OnModificationFailedAsync(T original, T modified, IContextInfo user)
         {
             WasOnModificationFailedCalled = true;
         }
 
-        public static bool WasOnDeletedCalled;
 
         public async Task OnRemovedAsync(T entity, IContextInfo user)
         {
             WasOnDeletedCalled = true;
         }
 
-        public static bool WasOnDeletionFailedCalled;
 
         public async Task OnRemoveFailedAsync(T entity, IContextInfo user)
         {
@@ -64,12 +64,8 @@ namespace BLM.Tests
             WasOnDeletedCalled = false;
             WasOnDeletionFailedCalled = false;
         }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-
-
     }
     #endregion
-
 
     public class MockListener : Listener<MockEntity> { }
 
@@ -89,7 +85,7 @@ namespace BLM.Tests
         public async Task Created()
         {
             MockListener.Reset();
-            await Listen.Created(ent, ctx);
+            await Listen.CreatedAsync(ent, ctx);
 
             Assert.IsTrue(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
@@ -103,7 +99,7 @@ namespace BLM.Tests
         public async Task CreateFailed()
         {
             MockListener.Reset();
-            await Listen.CreateFailed(ent, ctx);
+            await Listen.CreateFailedAsync(ent, ctx);
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsTrue(MockListener.WasOnCreationValidationFailedCalled);
@@ -119,7 +115,7 @@ namespace BLM.Tests
             MockListener.Reset();
             ObjectListener.Reset();
 
-            await Listen.Modified(ent, ent, ctx);
+            await Listen.ModifiedAsync(ent, ent, ctx);
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
@@ -135,7 +131,7 @@ namespace BLM.Tests
             MockListener.Reset();
             MockListener2.Reset();
 
-            await Listen.Modified(ent, ent, ctx);
+            await Listen.ModifiedAsync(ent, ent, ctx);
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
@@ -159,7 +155,7 @@ namespace BLM.Tests
             MockListener2.Reset();
             ObjectListener.Reset();
 
-            await Listen.Modified(ent, ent, ctx);
+            await Listen.ModifiedAsync(ent, ent, ctx);
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
@@ -185,7 +181,7 @@ namespace BLM.Tests
         }
 
         [TestMethod]
-        public void LoadTest()
+        public async Task LoadTest()
         {
             MockListener.Reset();
             MockListener2.Reset();
@@ -195,9 +191,9 @@ namespace BLM.Tests
 
             List<Task> tasks = new List<Task>();
 
-            for (int i = 0; i < 1000000; i++)
+            for (int i = 0; i < 5000000; i++)
             {
-                tasks.Add(Listen.Modified(ent, ent, ctx));
+                tasks.Add(Listen.ModifiedAsync(ent, ent, ctx));
             }
 
             Task.WaitAll(tasks.ToArray());
@@ -233,7 +229,7 @@ namespace BLM.Tests
         public async Task ModificationFailed()
         {
             MockListener.Reset();
-            await Listen.ModificationFailed(ent, ent, ctx);
+            await Listen.ModificationFailedAsync(ent, ent, ctx);
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
@@ -247,7 +243,7 @@ namespace BLM.Tests
         public async Task Removed()
         {
             MockListener.Reset();
-            await Listen.Removed(ent, ctx);
+            await Listen.RemovedAsync(ent, ctx);
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
@@ -261,7 +257,7 @@ namespace BLM.Tests
         public async Task RemoveFailed()
         {
             MockListener.Reset();
-            await Listen.RemoveFailed(ent, ctx);
+            await Listen.RemoveFailedAsync(ent, ctx);
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
@@ -272,3 +268,5 @@ namespace BLM.Tests
         }
     }
 }
+// ReSharper restore UnusedMember.Global
+// ReSharper restore StaticMemberInGenericType

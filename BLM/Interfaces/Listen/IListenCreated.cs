@@ -2,7 +2,7 @@
 
 namespace BLM.Interfaces.Listen
 {
-    public interface IListenCreated<T> : IBlmEntry
+    public interface IListenCreated<in T> : IBlmEntry
     {
         /// <summary>
         /// Triggered after the entity is validated, created and saved succesfully in the DB.

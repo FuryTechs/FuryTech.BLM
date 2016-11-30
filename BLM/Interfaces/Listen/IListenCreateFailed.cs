@@ -2,7 +2,7 @@
 
 namespace BLM.Interfaces.Listen
 {
-    public interface IListenCreateFailed<T> : IBlmEntry
+    public interface IListenCreateFailed<in T> : IBlmEntry
     {
         /// <summary>
         /// Triggered, when entity creation fails due validation in the Business Logic
