@@ -128,7 +128,7 @@ namespace BLM.EF6.Tests
             var reloadedValid = _repo.Entities(_identity).FirstOrDefault(a => a.Id == valid.Id);
             Assert.AreEqual(reloadedValid.Guid, newGuid);
         }
-
+        
         [TestMethod]
         [ExpectedException(typeof(AuthorizationFailedException))]
         public async Task ModifyFailedAsync()
