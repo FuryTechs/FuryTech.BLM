@@ -20,6 +20,7 @@ namespace BLM.Tests
         public static bool WasOnCreatedCalled;
         public static bool WasOnCreationValidationFailedCalled;
         public static bool WasOnModifiedCalled;
+        public static bool? EntitesWereNotTheSameOnCalling;
         public static bool WasOnModificationFailedCalled;
         public static bool WasOnDeletedCalled;
         public static bool WasOnDeletionFailedCalled;
@@ -36,10 +37,34 @@ namespace BLM.Tests
 
         public async Task OnModifiedAsync(T original, T modified, IContextInfo user)
         {
+            if (original != null)
+            {
+                EntitesWereNotTheSameOnCalling = !original.Equals(modified);
+            }
+            else if (modified != null)
+            {
+                EntitesWereNotTheSameOnCalling = true;
+            }
+            else
+            {
+                EntitesWereNotTheSameOnCalling = false;
+            }
             WasOnModifiedCalled = true;
         }
         public async Task OnModificationFailedAsync(T original, T modified, IContextInfo user)
         {
+            if (original != null)
+            {
+                EntitesWereNotTheSameOnCalling = !original.Equals(modified);
+            }
+            else if (modified != null)
+            {
+                EntitesWereNotTheSameOnCalling = !modified.Equals(original);
+            }
+            else
+            {
+                EntitesWereNotTheSameOnCalling = false;
+            }
             WasOnModificationFailedCalled = true;
         }
 
@@ -63,6 +88,8 @@ namespace BLM.Tests
             WasOnModificationFailedCalled = false;
             WasOnDeletedCalled = false;
             WasOnDeletionFailedCalled = false;
+
+            EntitesWereNotTheSameOnCalling = null;
         }
     }
     #endregion
@@ -79,6 +106,10 @@ namespace BLM.Tests
     {
 
         MockEntity ent = new MockEntity();
+        MockEntity ent2 = new MockEntity()
+        {
+            Guid = Guid.NewGuid().ToString()
+        };
         GenericContextInfo ctx = new GenericContextInfo(Thread.CurrentPrincipal.Identity);
 
         [TestMethod]
@@ -115,7 +146,7 @@ namespace BLM.Tests
             MockListener.Reset();
             ObjectListener.Reset();
 
-            await Listen.ModifiedAsync(ent, ent, ctx);
+            await Listen.ModifiedAsync(ent, ent2, ctx);
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
@@ -123,39 +154,21 @@ namespace BLM.Tests
             Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
             Assert.IsFalse(MockListener.WasOnDeletedCalled);
             Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
+
+            Assert.IsTrue(MockListener.EntitesWereNotTheSameOnCalling.HasValue && MockListener.EntitesWereNotTheSameOnCalling.Value);
         }
 
+        /// <summary>
+        /// Test the 3 different modify listeners, all of them need to run, and we pass two different entities into them
+        /// </summary>
         [TestMethod]
         public async Task MultipleModifiedListeners()
         {
             MockListener.Reset();
             MockListener2.Reset();
-
-            await Listen.ModifiedAsync(ent, ent, ctx);
-
-            Assert.IsFalse(MockListener.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
-            Assert.IsTrue(MockListener.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
-
-            Assert.IsFalse(MockListener2.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener2.WasOnCreationValidationFailedCalled);
-            Assert.IsTrue(MockListener2.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener2.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener2.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener2.WasOnDeletionFailedCalled);
-        }
-
-        [TestMethod]
-        public async Task MultipleModifiedListeners_Inheritance()
-        {
-            MockListener.Reset();
-            MockListener2.Reset();
             ObjectListener.Reset();
 
-            await Listen.ModifiedAsync(ent, ent, ctx);
+            await Listen.ModifiedAsync(ent, ent2, ctx);
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
@@ -170,7 +183,6 @@ namespace BLM.Tests
             Assert.IsFalse(MockListener2.WasOnModificationFailedCalled);
             Assert.IsFalse(MockListener2.WasOnDeletedCalled);
             Assert.IsFalse(MockListener2.WasOnDeletionFailedCalled);
-
 
             Assert.IsFalse(ObjectListener.WasOnCreatedCalled);
             Assert.IsFalse(ObjectListener.WasOnCreationValidationFailedCalled);
@@ -178,8 +190,53 @@ namespace BLM.Tests
             Assert.IsFalse(ObjectListener.WasOnModificationFailedCalled);
             Assert.IsFalse(ObjectListener.WasOnDeletedCalled);
             Assert.IsFalse(ObjectListener.WasOnDeletionFailedCalled);
+
+            Assert.IsTrue(MockListener.EntitesWereNotTheSameOnCalling.HasValue && MockListener.EntitesWereNotTheSameOnCalling.Value);
+            Assert.IsTrue(MockListener2.EntitesWereNotTheSameOnCalling.HasValue && MockListener2.EntitesWereNotTheSameOnCalling.Value);
+            Assert.IsTrue(ObjectListener.EntitesWereNotTheSameOnCalling.HasValue && ObjectListener.EntitesWereNotTheSameOnCalling.Value);
         }
 
+        /// <summary>
+        /// Only the object modify listener should run, because we pass two (different) objects into the listener
+        /// </summary>
+        [TestMethod]
+        public async Task MultipleModifiedListeners_TestInheritance()
+        {
+            MockListener.Reset();
+            MockListener2.Reset();
+            ObjectListener.Reset();
+
+            await Listen.ModifiedAsync(new object(), new { sajt = true }, ctx);
+
+            Assert.IsFalse(MockListener.WasOnCreatedCalled);
+            Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
+            Assert.IsFalse(MockListener.WasOnModifiedCalled);
+            Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
+            Assert.IsFalse(MockListener.WasOnDeletedCalled);
+            Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
+
+            Assert.IsFalse(MockListener2.WasOnCreatedCalled);
+            Assert.IsFalse(MockListener2.WasOnCreationValidationFailedCalled);
+            Assert.IsFalse(MockListener2.WasOnModifiedCalled);
+            Assert.IsFalse(MockListener2.WasOnModificationFailedCalled);
+            Assert.IsFalse(MockListener2.WasOnDeletedCalled);
+            Assert.IsFalse(MockListener2.WasOnDeletionFailedCalled);
+
+            Assert.IsFalse(ObjectListener.WasOnCreatedCalled);
+            Assert.IsFalse(ObjectListener.WasOnCreationValidationFailedCalled);
+            Assert.IsTrue(ObjectListener.WasOnModifiedCalled);
+            Assert.IsFalse(ObjectListener.WasOnModificationFailedCalled);
+            Assert.IsFalse(ObjectListener.WasOnDeletedCalled);
+            Assert.IsFalse(ObjectListener.WasOnDeletionFailedCalled);
+
+            Assert.IsNull(MockListener.EntitesWereNotTheSameOnCalling);
+            Assert.IsNull(MockListener2.EntitesWereNotTheSameOnCalling);
+            Assert.IsTrue(ObjectListener.EntitesWereNotTheSameOnCalling.HasValue && ObjectListener.EntitesWereNotTheSameOnCalling.Value);
+        }
+
+        /// <summary>
+        /// A little loadtest like something for check the performance is OK
+        /// </summary>
         [TestMethod]
         public async Task LoadTest()
         {
@@ -191,7 +248,7 @@ namespace BLM.Tests
 
             List<Task> tasks = new List<Task>();
 
-            for (int i = 0; i < 5000000; i++)
+            for (int i = 0; i < 500000; i++)
             {
                 tasks.Add(Listen.ModifiedAsync(ent, ent, ctx));
             }
@@ -200,7 +257,7 @@ namespace BLM.Tests
 
             var time = DateTime.Now.Subtract(start).TotalMilliseconds;
 
-            Assert.IsTrue(time < 10000);
+            Assert.IsTrue(time < 1000);
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
