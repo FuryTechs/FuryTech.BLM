@@ -1,6 +1,8 @@
 ﻿namespace BLM.Interfaces.Interpret
 {
-    public interface IInterpretBeforeCreate<T> : IBlmEntry
+    public interface IInterpretBeforeCreate<T> : IInterpretBeforeCreate<T, T> { }
+
+    public interface IInterpretBeforeCreate<in TInput, out TOutput> : IBlmEntry
     {
         /// <summary>
         /// Possibility to interpret an entity on creation before saving into the DB
@@ -8,6 +10,6 @@
         /// <param name="entity">The entity to be created</param>
         /// <param name="context">The creation context</param>
         /// <returns>The interpreted entity to be created</returns>
-        T InterpretBeforeCreate(T entity, IContextInfo context);
+        TOutput InterpretBeforeCreate(TInput entity, IContextInfo context);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace BLM.Interfaces.Listen
 {
-    public interface IListenRemoved<T> : IBlmEntry
+    public interface IListenRemoved<in T> : IBlmEntry
     {
         /// <summary>
         /// Triggered after successfully validating and removing an entity.
