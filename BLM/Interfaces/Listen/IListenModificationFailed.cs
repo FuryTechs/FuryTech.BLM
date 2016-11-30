@@ -2,7 +2,7 @@
 
 namespace BLM.Interfaces.Listen
 {
-    public interface IListenModificationFailed<T> : IBlmEntry
+    public interface IListenModificationFailed<in T> : IBlmEntry
     {
         /// <summary>
         /// Triggered when an entity modification has been failed due validation in the Business Layer

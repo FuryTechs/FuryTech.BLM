@@ -2,7 +2,7 @@
 
 namespace BLM.Interfaces.Listen
 {
-    public interface IListenRemoveFailed<T> : IBlmEntry
+    public interface IListenRemoveFailed<in T> : IBlmEntry
     {
         /// <summary>
         /// Triggered when an entity remove failed due validation in the Business Layer

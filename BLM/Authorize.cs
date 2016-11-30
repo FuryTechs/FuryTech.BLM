@@ -14,7 +14,7 @@ namespace BLM
             var collectionAuthorizers = Loader.GetEntriesFor<IAuthorizeCollection<T>>();
             foreach (var collectionAuthorizer in collectionAuthorizers)
             {
-                var auth = (dynamic)collectionAuthorizer;
+                var auth = (IAuthorizeCollection<T>)collectionAuthorizer;
                 entities = await auth.AuthorizeCollectionAsync(entities, context);
             }
 
@@ -32,7 +32,7 @@ namespace BLM
             List<AuthorizationResult> results = new List<AuthorizationResult>();
             foreach (var authorizer in createAuthorizers)
             {
-                var auth = (dynamic)authorizer;
+                var auth = (IAuthorizeCreate<T>)authorizer;
                 results.Add(await auth.CanCreateAsync(entity, context));
             }
             return results;
@@ -46,7 +46,7 @@ namespace BLM
 
             foreach (var authorizer in modifyAuthorizers)
             {
-                var auth = (dynamic)authorizer;
+                var auth = (IAuthorizeModify<T>)authorizer;
                 results.Add(await auth.CanModifyAsync(originalEntity, modifiedEntity, context));
             }
             return results;
@@ -60,7 +60,7 @@ namespace BLM
 
             foreach (var authorizer in removeAuthorizers)
             {
-                var auth = (dynamic)authorizer;
+                var auth = (IAuthorizeRemove<T>)authorizer;
                 results.Add(await auth.CanRemoveAsync(entity, context));
             }
             return results;

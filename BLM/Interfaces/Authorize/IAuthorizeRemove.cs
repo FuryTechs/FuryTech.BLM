@@ -2,7 +2,7 @@
 
 namespace BLM.Interfaces.Authorize
 {
-    public interface IAuthorizeRemove<T> : IBlmEntry
+    public interface IAuthorizeRemove<in T> : IBlmEntry
     {
         /// <summary>
         /// Authorizes a remove operation

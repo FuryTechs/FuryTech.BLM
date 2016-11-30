@@ -1,8 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace BLM.Interfaces.Listen
 {
-    public interface IListenModified<T> : IBlmEntry
+    public interface IListenModified<in T> : IBlmEntry
     {
         /// <summary>
         /// Triggered after an already existing entity is modified, validated and saved succesfully in the DB.

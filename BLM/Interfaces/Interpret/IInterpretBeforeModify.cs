@@ -1,6 +1,11 @@
 ﻿namespace BLM.Interfaces.Interpret
 {
-    public interface IInterpretBeforeModify<T> : IBlmEntry
+    public interface IInterpretBeforeModify<T> : IInterpretBeforeModify<T, T>
+    {
+        
+    }
+
+    public interface IInterpretBeforeModify<in TInput, out TOutput> : IBlmEntry
     {
         /// <summary>
         /// Possibility to interpret an entity on modification before saving into the DB
@@ -9,6 +14,6 @@
         /// <param name="modifiedEntity"></param>
         /// <param name="context"></param>
         /// <returns>The entity to be modified</returns>
-        T InterpretBeforeModify(T originalEntity, T modifiedEntity, IContextInfo context);
+        TOutput InterpretBeforeModify(TInput originalEntity, TInput modifiedEntity, IContextInfo context);
     }
 }
