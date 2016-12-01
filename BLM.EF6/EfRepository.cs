@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
 
@@ -17,11 +18,14 @@ namespace BLM.EF6
         private readonly DbContext _dbcontext;
         private readonly DbSet<T> _dbset;
 
+        private readonly PropertyInfo _logicalDelete;
+
         public EfRepository(DbContext db)
         {
             _dbcontext = db;
             _dbset = db.Set<T>();
-
+            // TODO: What about the inherited classes? 
+            _logicalDelete = typeof(T).GetProperties().FirstOrDefault(x => x.GetCustomAttributes(typeof(LogicalDeleteAttribute), true).Any());
         }
 
         private EfContextInfo GetContextInfo(IIdentity user)
@@ -44,7 +48,7 @@ namespace BLM.EF6
 
         public void Add(IIdentity user, T newItem)
         {
-            AddAsync(user, newItem).RunSynchronously();
+            AddAsync(user, newItem).Wait();
         }
 
         public async Task AddAsync(IIdentity user, T newItem)
@@ -60,7 +64,7 @@ namespace BLM.EF6
 
         public void AddRange(IIdentity user, IEnumerable<T> newItems)
         {
-            AddRangeAsync(user, newItems).RunSynchronously();
+            AddRangeAsync(user, newItems).Wait();
         }
 
         public async Task AddRangeAsync(IIdentity user, IEnumerable<T> newItems)
@@ -95,11 +99,11 @@ namespace BLM.EF6
         {
             return Authorize.Collection(_dbset, GetContextInfo(user));
         }
-        
+
 
         public void Remove(IIdentity usr, T item)
         {
-            RemoveAsync(usr, item).RunSynchronously();
+            RemoveAsync(usr, item).Wait();
         }
 
         public async Task RemoveAsync(IIdentity user, T item)
@@ -114,7 +118,7 @@ namespace BLM.EF6
 
         public void RemoveRange(IIdentity usr, IEnumerable<T> items)
         {
-            RemoveRangeAsync(usr, items).RunSynchronously();
+            RemoveRangeAsync(usr, items).Wait();
         }
 
         public async Task RemoveRangeAsync(IIdentity user, IEnumerable<T> items)
@@ -160,8 +164,8 @@ namespace BLM.EF6
                         return (await Authorize.CreateAsync(interpreted, GetContextInfo(user))).CreateAggregateResult();
 
                     case EntityState.Modified:
-                        var original = CreateWithValues(casted.OriginalValues);
-                        var modified = CreateWithValues(casted.CurrentValues);
+                        var original = await CreateWithValuesAsync(casted.OriginalValues);
+                        var modified = await CreateWithValuesAsync(casted.CurrentValues);
                         var modifiedInterpreted = Interpret.BeforeModify(original, modified, GetContextInfo(user));
                         foreach (var field in ent.CurrentValues.PropertyNames)
                         {
@@ -169,7 +173,7 @@ namespace BLM.EF6
                         }
                         return (await Authorize.ModifyAsync(original, modifiedInterpreted, GetContextInfo(user))).CreateAggregateResult();
                     case EntityState.Deleted:
-                        return (await Authorize.RemoveAsync(CreateWithValues(casted.OriginalValues), GetContextInfo(user))).CreateAggregateResult();
+                        return (await Authorize.RemoveAsync(await CreateWithValuesAsync(casted.OriginalValues, casted.Entity.GetType()), GetContextInfo(user))).CreateAggregateResult();
                     default:
                         return AuthorizationResult.Fail("The entity state is invalid", casted.Entity);
                 }
@@ -179,19 +183,34 @@ namespace BLM.EF6
                 return AuthorizationResult.Fail($"Changes for entity type '{ent.Entity.GetType().FullName}' is not supported in a context of a repository with type '{typeof(T).FullName}'", ent.Entity);
             }
         }
-        private T CreateWithValues(DbPropertyValues values)
+        private static async Task<T> CreateWithValuesAsync(DbPropertyValues values, Type type = null)
         {
-            T entity = new T();
-            Type type = typeof(T);
-
-            foreach (var name in values.PropertyNames)
+            return await Task.Factory.StartNew(() =>
             {
-                var property = type.GetProperty(name);
-                property.SetValue(entity, values.GetValue<object>(name));
-            }
 
-            return entity;
+                if (type == null)
+                {
+                    type = typeof(T);
+                }
+
+                T entity = (T)Activator.CreateInstance(type);
+
+                foreach (var name in values.PropertyNames)
+                {
+                    var value = values.GetValue<object>(name);
+                    var property = type.GetProperty(name);
+
+                    if (value != null)
+                    {
+                        property.SetValue(entity, Convert.ChangeType(value, property.PropertyType), null);
+                    }
+                }
+
+                return entity;
+            });
         }
+
+
 
         public void SaveChanges(IIdentity user)
         {
@@ -203,7 +222,8 @@ namespace BLM.EF6
             var contextInfo = GetContextInfo(user);
 
             _dbcontext.ChangeTracker.DetectChanges();
-            var entries = _dbcontext.ChangeTracker.Entries().ToList();
+            List<DbEntityEntry> entries = _dbcontext.ChangeTracker.Entries().ToList();
+
             foreach (var entityChange in _dbcontext.ChangeTracker.Entries())
             {
                 var authResult = await AuthorizeEntityChangeAsync(user, entityChange);
@@ -211,30 +231,83 @@ namespace BLM.EF6
                 {
                     if (entityChange.State == EntityState.Modified)
                     {
-                        await Listen.ModificationFailedAsync(CreateWithValues(entityChange.OriginalValues), entityChange.Entity as T, GetContextInfo(user));
+                        await Listen.ModificationFailedAsync(await CreateWithValuesAsync(entityChange.OriginalValues), entityChange.Entity as T, GetContextInfo(user));
                     }
                     else if (entityChange.State == EntityState.Deleted)
                     {
-                        await Listen.RemoveFailedAsync(CreateWithValues(entityChange.OriginalValues), contextInfo);
+                        await Listen.RemoveFailedAsync(await CreateWithValuesAsync(entityChange.OriginalValues), contextInfo);
                     }
                     throw new AuthorizationFailedException(authResult);
                 }
             }
 
-            var added = entries.Where(a => a.State == EntityState.Added).Select(a => new { CurrentValues = a.CurrentValues.Clone() }).ToList();
-            var modified = entries.Where(a => a.State == EntityState.Modified).Select(a => new { OriginalValues = a.OriginalValues.Clone(), CurrentValues = a.CurrentValues.Clone() }).ToList();
-            var removed = entries.Where(a => a.State == EntityState.Deleted).Select(a => CreateWithValues(a.OriginalValues)).ToList();
+            List<T> removed = null;
+
+            List<T> added =
+                entries.Where(a => a.State == EntityState.Added).Select(a => SelectCurrentAsync(a).Result).ToList();
+            List<dynamic> modified =
+                entries.Where(a => a.State == EntityState.Modified).Select(a => SelectBothAsync(a).Result).ToList();
+
+            if (_logicalDelete == null)
+            {
+                // Just add the Deleted entities to the removed list;
+                removed = entries.Where(a => a.State == EntityState.Deleted)
+                            .Select(a => SelectOriginalAsync(a).Result)
+                            .ToList();
+            }
+            else
+            {
+                List<DbEntityEntry> logicalRemoved = entries.Where(a => a.State == EntityState.Deleted).ToList();
+                logicalRemoved.ForEach(async entry =>
+                {
+                    await entry.ReloadAsync();
+                    entry.State = EntityState.Modified;
+                    entry.Property(_logicalDelete.Name).CurrentValue = true;
+                });
+                modified.AddRange(logicalRemoved.Select(a => SelectBothAsync(a).Result));
+            }
 
             _dbcontext.SaveChanges();
 
-            added.ForEach(async a => await Listen.CreatedAsync(CreateWithValues(a.CurrentValues), contextInfo));
-            modified.ForEach(async a => await Listen.ModifiedAsync(CreateWithValues(a.OriginalValues), CreateWithValues(a.CurrentValues), contextInfo));
-            removed.ForEach(async a => await Listen.RemovedAsync(a, contextInfo));
+            added.ForEach(async a => await Listen.CreatedAsync(a, contextInfo));
+            modified.ForEach(async a => await Listen.ModifiedAsync(a.OriginalValues, a.CurrentValues, contextInfo));
+
+            if (this._logicalDelete == null)
+            {
+                removed?.ForEach(async a => await Listen.RemovedAsync(a, contextInfo));
+            }
         }
 
         public void SetEntityState(T entity, EntityState newState)
         {
             _dbcontext.Entry(entity).State = newState;
+        }
+
+        private static async Task<T> SelectCurrentAsync(DbEntityEntry a, Type type = null)
+        {
+            if (type == null)
+            {
+                type = a.Entity.GetType();
+            }
+            return await CreateWithValuesAsync(a.CurrentValues.Clone(), type);
+        }
+        private static async Task<T> SelectOriginalAsync(DbEntityEntry a, Type type = null)
+        {
+            if (type == null)
+            {
+                type = a.Entity.GetType();
+            }
+            return await CreateWithValuesAsync(a.OriginalValues.Clone(), type);
+        }
+
+        private static async Task<dynamic> SelectBothAsync(DbEntityEntry a)
+        {
+            var type = a.Entity.GetType();
+            return new
+            {
+                OriginalValues = await SelectOriginalAsync(a, type),
+                CurrentValues = await SelectCurrentAsync(a, type)
+            };
         }
 
         public EntityState GetEntityState(T entity)
