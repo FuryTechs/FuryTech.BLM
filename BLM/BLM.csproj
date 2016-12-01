@@ -69,6 +69,7 @@
     <Compile Include="Interfaces\Listen\IListenModified.cs" />
     <Compile Include="Interfaces\Listen\IListenRemoved.cs" />
     <Compile Include="Interfaces\Listen\IListenRemoveFailed.cs" />
+    <Compile Include="Attributes\LogicalDeleteAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Interfaces\IRepository.cs" />
   </ItemGroup>
