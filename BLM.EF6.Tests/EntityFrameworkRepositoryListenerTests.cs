@@ -21,6 +21,7 @@ namespace BLM.EF6.Tests
     {
         private MockEntity Entity1 { get; set; }
         private LogicalDeleteEntity Entity2 { get; set; }
+        private LogicalDeleteEntity Entity3 { get; set; }
 
         [TestInitialize]
         public override void Init()
@@ -38,6 +39,14 @@ namespace BLM.EF6.Tests
             Entity2 = new LogicalDeleteEntity()
             {
                 Id = 2,
+                IsValid = true,
+                IsVisible = true,
+                IsVisible2 = true
+            };
+
+            Entity3 = new LogicalDeleteEntity()
+            {
+                Id = 3,
                 IsValid = true,
                 IsVisible = true,
                 IsVisible2 = true
@@ -71,7 +80,7 @@ namespace BLM.EF6.Tests
 
         [TestMethod]
         [ExpectedException(typeof(BLM.Exceptions.LogicalSecurityRiskException))]
-        public async Task EFListenRemove_SecurityRiskException()
+        public async Task LogicalDelete_ALL_Throw_SecurityRiskException()
         {
             await _add(); ;
             Assert.AreEqual(2, EfChangeListener.CreatedEntities.Count);
@@ -81,7 +90,22 @@ namespace BLM.EF6.Tests
         }
 
         [TestMethod]
-        public async Task EFListenRemove_IgnoreLogicalDeleteAttributes()
+        public async Task LogicalDelete_MockEntity_NoException()
+        {
+            await _add(); ;
+            Assert.AreEqual(2, EfChangeListener.CreatedEntities.Count);
+
+            await _repo.RemoveAsync(_identity, Entity1);
+            await _repo.SaveChangesAsync(_identity);
+
+            Assert.AreEqual(1, _repo.Entities(_identity).Count());
+            Assert.AreEqual(1, EfChangeListener.RemovedEntities.Count);
+            // The LogicalDeleting mock entity should just modified
+            Assert.AreEqual(false, EfChangeListener.WasOnModifiedCalled);
+        }
+
+        [TestMethod]
+        public async Task LogicalDelete_ALL_IgnoreLogicalDeleteAttributes_NoException()
         {
             await _add(); ;
             Assert.AreEqual(2, EfChangeListener.CreatedEntities.Count);
@@ -93,6 +117,30 @@ namespace BLM.EF6.Tests
 
             Assert.AreEqual(0, _repo.Entities(_identity).Count());
             Assert.AreEqual(2, EfChangeListener.RemovedEntities.Count);
+            // The LogicalDeleting mock entity should just modified
+            Assert.AreEqual(false, EfChangeListener.WasOnModifiedCalled);
+        }
+
+        [TestMethod]
+        public async Task LogicalDelete()
+        {
+            EfRepository<LogicalDeleteEntity> localRepository = new EfRepository<LogicalDeleteEntity>(_db);
+
+            await localRepository.AddAsync(_identity, Entity2);
+            await localRepository.AddAsync(_identity, Entity3);
+            await localRepository.SaveChangesAsync(_identity);
+
+            Assert.AreEqual(2, EfChangeListener.CreatedEntities.Count);
+
+            await localRepository.RemoveAsync(_identity, Entity2);
+            await localRepository.SaveChangesAsync(_identity);
+
+            Assert.AreEqual(2, (await localRepository.EntitiesAsync(_identity)).Count());
+            Assert.AreEqual(1, (await localRepository.EntitiesAsync(_identity)).Where(entity => entity.IsDeleted && entity.Id == 2).Count());
+            Assert.AreEqual(1, (await localRepository.EntitiesAsync(_identity)).Where(entity => !entity.IsDeleted && entity.Id == 3).Count());
+            Assert.AreEqual(0, EfChangeListener.RemovedEntities.Count);
+            Assert.AreEqual(1, EfChangeListener.ModifiedNewEntities.Count);
+            Assert.AreEqual(1, EfChangeListener.ModifiedOriginalEntities.Count);
             // The LogicalDeleting mock entity should just modified
             Assert.AreEqual(false, EfChangeListener.WasOnModifiedCalled);
         }

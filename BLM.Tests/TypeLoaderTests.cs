@@ -13,7 +13,7 @@ namespace BLM.Tests
     class DummyAuthorizeCollection : IAuthorizeCollection<DummyClass>
     {
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async Task<IQueryable<DummyClass>> AuthorizeCollectionAsync(IQueryable<DummyClass> entities, IContextInfo ctx)
+        public async Task<IQueryable<DummyClass>> AuthorizeCollection(IQueryable<DummyClass> entities, IContextInfo ctx)
         {
             return entities;
         }

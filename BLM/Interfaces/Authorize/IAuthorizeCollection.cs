@@ -5,7 +5,7 @@ namespace BLM.Interfaces.Authorize
 {
     public interface IAuthorizeCollection<T> : IAuthorizeCollection<T, T>
     {
-        
+
     }
 
     public interface IAuthorizeCollection<in TInput, TOutput> : IBlmEntry
@@ -16,6 +16,6 @@ namespace BLM.Interfaces.Authorize
         /// <param name="entities">The full entity set</param>
         /// <param name="ctx">The collection context info</param>
         /// <returns>The authorized entities</returns>
-        Task<IQueryable<TOutput>> AuthorizeCollectionAsync(IQueryable<TInput> entities, IContextInfo ctx);
+        Task<IQueryable<TOutput>> AuthorizeCollection(IQueryable<TInput> entities, IContextInfo ctx);
     }
 }

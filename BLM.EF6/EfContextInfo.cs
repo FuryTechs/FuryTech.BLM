@@ -26,6 +26,7 @@ namespace BLM.EF6
         {
             return Authorize.Collection(_dbcontext.Set<T>(), new EfContextInfo(Identity, _dbcontext));
         }
+
         public async Task<IQueryable<T>> GetAuthorizedEntitySetAsync<T>() where T : class
         {
             return await Authorize.CollectionAsync(_dbcontext.Set<T>(), new EfContextInfo(Identity, _dbcontext));
