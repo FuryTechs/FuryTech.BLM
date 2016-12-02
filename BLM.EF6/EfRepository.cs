@@ -8,7 +8,8 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 
 using BLM.Extensions;
-using Microsoft.Win32;
+using BLM.Exceptions;
+using BLM.Attributes;
 
 namespace BLM.EF6
 {
@@ -17,21 +18,48 @@ namespace BLM.EF6
 
         private readonly DbContext _dbcontext;
         private readonly DbSet<T> _dbset;
+        private readonly Type _type;
 
-        private readonly PropertyInfo _logicalDelete;
+        /// <summary>
+        /// If there are inherited objets, which have LogicalDeleteAttribue-s on it, we throw an exception
+        /// </summary>
+        public bool IgnoreLogicalDeleteError { get; set; } = false;
 
         public EfRepository(DbContext db)
         {
             _dbcontext = db;
             _dbset = db.Set<T>();
+            _type = typeof(T);
             // TODO: What about the inherited classes? 
-            _logicalDelete = typeof(T).GetProperties().FirstOrDefault(x => x.GetCustomAttributes(typeof(LogicalDeleteAttribute), true).Any());
         }
 
         private EfContextInfo GetContextInfo(IIdentity user)
         {
             return new EfContextInfo(user, _dbcontext);
         }
+
+        #region Static things
+        /// <summary>
+        /// Check the given type if it has an LogicalDeleteAttribute on any property, and returns with the first property it founds (or null)
+        /// </summary>
+        /// <param name="type">Checked type</param>
+        /// <returns></returns>
+        public static PropertyInfo GetLogicalDeleteProperty(Type type)
+        {
+            if (!LogicalDeleteCache.ContainsKey(type.FullName))
+            {
+                LogicalDeleteCache.Add(type.FullName, type.GetProperties().FirstOrDefault(x => x.GetCustomAttributes<LogicalDeleteAttribute>().Any()));
+            }
+            return LogicalDeleteCache[type.FullName];
+        }
+
+        private static readonly Dictionary<string, PropertyInfo> LogicalDeleteCache;
+
+        static EfRepository()
+        {
+            LogicalDeleteCache = new Dictionary<string, PropertyInfo>();
+        }
+        #endregion
 
         private async Task<AuthorizationResult> AuthorizeAddAsync(IIdentity usr, T newEntity)
         {
@@ -195,7 +223,7 @@ namespace BLM.EF6
 
                 T entity = (T)Activator.CreateInstance(type);
 
-                foreach (var name in values.PropertyNames)
+                foreach (string name in values.PropertyNames)
                 {
                     var value = values.GetValue<object>(name);
                     var property = type.GetProperty(name);
@@ -248,12 +276,18 @@ namespace BLM.EF6
             List<dynamic> modified =
                 entries.Where(a => a.State == EntityState.Modified).Select(a => SelectBothAsync(a).Result).ToList();
 
-            if (_logicalDelete == null)
+            if (GetLogicalDeleteProperty(_type) == null)
             {
                 // Just add the Deleted entities to the removed list;
                 removed = entries.Where(a => a.State == EntityState.Deleted)
                             .Select(a => SelectOriginalAsync(a).Result)
                             .ToList();
+
+                if (removed.FirstOrDefault(entry => GetLogicalDeleteProperty(entry.GetType()) != null) != null && !IgnoreLogicalDeleteError)
+                {
+                    throw new LogicalSecurityRiskException($"There are derived types in the deleted entries which have LogicalDeleteAttribute, but the base type does not use logical delete.");
+                }
+
             }
             else
             {
@@ -262,7 +296,7 @@ namespace BLM.EF6
                 {
                     await entry.ReloadAsync();
                     entry.State = EntityState.Modified;
-                    entry.Property(_logicalDelete.Name).CurrentValue = true;
+                    entry.Property(GetLogicalDeleteProperty(_type).Name).CurrentValue = true;
                 });
                 modified.AddRange(logicalRemoved.Select(a => SelectBothAsync(a).Result));
             }
@@ -272,7 +306,7 @@ namespace BLM.EF6
             added.ForEach(async a => await Listen.CreatedAsync(a, contextInfo));
             modified.ForEach(async a => await Listen.ModifiedAsync(a.OriginalValues, a.CurrentValues, contextInfo));
 
-            if (this._logicalDelete == null)
+            if (GetLogicalDeleteProperty(_type) == null)
             {
                 removed?.ForEach(async a => await Listen.RemovedAsync(a, contextInfo));
             }

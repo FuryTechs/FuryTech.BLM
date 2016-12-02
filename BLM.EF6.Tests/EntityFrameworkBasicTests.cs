@@ -10,6 +10,7 @@ using BLM.Tests;
 using Effort.Provider;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
+using BLM.Exceptions;
 
 namespace BLM.EF6.Tests
 {

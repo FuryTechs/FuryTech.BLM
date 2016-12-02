@@ -47,8 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\BLMException.cs" />
+    <Compile Include="Exceptions\LogicalSecurityRiskException.cs" />
     <Compile Include="Extensions\AuthoriaztionResultExtension.cs" />
-    <Compile Include="AuthorizationFailedException.cs" />
+    <Compile Include="Exceptions\AuthorizationFailedException.cs" />
     <Compile Include="AuthorizationResult.cs" />
     <Compile Include="Authorize.cs" />
     <Compile Include="GenericContextInfo.cs" />
