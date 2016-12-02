@@ -87,7 +87,7 @@ namespace BLM.Tests
 
             var authorizedCollection = Authorize.Collection(list, ctx);
 
-            Assert.IsTrue(authorizedCollection.All(a=>a.IsVisible && a.IsVisible2));
+            Assert.IsTrue(authorizedCollection.All(a => a.IsVisible && a.IsVisible2));
         }
     }
 }
