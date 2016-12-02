@@ -66,24 +66,35 @@ namespace BLM.EF6.Tests
         public async Task Add()
         {
             await _add();
-            Assert.AreEqual(_repo.Entities(_identity).Count(), 2);
+            Assert.AreEqual(2, _repo.Entities(_identity).Count());
         }
 
         [TestMethod]
-        public async Task EFListenRemove()
+        [ExpectedException(typeof(BLM.Exceptions.LogicalSecurityRiskException))]
+        public async Task EFListenRemove_SecurityRiskException()
         {
-            await _add();;
+            await _add(); ;
             Assert.AreEqual(2, EfChangeListener.CreatedEntities.Count);
 
             await _repo.RemoveRangeAsync(_identity, _repo.Entities(_identity));
             await _repo.SaveChangesAsync(_identity);
+        }
 
-            Assert.AreEqual(1, _repo.Entities(_identity).Count());
-            Assert.AreEqual(1, EfChangeListener.RemovedEntities.Count);
+        [TestMethod]
+        public async Task EFListenRemove_IgnoreLogicalDeleteAttributes()
+        {
+            await _add(); ;
+            Assert.AreEqual(2, EfChangeListener.CreatedEntities.Count);
+
+            _repo.IgnoreLogicalDeleteError = true;
+
+            await _repo.RemoveRangeAsync(_identity, _repo.Entities(_identity));
+            await _repo.SaveChangesAsync(_identity);
+
+            Assert.AreEqual(0, _repo.Entities(_identity).Count());
+            Assert.AreEqual(2, EfChangeListener.RemovedEntities.Count);
             // The LogicalDeleting mock entity should just modified
-            Assert.AreEqual(true, EfChangeListener.WasOnModifiedCalled);
-
-
+            Assert.AreEqual(false, EfChangeListener.WasOnModifiedCalled);
         }
     }
 
