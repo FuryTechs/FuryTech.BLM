@@ -8,7 +8,7 @@ namespace BLM.Tests
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public class MockCollectionAuthorizer : IAuthorizeCollection<MockEntity>
     {
-        public async Task<IQueryable<MockEntity>> AuthorizeCollectionAsync(IQueryable<MockEntity> entities, IContextInfo ctx)
+        public async Task<IQueryable<MockEntity>> AuthorizeCollection(IQueryable<MockEntity> entities, IContextInfo ctx)
         {
             return entities.Where(a => a.IsVisible);
         }
