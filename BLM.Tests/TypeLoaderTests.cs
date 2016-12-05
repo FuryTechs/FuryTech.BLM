@@ -10,10 +10,10 @@ namespace BLM.Tests
         public int Id { get; set; }
     }
 
-    class DummyAuthorizeCollection : IAuthorizeCollection<DummyClass>
+    class DummyAuthorizeCollection : IAuthorizeCollection<DummyClass, DummyClass>
     {
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async Task<IQueryable<DummyClass>> AuthorizeCollectionAsync(IQueryable<DummyClass> entities, IContextInfo ctx)
+        public async Task<IQueryable<DummyClass>> AuthorizeCollection(IQueryable<DummyClass> entities, IContextInfo ctx)
         {
             return entities;
         }
@@ -28,7 +28,7 @@ namespace BLM.Tests
         {
             var types = Loader.Types;
             Assert.IsNotNull(types);
-            Assert.IsTrue(types.All(t=>t.GetInterfaces().Contains(typeof(IBlmEntry))));
+            Assert.IsTrue(types.All(t => t.GetInterfaces().Contains(typeof(IBlmEntry))));
         }
 
         [TestMethod]

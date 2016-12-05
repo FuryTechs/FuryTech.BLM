@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
 
 using BLM.Extensions;
-using Microsoft.Win32;
+using BLM.Exceptions;
+using BLM.Attributes;
 
 namespace BLM.EF6
 {
@@ -16,18 +18,48 @@ namespace BLM.EF6
 
         private readonly DbContext _dbcontext;
         private readonly DbSet<T> _dbset;
+        private readonly Type _type;
+
+        /// <summary>
+        /// If there are inherited objets, which have LogicalDeleteAttribue-s on it, we throw an exception
+        /// </summary>
+        public bool IgnoreLogicalDeleteError { get; set; } = false;
 
         public EfRepository(DbContext db)
         {
             _dbcontext = db;
             _dbset = db.Set<T>();
-
+            _type = typeof(T);
+            // TODO: What about the inherited classes? 
         }
 
         private EfContextInfo GetContextInfo(IIdentity user)
         {
             return new EfContextInfo(user, _dbcontext);
         }
+
+        #region Static things
+        /// <summary>
+        /// Check the given type if it has an LogicalDeleteAttribute on any property, and returns with the first property it founds (or null)
+        /// </summary>
+        /// <param name="type">Checked type</param>
+        /// <returns></returns>
+        public static PropertyInfo GetLogicalDeleteProperty(Type type)
+        {
+            if (!LogicalDeleteCache.ContainsKey(type.FullName))
+            {
+                LogicalDeleteCache.Add(type.FullName, type.GetProperties().FirstOrDefault(x => x.GetCustomAttributes<LogicalDeleteAttribute>().Any()));
+            }
+            return LogicalDeleteCache[type.FullName];
+        }
+
+        private static readonly Dictionary<string, PropertyInfo> LogicalDeleteCache;
+
+        static EfRepository()
+        {
+            LogicalDeleteCache = new Dictionary<string, PropertyInfo>();
+        }
+        #endregion
 
         private async Task<AuthorizationResult> AuthorizeAddAsync(IIdentity usr, T newEntity)
         {
@@ -44,7 +76,7 @@ namespace BLM.EF6
 
         public void Add(IIdentity user, T newItem)
         {
-            AddAsync(user, newItem).RunSynchronously();
+            AddAsync(user, newItem).Wait();
         }
 
         public async Task AddAsync(IIdentity user, T newItem)
@@ -60,7 +92,7 @@ namespace BLM.EF6
 
         public void AddRange(IIdentity user, IEnumerable<T> newItems)
         {
-            AddRangeAsync(user, newItems).RunSynchronously();
+            AddRangeAsync(user, newItems).Wait();
         }
 
         public async Task AddRangeAsync(IIdentity user, IEnumerable<T> newItems)
@@ -95,11 +127,16 @@ namespace BLM.EF6
         {
             return Authorize.Collection(_dbset, GetContextInfo(user));
         }
-        
+
+        public async Task<IQueryable<T>> EntitiesAsync(IIdentity user)
+        {
+            return await Authorize.CollectionAsync(_dbset, GetContextInfo(user));
+        }
+
 
         public void Remove(IIdentity usr, T item)
         {
-            RemoveAsync(usr, item).RunSynchronously();
+            RemoveAsync(usr, item).Wait();
         }
 
         public async Task RemoveAsync(IIdentity user, T item)
@@ -114,7 +151,7 @@ namespace BLM.EF6
 
         public void RemoveRange(IIdentity usr, IEnumerable<T> items)
         {
-            RemoveRangeAsync(usr, items).RunSynchronously();
+            RemoveRangeAsync(usr, items).Wait();
         }
 
         public async Task RemoveRangeAsync(IIdentity user, IEnumerable<T> items)
@@ -160,8 +197,8 @@ namespace BLM.EF6
                         return (await Authorize.CreateAsync(interpreted, GetContextInfo(user))).CreateAggregateResult();
 
                     case EntityState.Modified:
-                        var original = CreateWithValues(casted.OriginalValues);
-                        var modified = CreateWithValues(casted.CurrentValues);
+                        var original = await CreateWithValuesAsync(casted.OriginalValues);
+                        var modified = await CreateWithValuesAsync(casted.CurrentValues);
                         var modifiedInterpreted = Interpret.BeforeModify(original, modified, GetContextInfo(user));
                         foreach (var field in ent.CurrentValues.PropertyNames)
                         {
@@ -169,7 +206,7 @@ namespace BLM.EF6
                         }
                         return (await Authorize.ModifyAsync(original, modifiedInterpreted, GetContextInfo(user))).CreateAggregateResult();
                     case EntityState.Deleted:
-                        return (await Authorize.RemoveAsync(CreateWithValues(casted.OriginalValues), GetContextInfo(user))).CreateAggregateResult();
+                        return (await Authorize.RemoveAsync(await CreateWithValuesAsync(casted.OriginalValues, casted.Entity.GetType()), GetContextInfo(user))).CreateAggregateResult();
                     default:
                         return AuthorizationResult.Fail("The entity state is invalid", casted.Entity);
                 }
@@ -179,19 +216,34 @@ namespace BLM.EF6
                 return AuthorizationResult.Fail($"Changes for entity type '{ent.Entity.GetType().FullName}' is not supported in a context of a repository with type '{typeof(T).FullName}'", ent.Entity);
             }
         }
-        private T CreateWithValues(DbPropertyValues values)
+        private static async Task<T> CreateWithValuesAsync(DbPropertyValues values, Type type = null)
         {
-            T entity = new T();
-            Type type = typeof(T);
-
-            foreach (var name in values.PropertyNames)
+            return await Task.Factory.StartNew(() =>
             {
-                var property = type.GetProperty(name);
-                property.SetValue(entity, values.GetValue<object>(name));
-            }
 
-            return entity;
+                if (type == null)
+                {
+                    type = typeof(T);
+                }
+
+                T entity = (T)Activator.CreateInstance(type);
+
+                foreach (string name in values.PropertyNames)
+                {
+                    var value = values.GetValue<object>(name);
+                    var property = type.GetProperty(name);
+
+                    if (value != null)
+                    {
+                        property.SetValue(entity, Convert.ChangeType(value, property.PropertyType), null);
+                    }
+                }
+
+                return entity;
+            });
         }
+
+
 
         public void SaveChanges(IIdentity user)
         {
@@ -203,7 +255,8 @@ namespace BLM.EF6
             var contextInfo = GetContextInfo(user);
 
             _dbcontext.ChangeTracker.DetectChanges();
-            var entries = _dbcontext.ChangeTracker.Entries().ToList();
+            List<DbEntityEntry> entries = _dbcontext.ChangeTracker.Entries().ToList();
+
             foreach (var entityChange in _dbcontext.ChangeTracker.Entries())
             {
                 var authResult = await AuthorizeEntityChangeAsync(user, entityChange);
@@ -211,30 +264,80 @@ namespace BLM.EF6
                 {
                     if (entityChange.State == EntityState.Modified)
                     {
-                        await Listen.ModificationFailedAsync(CreateWithValues(entityChange.OriginalValues), entityChange.Entity as T, GetContextInfo(user));
+                        await Listen.ModificationFailedAsync(await CreateWithValuesAsync(entityChange.OriginalValues), entityChange.Entity as T, GetContextInfo(user));
                     }
                     else if (entityChange.State == EntityState.Deleted)
                     {
-                        await Listen.RemoveFailedAsync(CreateWithValues(entityChange.OriginalValues), contextInfo);
+                        await Listen.RemoveFailedAsync(await CreateWithValuesAsync(entityChange.OriginalValues), contextInfo);
                     }
                     throw new AuthorizationFailedException(authResult);
                 }
             }
 
-            var added = entries.Where(a => a.State == EntityState.Added).Select(a => new { CurrentValues = a.CurrentValues.Clone() }).ToList();
-            var modified = entries.Where(a => a.State == EntityState.Modified).Select(a => new { OriginalValues = a.OriginalValues.Clone(), CurrentValues = a.CurrentValues.Clone() }).ToList();
-            var removed = entries.Where(a => a.State == EntityState.Deleted).Select(a => CreateWithValues(a.OriginalValues)).ToList();
+            List<T> removed =
+                entries.Where(a => a.State == EntityState.Deleted).Select(a => SelectOriginalAsync(a).Result).ToList();
+
+            List<T> added =
+                entries.Where(a => a.State == EntityState.Added).Select(a => SelectCurrentAsync(a).Result).ToList();
+            List<dynamic> modified =
+                entries.Where(a => a.State == EntityState.Modified).Select(a => SelectBothAsync(a).Result).ToList();
+
+
+            if (GetLogicalDeleteProperty(_type) == null)
+            {  
+                if (!IgnoreLogicalDeleteError && removed.FirstOrDefault(entry => GetLogicalDeleteProperty(entry.GetType()) != null) != null)
+                {
+                    throw new LogicalSecurityRiskException($"There are derived types in the deleted entries which have LogicalDeleteAttribute, but the base type does not use logical delete.");
+                }
+            }
+            else
+            {
+                List<DbEntityEntry> logicalRemoved = entries.Where(a => a.State == EntityState.Deleted).ToList();
+                logicalRemoved.ForEach(entry =>
+                {
+                    //await entry.ReloadAsync();
+                    entry.State = EntityState.Modified;
+                    entry.Property(GetLogicalDeleteProperty(_type).Name).CurrentValue = true;
+                });
+            }
 
             _dbcontext.SaveChanges();
 
-            added.ForEach(async a => await Listen.CreatedAsync(CreateWithValues(a.CurrentValues), contextInfo));
-            modified.ForEach(async a => await Listen.ModifiedAsync(CreateWithValues(a.OriginalValues), CreateWithValues(a.CurrentValues), contextInfo));
+            added.ForEach(async a => await Listen.CreatedAsync(a, contextInfo));
+            modified.ForEach(async a => await Listen.ModifiedAsync(a.OriginalValues, a.CurrentValues, contextInfo));
             removed.ForEach(async a => await Listen.RemovedAsync(a, contextInfo));
         }
 
         public void SetEntityState(T entity, EntityState newState)
         {
             _dbcontext.Entry(entity).State = newState;
+        }
+
+        private static async Task<T> SelectCurrentAsync(DbEntityEntry a, Type type = null)
+        {
+            if (type == null)
+            {
+                type = a.Entity.GetType();
+            }
+            return await CreateWithValuesAsync(a.CurrentValues.Clone(), type);
+        }
+        private static async Task<T> SelectOriginalAsync(DbEntityEntry a, Type type = null)
+        {
+            if (type == null)
+            {
+                type = a.Entity.GetType();
+            }
+            return await CreateWithValuesAsync(a.OriginalValues.Clone(), type);
+        }
+
+        private static async Task<dynamic> SelectBothAsync(DbEntityEntry a)
+        {
+            var type = a.Entity.GetType();
+            return new
+            {
+                OriginalValues = await SelectOriginalAsync(a, type),
+                CurrentValues = await SelectCurrentAsync(a, type)
+            };
         }
 
         public EntityState GetEntityState(T entity)

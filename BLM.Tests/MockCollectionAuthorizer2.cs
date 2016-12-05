@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 
 namespace BLM.Tests
 {
-    public class MockCollectionAuthorizer2 : IAuthorizeCollection<MockEntity>
+    public class MockCollectionAuthorizer2 : IAuthorizeCollection<MockEntity, MockEntity>
     {
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async Task<IQueryable<MockEntity>> AuthorizeCollectionAsync(IQueryable<MockEntity> entities, IContextInfo ctx)
+        public async Task<IQueryable<MockEntity>> AuthorizeCollection(IQueryable<MockEntity> entities, IContextInfo ctx)
         {
             return entities.Where(a => a.IsVisible2);
         }

@@ -2,7 +2,7 @@
 {
     public interface IInterpretBeforeModify<T> : IInterpretBeforeModify<T, T>
     {
-        
+
     }
 
     public interface IInterpretBeforeModify<in TInput, out TOutput> : IBlmEntry
