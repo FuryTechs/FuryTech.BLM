@@ -257,7 +257,7 @@ namespace BLM.Tests
 
             var time = DateTime.Now.Subtract(start).TotalMilliseconds;
 
-            Assert.IsTrue(time < 1000);
+            Assert.IsTrue(time < 1500, "time < 1500");
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
