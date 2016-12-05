@@ -254,7 +254,7 @@ namespace BLM.EF6
             var contextInfo = GetContextInfo(user);
 
             _dbcontext.ChangeTracker.DetectChanges();
-            List<DbEntityEntry> entries = _dbcontext.ChangeTracker.Entries().ToList();
+            var entries = _dbcontext.ChangeTracker.Entries().ToList();
 
             foreach (var entityChange in _dbcontext.ChangeTracker.Entries())
             {
@@ -273,38 +273,43 @@ namespace BLM.EF6
                 }
             }
 
-            List<T> removed =
-                entries.Where(a => a.State == EntityState.Deleted).Select(a => SelectOriginalAsync(a).Result).ToList();
+            var removed =
+                entries.Where(a => a.State == EntityState.Deleted).Select(async a => await SelectOriginalAsync(a)).ToList();
 
-            List<T> added =
-                entries.Where(a => a.State == EntityState.Added).Select(a => SelectCurrentAsync(a).Result).ToList();
-            List<dynamic> modified =
-                entries.Where(a => a.State == EntityState.Modified).Select(a => SelectBothAsync(a).Result).ToList();
+            var added =
+                entries.Where(a => a.State == EntityState.Added).Select(async a => await SelectCurrentAsync(a)).ToList();
+            var modified =
+                entries.Where(a => a.State == EntityState.Modified).Select(async a => await SelectBothAsync(a)).ToList();
 
 
-            if (GetLogicalDeleteProperty(_type) == null)
-            {  
-                if (!IgnoreLogicalDeleteError && removed.FirstOrDefault(entry => GetLogicalDeleteProperty(entry.GetType()) != null) != null)
-                {
-                    throw new LogicalSecurityRiskException($"There are derived types in the deleted entries which have LogicalDeleteAttribute, but the base type does not use logical delete.");
-                }
-            }
-            else
+            if (removed.Any())
             {
-                List<DbEntityEntry> logicalRemoved = entries.Where(a => a.State == EntityState.Deleted).ToList();
-                logicalRemoved.ForEach(entry =>
+                if (GetLogicalDeleteProperty(_type) == null)
                 {
-                    //await entry.ReloadAsync();
-                    entry.State = EntityState.Modified;
-                    entry.Property(GetLogicalDeleteProperty(_type).Name).CurrentValue = true;
-                });
+                    if (!IgnoreLogicalDeleteError &&
+                        removed.Any(entry => GetLogicalDeleteProperty(entry.Result.GetType()) != null))
+                    {
+                        throw new LogicalSecurityRiskException(
+                            $"There are derived types in the deleted entries which have LogicalDeleteAttribute, but the base type does not use logical delete.");
+                    }
+                }
+                else
+                {
+                    var logicalRemoved = entries.Where(a => a.State == EntityState.Deleted).ToList();
+                    logicalRemoved.ForEach(entry =>
+                    {
+                        //await entry.ReloadAsync();
+                        entry.State = EntityState.Modified;
+                        entry.Property(GetLogicalDeleteProperty(_type).Name).CurrentValue = true;
+                    });
+                }
             }
 
             _dbcontext.SaveChanges();
 
-            added.ForEach(async a => await Listen.CreatedAsync(a, contextInfo));
-            modified.ForEach(async a => await Listen.ModifiedAsync(a.OriginalValues, a.CurrentValues, contextInfo));
-            removed.ForEach(async a => await Listen.RemovedAsync(a, contextInfo));
+            added.ForEach(async a => await Listen.CreatedAsync((await a), contextInfo));
+            modified.ForEach(async a =>  await Listen.ModifiedAsync((await a).OriginalValues, (await a).CurrentValues, contextInfo));
+            removed.ForEach(async a => await Listen.RemovedAsync((await a), contextInfo));
         }
 
         public void SetEntityState(T entity, EntityState newState)
