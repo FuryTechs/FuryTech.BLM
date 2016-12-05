@@ -1,11 +1,6 @@
 ﻿namespace BLM.Interfaces.Interpret
 {
-    public interface IInterpretBeforeModify<T> : IInterpretBeforeModify<T, T>
-    {
-        
-    }
-
-    public interface IInterpretBeforeModify<in TInput, out TOutput> : IBlmEntry
+    internal interface IInterpretBeforeModify : IBlmEntry
     {
         /// <summary>
         /// Possibility to interpret an entity on modification before saving into the DB
@@ -14,6 +9,43 @@
         /// <param name="modifiedEntity"></param>
         /// <param name="context"></param>
         /// <returns>The entity to be modified</returns>
-        TOutput InterpretBeforeModify(TInput originalEntity, TInput modifiedEntity, IContextInfo context);
+        object DoInterpret(object originalEntity, object modifiedEntity, IContextInfo context);
     }
+
+    internal interface IInterpretBeforeModify<in TInput, out TOutput> : IInterpretBeforeModify
+    {
+        /// <summary>
+        /// Possibility to interpret an entity on modification before saving into the DB
+        /// </summary>
+        /// <param name="originalEntity"></param>
+        /// <param name="modifiedEntity"></param>
+        /// <param name="context"></param>
+        /// <returns>The entity to be modified</returns>
+        TOutput DoInterpret(TInput originalEntity, TInput modifiedEntity, IContextInfo context);
+    }
+    public abstract class InterpretBeforeModify<T> : IInterpretBeforeModify<T, T>
+    {
+        /// <summary>
+        /// Possibility to interpret an entity on modification before saving into the DB
+        /// </summary>
+        /// <param name="originalEntity"></param>
+        /// <param name="modifiedEntity"></param>
+        /// <param name="context"></param>
+        /// <returns>The entity to be modified</returns>
+        public abstract T DoInterpret(T originalEntity, T modifiedEntity, IContextInfo context);
+
+        /// <summary>
+        /// Possibility to interpret an entity on modification before saving into the DB
+        /// </summary>
+        /// <param name="originalEntity"></param>
+        /// <param name="modifiedEntity"></param>
+        /// <param name="context"></param>
+        /// <returns>The entity to be modified</returns>
+        public object DoInterpret(object originalEntity, object modifiedEntity, IContextInfo context)
+        {
+            return DoInterpret((T)originalEntity, (T)modifiedEntity, context);
+
+        }
+    }
+
 }

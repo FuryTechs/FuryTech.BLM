@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using BLM.Interfaces.Authorize;
@@ -10,14 +11,12 @@ namespace BLM.Tests
         public int Id { get; set; }
     }
 
-    class DummyAuthorizeCollection : IAuthorizeCollection<DummyClass>
+    class DummyAuthorizeCollection : AuthorizeCollection<DummyClass>
     {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async Task<IQueryable<DummyClass>> AuthorizeCollectionAsync(IQueryable<DummyClass> entities, IContextInfo ctx)
+        public override async Task<IQueryable<DummyClass>> AuthorizeCollectionAsync(IQueryable<DummyClass> entities, IContextInfo ctx)
         {
-            return entities;
+            return await Task.Factory.StartNew(() => entities);
         }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     }
 
     [TestClass]
@@ -28,7 +27,7 @@ namespace BLM.Tests
         {
             var types = Loader.Types;
             Assert.IsNotNull(types);
-            Assert.IsTrue(types.All(t=>t.GetInterfaces().Contains(typeof(IBlmEntry))));
+            Assert.IsTrue(types.All(t => t.GetInterfaces().Contains(typeof(IBlmEntry))));
         }
 
         [TestMethod]
@@ -45,21 +44,21 @@ namespace BLM.Tests
         [TestMethod]
         public void GetEntriesForType()
         {
-            var entryList = Loader.GetEntriesFor<IAuthorizeCollection<DummyClass>>();
+            var entryList = Loader.GetEntriesFor<AuthorizeCollection<DummyClass>>();
             Assert.IsNotNull(entryList);
 
             foreach (var instance in entryList)
             {
-                Assert.IsInstanceOfType(instance, typeof(IAuthorizeCollection<DummyClass>));
+                Assert.IsInstanceOfType(instance, typeof(AuthorizeCollection<DummyClass>));
             }
 
             // And...again from cache
-            var entryList2 = Loader.GetEntriesFor<IAuthorizeCollection<DummyClass>>();
+            var entryList2 = Loader.GetEntriesFor<AuthorizeCollection<DummyClass>>();
             Assert.IsNotNull(entryList2);
 
             foreach (var instance in entryList2)
             {
-                Assert.IsInstanceOfType(instance, typeof(IAuthorizeCollection<DummyClass>));
+                Assert.IsInstanceOfType(instance, typeof(AuthorizeCollection<DummyClass>));
 
             }
         }
