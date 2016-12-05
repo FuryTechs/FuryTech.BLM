@@ -16,7 +16,7 @@ namespace BLM
 
         public static void Created<T>(T entity, IContextInfo context)
         {
-            CreatedAsync<T>(entity, context).RunSynchronously();
+            CreatedAsync<T>(entity, context).Wait();
         }
 
         public static async Task CreateFailedAsync<T>(T entity, IContextInfo context)
@@ -30,7 +30,7 @@ namespace BLM
 
         public static void CreateFailed<T>(T entity, IContextInfo context)
         {
-            CreateFailedAsync(entity, context).RunSynchronously();
+            CreateFailedAsync(entity, context).Wait();
         }
 
         public static async Task ModifiedAsync<T>(T original, T modified, IContextInfo context)
@@ -45,7 +45,7 @@ namespace BLM
 
         public static void Modified<T>(T original, T modified, IContextInfo context)
         {
-            ModifiedAsync(original, modified, context).RunSynchronously();
+            ModifiedAsync(original, modified, context).Wait();
         }
 
         public static async Task ModificationFailedAsync<T>(T original, T modified, IContextInfo context)
@@ -59,7 +59,7 @@ namespace BLM
 
         public static void ModificationFailed<T>(T original, T modified, IContextInfo context)
         {
-            ModificationFailedAsync(original, modified, context).RunSynchronously();
+            ModificationFailedAsync(original, modified, context).Wait();
         }
 
         public static async Task RemovedAsync<T>(T entity, IContextInfo context)
@@ -73,7 +73,7 @@ namespace BLM
 
         public static void Removed<T>(T entity, IContextInfo context)
         {
-            RemovedAsync(entity, context).RunSynchronously();
+            RemovedAsync(entity, context).Wait();
         }
 
         public static async Task RemoveFailedAsync<T>(T entity, IContextInfo context)
@@ -87,7 +87,7 @@ namespace BLM
 
         public static void RemoveFailed<T>(T entity, IContextInfo context)
         {
-            RemoveFailedAsync(entity, context).RunSynchronously();
+            RemoveFailedAsync(entity, context).Wait();
         }
     }
 }

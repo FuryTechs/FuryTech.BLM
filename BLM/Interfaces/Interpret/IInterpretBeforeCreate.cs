@@ -1,8 +1,8 @@
-﻿namespace BLM.Interfaces.Interpret
-{
-    public interface IInterpretBeforeCreate<T> : IInterpretBeforeCreate<T, T> { }
+﻿using System.Security.Principal;
 
-    public interface IInterpretBeforeCreate<in TInput, out TOutput> : IBlmEntry
+namespace BLM.Interfaces.Interpret
+{
+    internal interface IInterpretBeforeCreate : IBlmEntry
     {
         /// <summary>
         /// Possibility to interpret an entity on creation before saving into the DB
@@ -10,6 +10,40 @@
         /// <param name="entity">The entity to be created</param>
         /// <param name="context">The creation context</param>
         /// <returns>The interpreted entity to be created</returns>
-        TOutput InterpretBeforeCreate(TInput entity, IContextInfo context);
+        object DoInterpret(object entity, IContextInfo context);
+    }
+
+    internal interface IInterpretBeforeCreate<in TInput, out TOutput> : IInterpretBeforeCreate
+    {
+        /// <summary>
+        /// Possibility to interpret an entity on creation before saving into the DB
+        /// </summary>
+        /// <param name="entity">The entity to be created</param>
+        /// <param name="context">The creation context</param>
+        /// <returns>The interpreted entity to be created</returns>
+        TOutput DoInterpret(TInput entity, IContextInfo context);
+    }
+
+    public abstract class InterpretBeforeCreate<T> : IInterpretBeforeCreate<T, T>
+    {
+        /// <summary>
+        /// Possibility to interpret an entity on creation before saving into the DB
+        /// </summary>
+        /// <param name="entity">The entity to be created</param>
+        /// <param name="context">The creation context</param>
+        /// <returns>The interpreted entity to be created</returns>
+        public abstract T DoInterpret(T entity, IContextInfo context);
+
+        /// <summary>
+        /// Possibility to interpret an entity on creation before saving into the DB
+        /// </summary>
+        /// <param name="entity">The entity to be created</param>
+        /// <param name="context">The creation context</param>
+        /// <returns>The interpreted entity to be created</returns>
+        public object DoInterpret(object entity, IContextInfo context)
+        {
+            return DoInterpret((T)entity, context);
+
+        }
     }
 }

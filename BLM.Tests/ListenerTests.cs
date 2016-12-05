@@ -25,17 +25,17 @@ namespace BLM.Tests
         public static bool WasOnDeletedCalled;
         public static bool WasOnDeletionFailedCalled;
 
-        public async Task OnCreatedAsync(T entity, IContextInfo user)
+        public virtual async Task OnCreatedAsync(T entity, IContextInfo user)
         {
             WasOnCreatedCalled = true;
         }
 
-        public async Task OnCreateFailedAsync(T entity, IContextInfo user)
+        public virtual async Task OnCreateFailedAsync(T entity, IContextInfo user)
         {
             WasOnCreationValidationFailedCalled = true;
         }
 
-        public async Task OnModifiedAsync(T original, T modified, IContextInfo user)
+        public virtual async Task OnModifiedAsync(T original, T modified, IContextInfo user)
         {
             if (original != null)
             {
@@ -51,7 +51,7 @@ namespace BLM.Tests
             }
             WasOnModifiedCalled = true;
         }
-        public async Task OnModificationFailedAsync(T original, T modified, IContextInfo user)
+        public virtual async Task OnModificationFailedAsync(T original, T modified, IContextInfo user)
         {
             if (original != null)
             {
@@ -69,13 +69,13 @@ namespace BLM.Tests
         }
 
 
-        public async Task OnRemovedAsync(T entity, IContextInfo user)
+        public virtual async Task OnRemovedAsync(T entity, IContextInfo user)
         {
             WasOnDeletedCalled = true;
         }
 
 
-        public async Task OnRemoveFailedAsync(T entity, IContextInfo user)
+        public virtual async Task OnRemoveFailedAsync(T entity, IContextInfo user)
         {
             WasOnDeletionFailedCalled = true;
         }
@@ -257,7 +257,7 @@ namespace BLM.Tests
 
             var time = DateTime.Now.Subtract(start).TotalMilliseconds;
 
-            Assert.IsTrue(time < 1000);
+            Assert.IsTrue(time < 1500, "time < 1500");
 
             Assert.IsFalse(MockListener.WasOnCreatedCalled);
             Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);

@@ -73,7 +73,10 @@
     <Reference Include="System.Transactions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractEFRepositoryTest.cs" />
     <Compile Include="EntityFrameworkBasicTests.cs" />
+    <Compile Include="FakeDbContext.cs" />
+    <Compile Include="EntityFrameworkRepositoryListenerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
