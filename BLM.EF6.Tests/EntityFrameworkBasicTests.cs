@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Principal;
 using System.Threading;
@@ -9,27 +10,15 @@ using BLM.Tests;
 using Effort.Provider;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
+using BLM.Exceptions;
 
 namespace BLM.EF6.Tests
 {
-    public class FakeDbContext : DbContext
-    {
-        public FakeDbContext(DbConnection connection) : base(connection, true)
-        {
-
-        }
-
-        public virtual DbSet<MockEntity> MockEntities { get; set; }
-    }
 
     [TestClass]
-    public class EntityFrameworkBasicTests
+    public class EntityFrameworkBasicTests : AbstractEfRepositoryTest
     {
-        private FakeDbContext _db;
-        private EfRepository<MockEntity> _repo;
-        private IIdentity _identity;
-
-        private MockEntity valid = new MockEntity()
+        protected MockEntity ValidEntity = new MockEntity()
         {
             Id = 1,
             IsValid = true,
@@ -38,7 +27,7 @@ namespace BLM.EF6.Tests
 
         };
 
-        private MockEntity invalid = new MockEntity()
+        protected MockEntity InvalidEntity = new MockEntity()
         {
             Id = 2,
             IsValid = false,
@@ -46,7 +35,7 @@ namespace BLM.EF6.Tests
             IsVisible2 = false
         };
 
-        private MockEntity invisible = new MockEntity()
+        protected MockEntity InvisibleEntity = new MockEntity()
         {
             Id = 3,
             IsValid = true,
@@ -54,53 +43,35 @@ namespace BLM.EF6.Tests
             IsVisible2 = true
         };
 
-        private MockEntity invisible2 = new MockEntity()
+        protected MockEntity InvisibleEntity2 = new MockEntity()
         {
             Id = 4,
             IsValid = true,
             IsVisible = false,
             IsVisible2 = true
         };
-
-        IContextInfo ctx = new GenericContextInfo(Thread.CurrentPrincipal.Identity);
-
-        [TestInitialize]
-        public void Init()
-        {
-            EffortProviderConfiguration.RegisterProvider();
-            var efforConnection = Effort.DbConnectionFactory.CreateTransient();
-            _db = new FakeDbContext(efforConnection);
-            _repo = new EfRepository<MockEntity>(_db);
-            _identity = Thread.CurrentPrincipal.Identity;
-        }
-
-        [TestCleanup]
-        public void Cleanup()
-        {
-            _repo?.Dispose();
-            _db?.Dispose();
-        }
-
+        
         [TestMethod]
-        public async Task Add()
+        public virtual async Task Add()
         {
-            await _repo.AddAsync(_identity, valid);
+            await _repo.AddAsync(_identity, ValidEntity);
             await _repo.SaveChangesAsync(_identity);
         }
 
         [TestMethod]
         [ExpectedException(typeof(AuthorizationFailedException))]
-        public async Task AddFailure()
+        public virtual async Task AddFailure()
         {
-            await _repo.AddAsync(_identity, invalid);
+            await _repo.AddAsync(_identity, InvalidEntity);
         }
 
         [TestMethod]
         [ExpectedException(typeof(AuthorizationFailedException))]
-        public async Task AddFailureOnSave()
+        public virtual async Task AddFailureOnSave()
         {
-            await _repo.AddAsync(_identity, valid);
+            await _repo.AddAsync(_identity, ValidEntity);
             await _repo.SaveChangesAsync(_identity);
+            
             _db.Set<MockEntity>().FirstOrDefault().IsValid = false;
 
             await _repo.SaveChangesAsync(_identity);
@@ -108,88 +79,88 @@ namespace BLM.EF6.Tests
 
         [TestMethod]
         [ExpectedException(typeof(AuthorizationFailedException))]
-        public async Task AddRangeFail()
+        public virtual async Task AddRangeFail()
         {
-            await _repo.AddRangeAsync(_identity, new List<MockEntity>() { valid, invisible, invalid });
+            await _repo.AddRangeAsync(_identity, new List<MockEntity>() { ValidEntity, InvisibleEntity, InvalidEntity });
         }
 
         [TestMethod]
-        public async Task Modify()
+        public virtual async Task Modify()
         {
-            valid.Guid = Guid.NewGuid().ToString();
-            await _repo.AddAsync(_identity, valid);
+            ValidEntity.Guid = Guid.NewGuid().ToString();
+            await _repo.AddAsync(_identity, ValidEntity);
             await _repo.SaveChangesAsync(_identity);
 
             var newGuid = Guid.NewGuid().ToString();
-            var loadedValid = _repo.Entities(_identity).FirstOrDefault(a => a.Id == valid.Id);
+            var loadedValid = _repo.Entities(_identity).FirstOrDefault(a => a.Id == ValidEntity.Id);
             loadedValid.Guid = newGuid;
             await _repo.SaveChangesAsync(_identity);
 
-            var reloadedValid = _repo.Entities(_identity).FirstOrDefault(a => a.Id == valid.Id);
+            var reloadedValid = _repo.Entities(_identity).FirstOrDefault(a => a.Id == ValidEntity.Id);
             Assert.AreEqual(reloadedValid.Guid, newGuid);
         }
-        
+
         [TestMethod]
         [ExpectedException(typeof(AuthorizationFailedException))]
-        public async Task ModifyFailedAsync()
+        public virtual async Task ModifyFailedAsync()
         {
-            await _repo.AddAsync(_identity, valid);
+            await _repo.AddAsync(_identity, ValidEntity);
             await _repo.SaveChangesAsync(_identity);
 
-            var validToChange = _repo.Entities(_identity).FirstOrDefault(a => a.Id == valid.Id);
+            var validToChange = _repo.Entities(_identity).FirstOrDefault(a => a.Id == ValidEntity.Id);
             validToChange.IsValid = false;
 
             await _repo.SaveChangesAsync(_identity);
         }
 
         [TestMethod]
-        public async Task RemoveAsync()
+        public virtual async Task RemoveAsync()
         {
-            await _repo.AddAsync(_identity, valid);
+            await _repo.AddAsync(_identity, ValidEntity);
             await _repo.SaveChangesAsync(_identity);
 
-            await _repo.RemoveAsync(_identity, valid);
+            await _repo.RemoveAsync(_identity, ValidEntity);
             await _repo.SaveChangesAsync(_identity);
         }
 
         [TestMethod]
-        public async Task RemoveRange()
+        public virtual async Task RemoveRange()
         {
-            await _repo.AddAsync(_identity, valid);
+            await _repo.AddAsync(_identity, ValidEntity);
             await _repo.SaveChangesAsync(_identity);
 
-            await _repo.RemoveRangeAsync(_identity, new List<MockEntity> { valid });
+            await _repo.RemoveRangeAsync(_identity, new List<MockEntity> { ValidEntity });
             await _repo.SaveChangesAsync(_identity);
         }
 
 
-
-        [TestMethod]
-        [ExpectedException(typeof(AuthorizationFailedException))]
-        public async Task RemoveFailed()
-        {
-            _db.Set<MockEntity>().Add(invalid);
-            await _db.SaveChangesAsync();
-
-            await _repo.RemoveAsync(_identity, invalid);
-        }
 
         [TestMethod]
         [ExpectedException(typeof(AuthorizationFailedException))]
-        public async Task RemoveRangeFailed()
+        public virtual async Task RemoveFailed()
         {
-            _db.Set<MockEntity>().Add(invalid);
+            _db.Set<MockEntity>().Add(InvalidEntity);
             await _db.SaveChangesAsync();
 
-            await _repo.RemoveRangeAsync(_identity, new List<MockEntity> { invalid });
+            await _repo.RemoveAsync(_identity, InvalidEntity);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(AuthorizationFailedException))]
+        public virtual async Task RemoveRangeFailed()
+        {
+            _db.Set<MockEntity>().Add(InvalidEntity);
+            await _db.SaveChangesAsync();
+
+            await _repo.RemoveRangeAsync(_identity, new List<MockEntity> { InvalidEntity });
 
         }
 
 
         [TestMethod]
-        public async Task AuthorizeCollection()
+        public virtual async Task AuthorizeCollection()
         {
-            await _repo.AddRangeAsync(_identity, new List<MockEntity>() { valid, invisible, invisible2 });
+            await _repo.AddRangeAsync(_identity, new List<MockEntity>() { ValidEntity, InvisibleEntity, InvisibleEntity2 });
             await _repo.SaveChangesAsync(_identity);
 
             Assert.IsTrue(_repo.Entities(_identity).All(a => a.IsVisible && a.IsVisible2));
@@ -197,44 +168,44 @@ namespace BLM.EF6.Tests
 
 
         [TestMethod]
-        public async Task CtxAuthorizedEntitySet()
+        public virtual async Task CtxAuthorizedEntitySet()
         {
             var ctx = new EfContextInfo(_identity, _db);
 
-            _db.Set<MockEntity>().AddRange(new List<MockEntity>() { valid, invalid, invisible, invisible2 });
+            _db.Set<MockEntity>().AddRange(new List<MockEntity>() { ValidEntity, InvalidEntity, InvisibleEntity, InvisibleEntity2 });
             await _db.SaveChangesAsync();
 
             Assert.IsTrue((await ctx.GetAuthorizedEntitySetAsync<MockEntity>()).All(a => a.IsVisible && a.IsVisible2));
         }
 
         [TestMethod]
-        public async Task CtxFullEntitySet()
+        public virtual async Task CtxFullEntitySet()
         {
             var ctx = new EfContextInfo(_identity, _db);
 
-            _db.Set<MockEntity>().AddRange(new List<MockEntity>() { valid, invalid, invisible, invisible2 });
+            _db.Set<MockEntity>().AddRange(new List<MockEntity>() { ValidEntity, InvalidEntity, InvisibleEntity, InvisibleEntity2 });
             await _db.SaveChangesAsync();
 
             Assert.IsTrue(ctx.GetFullEntitySet<MockEntity>().Any(a => !a.IsVisible || !a.IsVisible2));
         }
 
         [TestMethod]
-        public async Task GetSetEntityState()
+        public virtual async Task GetSetEntityState()
         {
-            await _repo.AddAsync(_identity, valid);
-            Assert.AreEqual(_repo.GetEntityState(valid), EntityState.Added);
-            _repo.SetEntityState(valid, EntityState.Modified);
-            Assert.AreEqual(_repo.GetEntityState(valid), EntityState.Modified);
+            await _repo.AddAsync(_identity, ValidEntity);
+            Assert.AreEqual(_repo.GetEntityState(ValidEntity), EntityState.Added);
+            _repo.SetEntityState(ValidEntity, EntityState.Modified);
+            Assert.AreEqual(_repo.GetEntityState(ValidEntity), EntityState.Modified);
         }
 
         [TestMethod]
-        public async Task SkipUnchangedEntities()
+        public virtual async Task SkipUnchangedEntities()
         {
-            await _repo.AddAsync(_identity, valid);
+            await _repo.AddAsync(_identity, ValidEntity);
             await _repo.SaveChangesAsync(_identity);
 
-            var loaded = _repo.Entities(_identity).FirstOrDefault(a => a.Id == valid.Id);
-            valid.Guid = Guid.NewGuid().ToString();
+            var loaded = _repo.Entities(_identity).FirstOrDefault(a => a.Id == ValidEntity.Id);
+            ValidEntity.Guid = Guid.NewGuid().ToString();
             _repo.SetEntityState(loaded, EntityState.Unchanged);
 
             await _repo.SaveChangesAsync(_identity);

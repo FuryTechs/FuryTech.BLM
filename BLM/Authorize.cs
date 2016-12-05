@@ -11,11 +11,11 @@ namespace BLM
 
         public static async Task<IQueryable<T>> CollectionAsync<T>(IQueryable<T> entities, IContextInfo context) where T : class
         {
-            var collectionAuthorizers = Loader.GetEntriesFor<IAuthorizeCollection<T>>();
+            var collectionAuthorizers = Loader.GetEntriesFor<IAuthorizeCollection<T, T>>();
             foreach (var collectionAuthorizer in collectionAuthorizers)
             {
-                var auth = (IAuthorizeCollection<T>)collectionAuthorizer;
-                entities = await auth.AuthorizeCollectionAsync(entities, context);
+                var auth = (IAuthorizeCollection<T, T>)collectionAuthorizer;
+                entities = await auth.AuthorizeCollection(entities, context);
             }
 
             return entities;

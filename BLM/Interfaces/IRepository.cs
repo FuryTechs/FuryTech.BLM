@@ -6,17 +6,23 @@ using System.Threading.Tasks;
 
 namespace BLM
 {
-    public interface IRepository<T> : IDisposable where T: class
+
+    public interface IRepository<T> : IRepository<T, T> where T : class
     {
-        IQueryable<T> Entities(IIdentity user);
-        void Add(IIdentity user, T newItem);
-        Task AddAsync(IIdentity user, T newItem);
-        void AddRange(IIdentity user, IEnumerable<T> newItems);
-        Task AddRangeAsync(IIdentity user, IEnumerable<T> newItems);
-        void Remove(IIdentity usr, T item);
-        Task RemoveAsync(IIdentity usr, T item);
-        void RemoveRange(IIdentity usr, IEnumerable<T> items);
-        Task RemoveRangeAsync(IIdentity usr, IEnumerable<T> items);
+
+    }
+
+    public interface IRepository<in TInput, out TOutput> : IDisposable where TInput : class where TOutput: class
+    {
+        IQueryable<TOutput> Entities(IIdentity user);
+        void Add(IIdentity user, TInput newItem);
+        Task AddAsync(IIdentity user, TInput newItem);
+        void AddRange(IIdentity user, IEnumerable<TInput> newItems);
+        Task AddRangeAsync(IIdentity user, IEnumerable<TInput> newItems);
+        void Remove(IIdentity usr, TInput item);
+        Task RemoveAsync(IIdentity usr, TInput item);
+        void RemoveRange(IIdentity usr, IEnumerable<TInput> items);
+        Task RemoveRangeAsync(IIdentity usr, IEnumerable<TInput> items);
         void SaveChanges(IIdentity user);
         Task SaveChangesAsync(IIdentity user);
     }
