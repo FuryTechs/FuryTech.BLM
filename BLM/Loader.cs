@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BLM.Interfaces.Authorize;
 
 namespace BLM
 {
@@ -62,7 +63,7 @@ namespace BLM
                 .ToList();
         }
 
-        private static object EntryLoadLock = new object();
+        private static readonly object EntryLoadLock = new object();
 
         public static List<IBlmEntry> GetEntriesFor<T>() where T : class, IBlmEntry
         {
@@ -82,16 +83,17 @@ namespace BLM
                     return entries;
                 }
 
+                var entityType = typeof(T);
+                var typesForEntity = GetAllEntriesFor(entityType.GetGenericArguments()[0]);
+                var typesForBlmEntry = typesForEntity.Where(t => 
+                    (t.GetInterfaces().Any(intr => intr.IsGenericType && entityType.GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition())))
+                    || (   t.BaseType != null 
+                        && t.BaseType.IsAssignableFrom(typeof(IAuthorizeCollection)) 
+                        && t.BaseType.GetInterfaces().Any(intr => intr.IsGenericType && entityType.GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition()))
+                    )
+                );
 
-                entries = new List<IBlmEntry>();
-                var typesForEntity = GetAllEntriesFor(typeof(T).GetGenericArguments()[0]);
-                var typesForBlmEntry = typesForEntity.Where(t => t.GetInterfaces().Any(intr => intr.IsGenericType && typeof(T).GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition())));
-
-                foreach (var type in typesForBlmEntry)
-                {
-                    IBlmEntry instance = (IBlmEntry)typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null, null);
-                    entries.Add(instance);
-                }
+                entries = typesForBlmEntry.Select(type => (IBlmEntry) typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null, null)).ToList();
 
                 EntriesByTypeCache.Add(key, entries);
 

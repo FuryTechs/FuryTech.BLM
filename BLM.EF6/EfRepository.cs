@@ -133,7 +133,6 @@ namespace BLM.EF6
             return await Authorize.CollectionAsync(_dbset, GetContextInfo(user));
         }
 
-
         public void Remove(IIdentity usr, T item)
         {
             RemoveAsync(usr, item).Wait();

@@ -14,8 +14,9 @@ namespace BLM
             var collectionAuthorizers = Loader.GetEntriesFor<IAuthorizeCollection<T, T>>();
             foreach (var collectionAuthorizer in collectionAuthorizers)
             {
-                var auth = (IAuthorizeCollection<T, T>)collectionAuthorizer;
-                entities = await auth.AuthorizeCollection(entities, context);
+
+                var auth = (IAuthorizeCollection)collectionAuthorizer;
+                entities = (await auth.AuthorizeCollectionAsync(entities, context)).Cast<T>();
             }
 
             return entities;
