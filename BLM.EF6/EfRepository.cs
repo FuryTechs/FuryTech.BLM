@@ -275,12 +275,16 @@ namespace BLM.EF6
 
             var removed =
                 entries.Where(a => a.State == EntityState.Deleted).Select(async a => await SelectOriginalAsync(a)).ToList();
-
             var added =
                 entries.Where(a => a.State == EntityState.Added).Select(async a => await SelectCurrentAsync(a)).ToList();
             var modified =
                 entries.Where(a => a.State == EntityState.Modified).Select(async a => await SelectBothAsync(a)).ToList();
 
+            var tasks = new List<Task>(removed);
+            tasks.AddRange(added);
+            tasks.AddRange(modified);
+
+            await Task.WhenAll(tasks.ToArray());
 
             if (removed.Any())
             {
@@ -304,7 +308,7 @@ namespace BLM.EF6
                     });
                 }
             }
-
+            
             _dbcontext.SaveChanges();
 
             added.ForEach(async a => await Listen.CreatedAsync((await a), contextInfo));
