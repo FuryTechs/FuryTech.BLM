@@ -1,29 +1,20 @@
-﻿using BLM.Interfaces.Interpret;
+﻿using System.Linq;
+using BLM.Interfaces.Interpret;
 
 namespace BLM
 {
-    public class Interpret
+    public static class Interpret
     {
         public static T BeforeCreate<T>(T entity, IContextInfo context)
         {
-            var createInterpreters = Loader.GetEntriesFor<IInterpretBeforeCreate<T>>();
-            foreach (var interpreter in createInterpreters)
-            {
-                var intr = (IInterpretBeforeCreate<T>)interpreter;
-                entity = intr.InterpretBeforeCreate(entity, context);
-            }
-            return entity;
+            var createInterpreters = Loader.GetEntriesFor<IInterpretBeforeCreate<T, T>>();
+            return createInterpreters.Cast<IInterpretBeforeCreate>().Aggregate(entity, (current, intr) => (T)intr.DoInterpret(current, context));
         }
 
         public static T BeforeModify<T>(T originalEntity, T modifiedEntity, IContextInfo context)
         {
-            var modifyInterpreters = Loader.GetEntriesFor<IInterpretBeforeModify<T>>();
-            foreach (var interpreter in modifyInterpreters)
-            {
-                var intr = (IInterpretBeforeModify<T>)interpreter;
-                modifiedEntity = intr.InterpretBeforeModify(originalEntity, modifiedEntity, context);
-            }
-            return modifiedEntity;
+            var modifyInterpreters = Loader.GetEntriesFor<IInterpretBeforeModify<T, T>>();
+            return modifyInterpreters.Cast<IInterpretBeforeModify>().Aggregate(modifiedEntity, (current, intr) => (T)intr.DoInterpret(originalEntity, current, context));
         }
     }
 }
