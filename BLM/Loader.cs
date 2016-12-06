@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BLM.Interfaces.Authorize;
+using BLM.Interfaces.Interpret;
 
 namespace BLM
 {
@@ -85,15 +86,18 @@ namespace BLM
 
                 var entityType = typeof(T);
                 var typesForEntity = GetAllEntriesFor(entityType.GetGenericArguments()[0]);
-                var typesForBlmEntry = typesForEntity.Where(t => 
+                var typesForBlmEntry = typesForEntity.Where(t =>
                     (t.GetInterfaces().Any(intr => intr.IsGenericType && entityType.GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition())))
-                    || (   t.BaseType != null 
-                        && t.BaseType.IsAssignableFrom(typeof(IAuthorizeCollection)) 
+                    || (t.BaseType != null
+                        && (t.BaseType.IsAssignableFrom(typeof(IAuthorizeCollection))
+                            || t.BaseType.IsAssignableFrom(typeof(IInterpretBeforeCreate))
+                            || t.BaseType.IsAssignableFrom(typeof(IInterpretBeforeModify))
+                        )
                         && t.BaseType.GetInterfaces().Any(intr => intr.IsGenericType && entityType.GetGenericTypeDefinition().IsAssignableFrom(intr.GetGenericTypeDefinition()))
                     )
                 );
 
-                entries = typesForBlmEntry.Select(type => (IBlmEntry) typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null, null)).ToList();
+                entries = typesForBlmEntry.Select(type => (IBlmEntry)typeof(Loader).GetMethod("GetInstance").MakeGenericMethod(type).Invoke(null, null)).ToList();
 
                 EntriesByTypeCache.Add(key, entries);
 
