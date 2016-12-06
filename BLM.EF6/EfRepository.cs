@@ -274,13 +274,13 @@ namespace BLM.EF6
             }
 
             // Added should be updated after saving changes for get the ID of the newly created entity
-            var added = entries.Where(a => a.State == EntityState.Added).ToList();
+            var added = entries.Where(a => a.State == EntityState.Added).Select(a => a.Entity).Cast<T>().ToList();
 
             var modified =
                 entries.Where(a => a.State == EntityState.Modified).Select(async a => await SelectBothAsync(a)).ToList();
             var removed =
                 entries.Where(a => a.State == EntityState.Deleted).Select(async a => await SelectOriginalAsync(a)).ToList();
-            
+
             var tasks = new List<Task>(removed);
             tasks.AddRange(modified);
 
@@ -308,11 +308,11 @@ namespace BLM.EF6
                     });
                 }
             }
-            
+
             _dbcontext.SaveChanges();
 
-            added.ForEach(async a => await Listen.CreatedAsync(a.Entity, contextInfo));
-            modified.ForEach(async a =>  await Listen.ModifiedAsync((await a).OriginalValues, (await a).CurrentValues, contextInfo));
+            added.ForEach(async a => await Listen.CreatedAsync(a, contextInfo));
+            modified.ForEach(async a => await Listen.ModifiedAsync((await a).OriginalValues, (await a).CurrentValues, contextInfo));
             removed.ForEach(async a => await Listen.RemovedAsync((await a), contextInfo));
         }
 
