@@ -309,11 +309,15 @@ namespace BLM.EF6
                 }
             }
 
-            _dbcontext.SaveChanges();
+            await _dbcontext.SaveChangesAsync();
 
-            added.ForEach(async a => await Listen.CreatedAsync(a, contextInfo));
-            modified.ForEach(async a => await Listen.ModifiedAsync((await a).OriginalValues, (await a).CurrentValues, contextInfo));
-            removed.ForEach(async a => await Listen.RemovedAsync((await a), contextInfo));
+            tasks.Clear();
+
+            tasks.AddRange(added.Select(async a => await Listen.CreatedAsync(a, contextInfo)));
+            tasks.AddRange(modified.Select(async a => await Listen.ModifiedAsync((await a).OriginalValues, (await a).CurrentValues, contextInfo)));
+            tasks.AddRange(removed.Select(async a => await Listen.RemovedAsync((await a), contextInfo)));
+
+            await Task.WhenAll(tasks.ToArray());
         }
 
         public void SetEntityState(T entity, EntityState newState)
