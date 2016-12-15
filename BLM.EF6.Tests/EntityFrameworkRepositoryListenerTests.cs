@@ -19,40 +19,6 @@ namespace BLM.EF6.Tests
     [TestClass]
     public class EntityFrameworkRepositoryListenerTests : AbstractEfRepositoryTest
     {
-        private MockEntity Entity1 { get; set; }
-        private LogicalDeleteEntity Entity2 { get; set; }
-        private LogicalDeleteEntity Entity3 { get; set; }
-
-        [TestInitialize]
-        public override void Init()
-        {
-            base.Init();
-            EfChangeListener.Reset();
-            Entity1 = new MockEntity()
-            {
-                Id = 1,
-                IsValid = true,
-                IsVisible = true,
-                IsVisible2 = true
-            };
-
-            Entity2 = new LogicalDeleteEntity()
-            {
-                Id = 2,
-                IsValid = true,
-                IsVisible = true,
-                IsVisible2 = true
-            };
-
-            Entity3 = new LogicalDeleteEntity()
-            {
-                Id = 3,
-                IsValid = true,
-                IsVisible = true,
-                IsVisible2 = true
-            };
-        }
-
         [TestCleanup]
         public override void Cleanup()
         {
