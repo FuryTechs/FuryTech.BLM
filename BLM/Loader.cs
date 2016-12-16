@@ -8,6 +8,12 @@ namespace BLM
 {
     public static class Loader
     {
+        static Loader()
+        {
+            AppDomain.CurrentDomain.AssemblyLoad += CurrentDomain_AssemblyLoad;
+
+        }
+
         private static readonly object TypeLoaderLock = new object();
         private static List<Type> _loadedTypes;
         public static List<Type> Types
@@ -20,17 +26,7 @@ namespace BLM
                     {
                         if (_loadedTypes == null)
                         {
-                            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                            _loadedTypes = new List<Type>();
-                            foreach (var assembly in assemblies)
-                            {
-                                _loadedTypes.AddRange(
-                                    assembly.GetTypes().Where(a =>
-                                        a.GetInterfaces().Contains(typeof(IBlmEntry))
-                                        && a.IsClass
-                                        && !a.IsAbstract
-                                        ));
-                            }
+                            LoadTypes();
                         }
                     }
                 }
@@ -38,6 +34,26 @@ namespace BLM
             }
         }
 
+        static void LoadTypes()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+            _loadedTypes = new List<Type>();
+            foreach (var assembly in assemblies)
+            {
+                _loadedTypes.AddRange(
+                    assembly.GetTypes().Where(a =>
+                        a.GetInterfaces().Contains(typeof(IBlmEntry))
+                        && a.IsClass
+                        && !a.IsAbstract
+                        ));
+            }
+        }
+
+        private static void CurrentDomain_AssemblyLoad(object sender, AssemblyLoadEventArgs args)
+        {
+            _loadedTypes = null;
+            LoadTypes();
+        }
 
         private static readonly Dictionary<string, IBlmEntry> BlmInstances = new Dictionary<string, IBlmEntry>();
 
@@ -74,14 +90,22 @@ namespace BLM
 
             if (EntriesByTypeCache.TryGetValue(key, out entries))
             {
-                return entries;
+                if (entries.Count != 0)
+                {
+                    return entries;
+                }
+                EntriesByTypeCache.Remove(key);
             }
 
             lock (EntryLoadLock)
             {
                 if (EntriesByTypeCache.TryGetValue(key, out entries))
                 {
-                    return entries;
+                    if (entries.Count != 0)
+                    {
+                        return entries;
+                    }
+                    EntriesByTypeCache.Remove(key);
                 }
 
                 var entityType = typeof(T);
