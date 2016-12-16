@@ -34,18 +34,23 @@ namespace BLM
             }
         }
 
+        private static object _loadingTypes = new object();
+
         static void LoadTypes()
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
-            _loadedTypes = new List<Type>();
-            foreach (var assembly in assemblies)
+            lock (_loadingTypes)
             {
-                _loadedTypes.AddRange(
-                    assembly.GetTypes().Where(a =>
-                        a.GetInterfaces().Contains(typeof(IBlmEntry))
-                        && a.IsClass
-                        && !a.IsAbstract
-                        ));
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+                _loadedTypes = new List<Type>();
+                foreach (var assembly in assemblies)
+                {
+                    _loadedTypes.AddRange(
+                        assembly.GetTypes().Where(a =>
+                            a.GetInterfaces().Contains(typeof(IBlmEntry))
+                            && a.IsClass
+                            && !a.IsAbstract
+                            ));
+                }
             }
         }
 
