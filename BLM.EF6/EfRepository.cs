@@ -318,7 +318,7 @@ namespace BLM.EF6
                 modified.Select(
                     async a =>
                         await
-                            Listen.ModifiedAsync((await a).originalValue, (await a).currentValue, contextInfo)));
+                            Listen.ModifiedAsync((await a).Item1, (await a).Item2, contextInfo)));
             tasks.AddRange(removed.Select(async a => await Listen.RemovedAsync((await a), contextInfo)));
 
             await Task.WhenAll(tasks.ToArray());
@@ -346,10 +346,10 @@ namespace BLM.EF6
             return await CreateWithValuesAsync(a.OriginalValues.Clone(), type);
         }
 
-        private static async Task<(T originalValue, T currentValue)> SelectBothAsync(DbEntityEntry a)
+        private static async Task<Tuple<T, T >> SelectBothAsync(DbEntityEntry a)
         {
             var type = a.Entity.GetType();
-            return (await SelectOriginalAsync(a, type), await SelectCurrentAsync(a, type));
+            return (new Tuple<T, T>(await SelectOriginalAsync(a, type), await SelectCurrentAsync(a, type)));
         }
 
         public EntityState GetEntityState(T entity)
