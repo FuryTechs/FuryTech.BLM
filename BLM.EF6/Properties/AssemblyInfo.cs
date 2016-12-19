@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("BLM.EF6")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("FuryTechs Business Layer Management tools for Entity Framework 6 integration")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Digic Pictures")]
+[assembly: AssemblyCompany("FuryTech")]
 [assembly: AssemblyProduct("BLM.EF6")]
-[assembly: AssemblyCopyright("Copyright © Digic Pictures 2016")]
+[assembly: AssemblyCopyright("Copyright © FuryTech 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
