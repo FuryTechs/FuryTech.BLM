@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("BLM.EF6.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Digic Pictures")]
+[assembly: AssemblyCompany("FuryTech")]
 [assembly: AssemblyProduct("BLM.EF6.Tests")]
-[assembly: AssemblyCopyright("Copyright © Digic Pictures 2016")]
+[assembly: AssemblyCopyright("Copyright © FuryTech 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
