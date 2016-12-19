@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Rage.BLM.Base")]
-[assembly: AssemblyDescription("Rage Business Layer Management tools for Entity Framework")]
+[assembly: AssemblyTitle("FuryTech.BLM")]
+[assembly: AssemblyDescription("FuryTechs Business Layer Management tools")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("RageSoft")]
+[assembly: AssemblyCompany("FuryTech")]
 [assembly: AssemblyProduct("BLM")]
-[assembly: AssemblyCopyright("Copyright © RageSoft 2016")]
+[assembly: AssemblyCopyright("Copyright © FuryTech 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
