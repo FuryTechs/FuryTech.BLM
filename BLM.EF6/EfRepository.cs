@@ -63,7 +63,6 @@ namespace BLM.EF6
 
         private async Task<AuthorizationResult> AuthorizeAddAsync(IIdentity usr, T newEntity)
         {
-            _dbset.Attach(newEntity);
             var authResult = (await Authorize.CreateAsync(newEntity, GetContextInfo(usr))).CreateAggregateResult();
             if (!authResult.HasSucceed)
             {
