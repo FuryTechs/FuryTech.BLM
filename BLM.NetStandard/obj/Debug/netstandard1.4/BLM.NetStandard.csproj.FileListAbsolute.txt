@@ -1,4 +1,0 @@
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.NetStandard\bin\Debug\netstandard1.4\BLM.NetStandard.deps.json
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.NetStandard\obj\Debug\netstandard1.4\BLM.NetStandard.csprojResolveAssemblyReference.cache
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.NetStandard\obj\Debug\netstandard1.4\BLM.NetStandard.AssemblyInfo.cs
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.NetStandard\bin\Debug\netstandard1.4\BLM.NetStandard.dll

@@ -1,6 +1,0 @@
-c:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.NetStandard\bin\Release\netstandard1.6\BLM.NetStandard.deps.json
-c:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.NetStandard\bin\Release\netstandard1.6\BLM.NetStandard.dll
-c:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.NetStandard\bin\Release\netstandard1.6\BLM.NetStandard.pdb
-c:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.NetStandard\obj\Release\netstandard1.6\BLM.NetStandard.AssemblyInfo.cs
-c:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.NetStandard\obj\Release\netstandard1.6\BLM.NetStandard.dll
-c:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.NetStandard\obj\Release\netstandard1.6\BLM.NetStandard.pdb

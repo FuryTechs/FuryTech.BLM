@@ -1,7 +1,0 @@
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.EF7\bin\Release\netstandard1.6\BLM.EF7.deps.json
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.EF7\bin\Release\netstandard1.6\BLM.EF7.dll
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.EF7\bin\Release\netstandard1.6\BLM.EF7.pdb
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.EF7\obj\Release\netstandard1.6\BLM.EF7.csprojResolveAssemblyReference.cache
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.EF7\obj\Release\netstandard1.6\BLM.EF7.AssemblyInfo.cs
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.EF7\obj\Release\netstandard1.6\BLM.EF7.dll
-C:\Users\gallayb\Documents\Visual Studio 2017\Projects\FuryTech.BLM\BLM.EF7\obj\Release\netstandard1.6\BLM.EF7.pdb
