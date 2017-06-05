@@ -5,7 +5,8 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using BLM.EF7;
+using BLM.NetStandard.Tests;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BLM.EF7.Tests
@@ -22,13 +23,14 @@ namespace BLM.EF7.Tests
         [TestInitialize]
         public void Init()
         {
-            EffortProviderConfiguration.RegisterProvider();
-            var efforConnection = Effort.DbConnectionFactory.CreateTransient();
-            _db = new FakeDbContext(efforConnection);
+            var InMemoryOptions = Microsoft.EntityFrameworkCore.InMemoryDbContextOptionsExtensions.UseInMemoryDatabase(new DbContextOptionsBuilder(new DbContextOptions<FakeDbContext>()), "Db");
+            //EffortProviderConfiguration.RegisterProvider();
+            //var efforConnection = Effort.DbConnectionFactory.CreateTransient();
+            _db = new FakeDbContext(InMemoryOptions.Options);
             _repo = new EfRepository<MockEntity>(_db);
             _repoNested = new EfRepository<MockNestedEntity>(_db);
             _repoInterpreted = new EfRepository<MockInterpretedEntity>(_db);
-            _identity = Thread.CurrentPrincipal.Identity;
+            _identity = new GenericIdentity("gallayb");
 
             EfChangeListener.Reset();
             Entity1 = new MockEntity()

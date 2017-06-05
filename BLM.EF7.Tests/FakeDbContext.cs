@@ -1,15 +1,19 @@
-﻿using System.Data.Common;
-using System.Data.Entity;
-using BLM.Tests;
+﻿using BLM.NetStandard.Tests;
+using Microsoft.EntityFrameworkCore;
 
 namespace BLM.EF7.Tests
 {
     public class FakeDbContext : DbContext
     {
-        public FakeDbContext(DbConnection connection) : base(connection, true)
+        public FakeDbContext(DbContextOptions options) : base(options)
         {
 
         }
+
+        //public FakeDbContext(DbConnection connection) : base(connection, true)
+        //{
+
+        //}
 
         public virtual DbSet<MockEntity> MockEntities { get; set; }
         public virtual DbSet<MockNestedEntity> MockNestedEntities { get; set; }

@@ -194,9 +194,9 @@ namespace BLM.EF7
                         var original = CreateWithValues(ent.OriginalValues);
                         var modified = CreateWithValues(ent.CurrentValues);
                         var modifiedInterpreted = Interpret.BeforeModify((T)original, (T)modified, GetContextInfo(user));
-                        foreach (var field in ent.CurrentValues.PropertyNames)
+                        foreach (var property in ent.CurrentValues.Properties)
                         {
-                            ent.CurrentValues[field] = modifiedInterpreted.GetType().GetProperty(field).GetValue(modifiedInterpreted, null);
+                            ent.CurrentValues[property.Name] = modifiedInterpreted.GetType().GetProperty(property.Name).GetValue(modifiedInterpreted, null);
                         }
                         return (await Authorize.ModifyAsync((T)original, (T)modifiedInterpreted, GetContextInfo(user))).CreateAggregateResult();
                     case EntityState.Deleted:
@@ -246,7 +246,7 @@ namespace BLM.EF7
             _dbcontext.ChangeTracker.DetectChanges();
             var entries = _dbcontext.ChangeTracker.Entries().ToList();
 
-            foreach (var entityChange in _dbcontext.ChangeTracker.Entries())
+            foreach (var entityChange in _dbcontext.ChangeTracker.Entries<T>())
             {
                 var authResult = await AuthorizeEntityChangeAsync(user, entityChange);
                 if (!authResult.HasSucceed)
@@ -335,7 +335,7 @@ namespace BLM.EF7
             _dbcontext.Entry(entity).State = newState;
         }
 
-        private static T SelectCurrent(EntityEntry<T> a, Type type = null)
+        private static object SelectCurrent(EntityEntry a, Type type = null)
         {
             if (type == null)
             {
@@ -343,7 +343,7 @@ namespace BLM.EF7
             }
             return CreateWithValues(a.CurrentValues.Clone(), type);
         }
-        private static T SelectOriginal(EntityEntry<T> a, Type type = null)
+        private static object SelectOriginal(EntityEntry a, Type type = null)
         {
             if (type == null)
             {
@@ -352,10 +352,10 @@ namespace BLM.EF7
             return CreateWithValues(a.OriginalValues.Clone(), type);
         }
 
-        private static Tuple<T, T> SelectBoth(EntityEntry<T> a)
+        private static Tuple<object, object> SelectBoth(EntityEntry a)
         {
             var type = a.Entity.GetType();
-            return (new Tuple<T, T>(SelectOriginal(a, type), SelectCurrent(a, type)));
+            return (new Tuple<object, object>(SelectOriginal(a, type), SelectCurrent(a, type)));
         }
 
         public EntityState GetEntityState(T entity)

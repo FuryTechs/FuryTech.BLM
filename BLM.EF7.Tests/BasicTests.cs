@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
-using BLM.Tests;
+using BLM.NetStandard.Tests;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
-using BLM.Exceptions;
+using BLM.NetStandard.Exceptions;
 
 namespace BLM.EF7.Tests
 {

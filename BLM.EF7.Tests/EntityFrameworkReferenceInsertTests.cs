@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BLM.Exceptions;
-using BLM.Tests;
+using BLM.NetStandard.Exceptions;
+using BLM.NetStandard.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BLM.EF7.Tests

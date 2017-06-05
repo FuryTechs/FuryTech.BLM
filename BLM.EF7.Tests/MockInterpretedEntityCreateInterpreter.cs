@@ -1,4 +1,5 @@
-﻿using BLM.Interfaces;
+﻿using BLM.NetStandard;
+using BLM.NetStandard.Interfaces;
 
 namespace BLM.EF7.Tests
 {

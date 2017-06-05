@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BLM.Interfaces;
-using BLM.Tests;
+using BLM.NetStandard.Interfaces;
+using BLM.NetStandard.Tests;
 
 namespace BLM.EF7.Tests
 {

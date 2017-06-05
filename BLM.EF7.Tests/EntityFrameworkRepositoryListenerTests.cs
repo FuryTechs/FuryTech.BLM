@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using BLM.Tests;
+using BLM.NetStandard.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BLM.EF7.Tests
@@ -37,7 +37,7 @@ namespace BLM.EF7.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(BLM.Exceptions.LogicalSecurityRiskException))]
+        [ExpectedException(typeof(BLM.NetStandard.Exceptions.LogicalSecurityRiskException))]
         public async Task LogicalDelete_ALL_Throw_SecurityRiskException()
         {
             await _add(); ;
