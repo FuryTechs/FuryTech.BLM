@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26430.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLM", "BLM\BLM.csproj", "{D5F2CC21-9001-4CB4-A7D6-56D826F6DC24}"
 EndProject
@@ -21,6 +21,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLM.NetStandard.Tests", "BLM.NetStandard.Tests\BLM.NetStandard.Tests.csproj", "{786B5E2B-789D-47CF-819A-5DFB38E19580}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLM.EF7", "BLM.EF7\BLM.EF7.csproj", "{50442DED-C0E2-49B0-9BB0-F3078E957B96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLM.EF7.Tests", "BLM.EF7.Tests\BLM.EF7.Tests.csproj", "{6F7F01F8-FBC3-4FB9-8631-ED169C35606A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,10 @@ Global
 		{50442DED-C0E2-49B0-9BB0-F3078E957B96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50442DED-C0E2-49B0-9BB0-F3078E957B96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50442DED-C0E2-49B0-9BB0-F3078E957B96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F7F01F8-FBC3-4FB9-8631-ED169C35606A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F7F01F8-FBC3-4FB9-8631-ED169C35606A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F7F01F8-FBC3-4FB9-8631-ED169C35606A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F7F01F8-FBC3-4FB9-8631-ED169C35606A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,5 +70,6 @@ Global
 		{D0A0CB4A-F053-470F-8D49-43CAA81B3EAB} = {FE6447C3-33CF-4486-8835-68B9F107F9DE}
 		{CB08C81E-21F4-41C9-89F3-A8C0226E8F94} = {FE6447C3-33CF-4486-8835-68B9F107F9DE}
 		{786B5E2B-789D-47CF-819A-5DFB38E19580} = {FE6447C3-33CF-4486-8835-68B9F107F9DE}
+		{6F7F01F8-FBC3-4FB9-8631-ED169C35606A} = {FE6447C3-33CF-4486-8835-68B9F107F9DE}
 	EndGlobalSection
 EndGlobal
