@@ -113,7 +113,7 @@ namespace BLM.NetStandard.Tests
         {
             Guid = Guid.NewGuid().ToString()
         };
-        GenericContextInfo ctx = new GenericContextInfo(new WindowsIdentity("gallayb"));
+        GenericContextInfo ctx = new GenericContextInfo(new GenericIdentity("gallayb"));
 
         [TestMethod]
         public async Task Created()

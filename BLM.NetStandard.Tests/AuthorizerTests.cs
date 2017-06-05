@@ -55,7 +55,7 @@ namespace BLM.NetStandard.Tests
             IsVisible = false
         };
 
-        readonly IContextInfo _ctx = new GenericContextInfo(new WindowsIdentity("gallayb"));
+        readonly IContextInfo _ctx = new GenericContextInfo(new GenericIdentity("gallayb"));
 
         [TestMethod]
         public async Task CreateSuccess()
