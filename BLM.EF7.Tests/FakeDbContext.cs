@@ -9,12 +9,7 @@ namespace BLM.EF7.Tests
         {
 
         }
-
-        //public FakeDbContext(DbConnection connection) : base(connection, true)
-        //{
-
-        //}
-
+        
         public virtual DbSet<MockEntity> MockEntities { get; set; }
         public virtual DbSet<MockNestedEntity> MockNestedEntities { get; set; }
 

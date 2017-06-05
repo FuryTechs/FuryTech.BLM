@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BLM.NetStandard.Tests;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BLM.EF7.Tests
@@ -23,10 +24,10 @@ namespace BLM.EF7.Tests
         [TestInitialize]
         public void Init()
         {
-            var InMemoryOptions = Microsoft.EntityFrameworkCore.InMemoryDbContextOptionsExtensions.UseInMemoryDatabase(new DbContextOptionsBuilder(new DbContextOptions<FakeDbContext>()), "Db");
-            //EffortProviderConfiguration.RegisterProvider();
-            //var efforConnection = Effort.DbConnectionFactory.CreateTransient();
+            var InMemoryOptions = InMemoryDbContextOptionsExtensions.UseTransientInMemoryDatabase(new DbContextOptionsBuilder(new DbContextOptions<FakeDbContext>()));
+            
             _db = new FakeDbContext(InMemoryOptions.Options);
+
             _repo = new EfRepository<MockEntity>(_db);
             _repoNested = new EfRepository<MockNestedEntity>(_db);
             _repoInterpreted = new EfRepository<MockInterpretedEntity>(_db);
