@@ -255,7 +255,7 @@ namespace BLM.EF7
             _dbcontext.ChangeTracker.DetectChanges();
             var entries = _dbcontext.ChangeTracker.Entries().ToList();
 
-            foreach (var entityChange in _dbcontext.ChangeTracker.Entries<T>())
+            foreach (var entityChange in _dbcontext.ChangeTracker.Entries())
             {
                 var authResult = await AuthorizeEntityChangeAsync(user, entityChange);
                 if (!authResult.HasSucceed)

@@ -96,8 +96,8 @@ namespace BLM.EF7.Tests
 
                 Assert.AreEqual(2, (await localRepository.EntitiesAsync(_identity)).Count());
                 var entities = (await localRepository.EntitiesAsync(_identity)).ToArray();
-                Assert.AreEqual(1, (await localRepository.EntitiesAsync(_identity)).Count(entity => entity.IsDeleted && entity.Id == 1));
-                Assert.AreEqual(1, (await localRepository.EntitiesAsync(_identity)).Count(entity => !entity.IsDeleted && entity.Id == 2));
+                Assert.AreEqual(1, (await localRepository.EntitiesAsync(_identity)).Count(entity => entity.IsDeleted && entity.Id == Entity2.Id));
+                Assert.AreEqual(1, (await localRepository.EntitiesAsync(_identity)).Count(entity => !entity.IsDeleted && entity.Id == Entity3.Id));
                 Assert.AreEqual(1, EfChangeListener.RemovedEntities.Count);
                 Assert.AreEqual(0, EfChangeListener.ModifiedNewEntities.Count);
                 Assert.AreEqual(0, EfChangeListener.ModifiedOriginalEntities.Count);
