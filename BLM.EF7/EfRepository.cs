@@ -11,10 +11,11 @@ using BLM.NetStandard.Extensions;
 using BLM.NetStandard.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Diagnostics;
 
 namespace BLM.EF7
 {
-    public class EfRepository<T> : IRepository<T>, IEfRepository<T> where T : class, new()
+    public class EfRepository<T> : IRepository<T>, IEfRepository where T : class, new()
     {
 
         private readonly DbContext _dbcontext;
@@ -22,7 +23,7 @@ namespace BLM.EF7
         private readonly Type _type;
         private readonly bool _disposeDbContextOnDispose;
 
-        private readonly Dictionary<string, IEfRepository<T>> _childRepositories = new Dictionary<string, IEfRepository<T>>();
+        private readonly Dictionary<string, IEfRepository> _childRepositories = new Dictionary<string, IEfRepository>();
 
         /// <summary>
         /// If there are inherited objets, which have LogicalDeleteAttribue-s on it, we throw an exception
@@ -43,13 +44,13 @@ namespace BLM.EF7
             return new EfContextInfo(user, _dbcontext);
         }
 
-        private IEfRepository<T> GetChildRepositoryFor(EntityEntry entry)
+        private IEfRepository GetChildRepositoryFor(EntityEntry entry)
         {
             var repoType = entry.Entity.GetType();
             return GetChildRepositoryFor(repoType);
         }
 
-        private IEfRepository<T> GetChildRepositoryFor(Type type)
+        private IEfRepository GetChildRepositoryFor(Type type)
         {
             var repoKey = type.FullName;
             if (_childRepositories.ContainsKey(repoKey))
@@ -57,7 +58,7 @@ namespace BLM.EF7
                 return _childRepositories[repoKey];
             }
             var childRepositoryType = typeof(EfRepository<>).MakeGenericType(type);
-            var childRepo = Activator.CreateInstance(childRepositoryType, _dbcontext, false) as IEfRepository<T>;
+            var childRepo = (IEfRepository)Activator.CreateInstance(childRepositoryType, _dbcontext, false);
             return childRepo;
         }
 
@@ -125,7 +126,7 @@ namespace BLM.EF7
 
         public void Dispose()
         {
-            foreach (KeyValuePair<string, IEfRepository<T>> childRepo in _childRepositories)
+            foreach (KeyValuePair<string, IEfRepository> childRepo in _childRepositories)
             {
                 childRepo.Value?.Dispose();
             }
@@ -142,7 +143,8 @@ namespace BLM.EF7
 
         public async Task<IQueryable<T>> EntitiesAsync(IIdentity user)
         {
-            return await Authorize.CollectionAsync(_dbset, GetContextInfo(user));
+            var result = await Authorize.CollectionAsync(_dbset, GetContextInfo(user));
+            return result as IQueryable<T>;
         }
 
         public void Remove(IIdentity usr, T item)
@@ -171,12 +173,12 @@ namespace BLM.EF7
             });
         }
 
-        private AuthorizationResult AuthorizeEntityChange(IIdentity user, EntityEntry<T> ent)
+        private AuthorizationResult AuthorizeEntityChange(IIdentity user, EntityEntry ent)
         {
             return AuthorizeEntityChangeAsync(user, ent).Result;
         }
 
-        public async Task<AuthorizationResult> AuthorizeEntityChangeAsync(IIdentity user, EntityEntry<T> ent)
+        public async Task<AuthorizationResult> AuthorizeEntityChangeAsync(IIdentity user, EntityEntry ent)
         {
 
             if (ent.State == EntityState.Unchanged || ent.State == EntityState.Detached)
@@ -187,7 +189,7 @@ namespace BLM.EF7
                 switch (ent.State)
                 {
                     case EntityState.Added:
-                        T interpreted = Interpret.BeforeCreate(ent.Entity, GetContextInfo(user));
+                        T interpreted = Interpret.BeforeCreate(ent.Entity as T, GetContextInfo(user));
                         return (await Authorize.CreateAsync(interpreted, GetContextInfo(user))).CreateAggregateResult();
 
                     case EntityState.Modified:
@@ -196,7 +198,7 @@ namespace BLM.EF7
                         var modifiedInterpreted = Interpret.BeforeModify((T)original, (T)modified, GetContextInfo(user));
                         foreach (var property in ent.CurrentValues.Properties)
                         {
-                            ent.CurrentValues[property.Name] = modifiedInterpreted.GetType().GetProperty(property.Name).GetValue(modifiedInterpreted, null);
+                            ent.CurrentValues[property.Name] = modifiedInterpreted.GetType().GetProperty(property.Name)?.GetValue(modifiedInterpreted, null);
                         }
                         return (await Authorize.ModifyAsync((T)original, (T)modifiedInterpreted, GetContextInfo(user))).CreateAggregateResult();
                     case EntityState.Deleted:
@@ -217,21 +219,28 @@ namespace BLM.EF7
             {
                 type = typeof(T);
             }
-
-            var entity = Activator.CreateInstance(type);
-
-            foreach (var p in values.Properties)
+            try
             {
-                var name = p.Name;
-                var value = values.GetValue<object>(name);
-                var property = type.GetProperty(name);
-
-                if (value == null) continue;
-
-                var propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-                property.SetValue(entity, Convert.ChangeType(value, propertyType), null);
+                return values.ToObject();
             }
-            return entity;
+            catch
+            {
+                var entity = Activator.CreateInstance(type);
+
+                Debug.WriteLine(values.ToObject());
+                foreach (var p in values.Properties)
+                {
+                    var name = p.Name;
+                    var value = values.GetValue<object>(name);
+                    var property = type.GetProperty(name);
+
+                    if (value == null) continue;
+
+                    var propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+                    property.SetValue(entity, Convert.ChangeType(value, propertyType), null);
+                }
+                return entity;
+            }
         }
 
         public void SaveChanges(IIdentity user)

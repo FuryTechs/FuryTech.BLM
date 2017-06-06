@@ -34,7 +34,7 @@ namespace BLM.NetStandard
 
         public static IQueryable<T> Collection<T>(IQueryable<T> entities, IContextInfo context) where T : class
         {
-            return CollectionAsync<T>(entities, context).Result;
+            return CollectionAsync(entities, context).Result;
         }
 
         public static async Task<System.Collections.Generic.IEnumerable<AuthorizationResult>> CreateAsync<T>(T entity, IContextInfo context)

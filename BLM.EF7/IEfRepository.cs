@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace BLM.EF7
 {
-    public interface IEfRepository<T> : IDisposable where T : class, new()
+    public interface IEfRepository : IDisposable
     {
-        Task<AuthorizationResult> AuthorizeEntityChangeAsync(IIdentity user, EntityEntry<T> ent);
+        Task<AuthorizationResult> AuthorizeEntityChangeAsync(IIdentity user, EntityEntry ent);
 
         Task DistributeToListenersAsync(List<object> added, EfContextInfo contextInfo, List<Tuple<object, object>> modified,
             List<object> removed, bool isChildRepository);

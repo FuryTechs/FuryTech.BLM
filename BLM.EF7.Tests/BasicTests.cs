@@ -161,10 +161,18 @@ namespace BLM.EF7.Tests
         [TestMethod]
         public virtual async Task AuthorizeCollection()
         {
-            await _repo.AddRangeAsync(_identity, new List<MockEntity>() { ValidEntity, InvisibleEntity, InvisibleEntity2 });
-            await _repo.SaveChangesAsync(_identity);
-
-            Assert.IsTrue(_repo.Entities(_identity).All(a => a.IsVisible && a.IsVisible2));
+            try
+            {
+                await _repo.AddRangeAsync(_identity, new List<MockEntity>() { ValidEntity, InvisibleEntity, InvisibleEntity2 });
+                await _repo.SaveChangesAsync(_identity);
+                var authorizationResult = (await _repo.EntitiesAsync(_identity));
+                var queryResult = authorizationResult.All(a => a.IsVisible && a.IsVisible2);
+                Assert.IsTrue(queryResult);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
 

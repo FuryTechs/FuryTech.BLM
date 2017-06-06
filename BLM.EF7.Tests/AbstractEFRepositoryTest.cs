@@ -20,13 +20,21 @@ namespace BLM.EF7.Tests
         protected EfRepository<MockNestedEntity> _repoNested;
         protected EfRepository<MockInterpretedEntity> _repoInterpreted;
         protected IIdentity _identity;
+        
+        // Needed to proper DB name generation
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void Init()
         {
-            var InMemoryOptions = InMemoryDbContextOptionsExtensions.UseTransientInMemoryDatabase(new DbContextOptionsBuilder(new DbContextOptions<FakeDbContext>()));
-            
-            _db = new FakeDbContext(InMemoryOptions.Options);
+            /// In EFCore 1.x there is no transient InMemory db, so we'll need to generate spearated db-s for testing.
+            /// In EFCore 2.x there will be a TransientInMemoryDatabase, so we'll have to use that later.
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder();
+            dbContextOptionsBuilder.UseInMemoryDatabase($"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}-{Guid.NewGuid()}");
+            //var dbContextOptionsBuilder = InMemoryDbContextOptionsExtensions.UseTransientInMemoryDatabase(new DbContextOptionsBuilder(new DbContextOptions<FakeDbContext>()));
+
+
+            _db = new FakeDbContext(dbContextOptionsBuilder.Options);
 
             _repo = new EfRepository<MockEntity>(_db);
             _repoNested = new EfRepository<MockNestedEntity>(_db);
