@@ -18,7 +18,7 @@ namespace FuryTechs.BLM.NetStandard
             var createListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenCreated<T>>();
             foreach (var createListener in createListeners)
             {
-                await ((IListenCreated<T>)createListener).OnCreatedAsync(entity, context);
+                await createListener.OnCreatedAsync(entity, context);
             }
         }
 
@@ -39,7 +39,7 @@ namespace FuryTechs.BLM.NetStandard
             var createFailListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenCreateFailed<T>>();
             foreach (var listener in createFailListeners)
             {
-                await ((IListenCreateFailed<T>)listener).OnCreateFailedAsync(entity, context);
+                await listener.OnCreateFailedAsync(entity, context);
             }
         }
 
@@ -61,7 +61,7 @@ namespace FuryTechs.BLM.NetStandard
             var modifyListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenModified<T>>();
             foreach (var listener in modifyListeners)
             {
-                await ((IListenModified<T>)listener).OnModifiedAsync(original, modified, context);
+                await listener.OnModifiedAsync(original, modified, context);
             }
         }
 
@@ -104,7 +104,7 @@ namespace FuryTechs.BLM.NetStandard
             var modifyListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenRemoved<T>>();
             foreach (var listener in modifyListeners)
             {
-                await ((IListenRemoved<T>)listener).OnRemovedAsync(entity, context);
+                await listener.OnRemovedAsync(entity, context);
             }
         }
 
