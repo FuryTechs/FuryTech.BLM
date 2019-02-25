@@ -6,7 +6,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\BLM\NetStandard\FuryTechs.BLM.NetStandard.csproj" />
+    <ProjectReference Include="..\NetStandard\FuryTechs.BLM.NetStandard.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
