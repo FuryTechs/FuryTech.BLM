@@ -10,8 +10,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <typeparam name="TDbContext"></typeparam>
         /// <param name="services"></param>
-        public static void AddBLMEFCore<TDbContext>(this IServiceCollection services)
-            where TDbContext : DbContext
+        public static void AddBLMEFCore(this IServiceCollection services)
         {
             services.AddScoped(typeof(EfRepository<,>));
         }
@@ -25,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static void AddBLMEFCoreDefaultDbContext<TDbContext>(this IServiceCollection services)
             where TDbContext : DbContext
         {
-            services.AddBLMEFCore<TDbContext>();
+            services.AddBLMEFCore();
             services.AddScoped(typeof(EfRepository<>));
             services.AddScoped<DbContext, TDbContext>();
         }
