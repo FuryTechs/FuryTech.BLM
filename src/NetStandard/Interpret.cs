@@ -5,11 +5,6 @@ using FuryTechs.BLM.NetStandard.Interfaces;
 using FuryTechs.BLM.NetStandard.Interfaces.Interpret;
 using Microsoft.Extensions.DependencyInjection;
 
-[assembly: InternalsVisibleTo("FuryTechs.BLM.EntityFrameworkCore")]
-
-[assembly: InternalsVisibleTo("FuryTechs.BLM.NetStandard.Tests")]
-[assembly: InternalsVisibleTo("FuryTechs.BLM.EntityFrameworkCore.Tests")]
-
 namespace FuryTechs.BLM.NetStandard
 {
     internal static class Interpret
