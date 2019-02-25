@@ -35,7 +35,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
                 o.UseInMemoryDatabase(name);
             });
 
-            coll.AddBLMEFCore<FakeDbContext>();
+            coll.AddBLMEFCore();
             coll.AddSingleton<IBlmEntry, MockCollectionAuthorizer>();
             coll.AddSingleton<IBlmEntry, MockCollectionAuthorizer2>();
             coll.AddSingleton<IBlmEntry, MockCreateAuthorizer>();
