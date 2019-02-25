@@ -1,7 +1,7 @@
-﻿using BLM.NetStandard.Interfaces;
-using BLM.NetStandard.Interfaces.Interpret;
+﻿using FuryTech.BLM.NetStandard.Interfaces;
+using FuryTech.BLM.NetStandard.Interfaces.Interpret;
 
-namespace BLM.NetStandard
+namespace FuryTech.BLM.NetStandard
 {
     public abstract class InterpretBeforeCreate<T> : IInterpretBeforeCreate<T, T>
     {

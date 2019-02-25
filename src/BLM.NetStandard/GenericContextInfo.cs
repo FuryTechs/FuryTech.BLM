@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using BLM.NetStandard.Interfaces;
+using FuryTech.BLM.NetStandard.Interfaces;
 
-namespace BLM.NetStandard
+namespace FuryTech.BLM.NetStandard
 {
     public class GenericContextInfo : IContextInfo
     {

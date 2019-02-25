@@ -1,4 +1,4 @@
-﻿namespace BLM.NetStandard.Interfaces
+﻿namespace FuryTech.BLM.NetStandard.Interfaces
 {
     public interface IBlmEntry
     {

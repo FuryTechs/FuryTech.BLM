@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace BLM.NetStandard.Interfaces.Listen
+namespace FuryTech.BLM.NetStandard.Interfaces.Listen
 {
     public interface IListenRemoved<in T> : IBlmEntry
     {

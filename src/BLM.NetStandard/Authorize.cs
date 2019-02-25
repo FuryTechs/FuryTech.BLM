@@ -1,76 +1,82 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using BLM.NetStandard.Interfaces;
-using BLM.NetStandard.Interfaces.Authorize;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using FuryTech.BLM.NetStandard.Interfaces;
+using FuryTech.BLM.NetStandard.Interfaces.Authorize;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace BLM.NetStandard
+namespace FuryTech.BLM.NetStandard
 {
-    static class QueryableCast
+    internal static class Authorize
     {
-        public static IQueryable<T> CastTo<T>(this IQueryable<T> input) {
-            return (IQueryable<T>)input.Cast<T>();
-        }
-    }
-
-    public static class Authorize
-    {
-        private static AuthorizationResult _elevatedResult = AuthorizationResult.Success("Elevated context");
-
-        public static async Task<IQueryable<T>> CollectionAsync<T>(IQueryable<T> entities, IContextInfo context) where T : class
+        internal static async Task<IQueryable<T>> CollectionAsync<T>(
+            IQueryable<T> entities, 
+            IContextInfo context, 
+            IServiceProvider providers
+            ) where T : class
         {
-            var collectionAuthorizers = Loader.GetEntriesFor<IAuthorizeCollection<T, T>>();
+            var collectionAuthorizers = providers.GetServices<IBlmEntry>().OfType<IAuthorizeCollection<T, T>>();
             foreach (var collectionAuthorizer in collectionAuthorizers)
             {
 
-                var auth = (IAuthorizeCollection)collectionAuthorizer;
-                entities = (await auth.AuthorizeCollectionAsync(entities, context)).Cast<T>();
+                entities = (await collectionAuthorizer.AuthorizeCollectionAsync(entities, context)).Cast<T>();
             }
 
             return entities;
         }
 
-        public static IQueryable<T> Collection<T>(IQueryable<T> entities, IContextInfo context) where T : class
+        internal static IQueryable<T> Collection<T>(
+            IQueryable<T> entities, 
+            IContextInfo context,
+            IServiceProvider providers
+            ) where T : class
         {
-            return CollectionAsync(entities, context).Result;
+            return CollectionAsync(entities, context, providers).Result;
         }
 
-        public static async Task<System.Collections.Generic.IEnumerable<AuthorizationResult>> CreateAsync<T>(T entity, IContextInfo context)
+        internal static async Task<IEnumerable<AuthorizationResult>> CreateAsync<T>(
+            T entity, 
+            IContextInfo context,
+            IServiceProvider providers)
         {
-            var createAuthorizers = Loader.GetEntriesFor<IAuthorizeCreate<T>>();
-            System.Collections.Generic.List<AuthorizationResult> results = new System.Collections.Generic.List<AuthorizationResult>();
+            var createAuthorizers = providers.GetServices<IBlmEntry>().OfType<IAuthorizeCreate<T>>();
+            var results = new List<AuthorizationResult>();
             foreach (var authorizer in createAuthorizers)
             {
-                var auth = (IAuthorizeCreate<T>)authorizer;
-                results.Add(await auth.CanCreateAsync(entity, context));
+                results.Add(await authorizer.CanCreateAsync(entity, context));
             }
             return results;
         }
 
-        public static async Task<System.Collections.Generic.IEnumerable<AuthorizationResult>> ModifyAsync<T>(T originalEntity, T modifiedEntity, IContextInfo context)
+        internal static async Task<IEnumerable<AuthorizationResult>> ModifyAsync<T>(
+            T originalEntity, 
+            T modifiedEntity, 
+            IContextInfo context,
+            IServiceProvider providers)
         {
-
-            var modifyAuthorizers = Loader.GetEntriesFor<IAuthorizeModify<T>>();
-            List<AuthorizationResult> results = new List<AuthorizationResult>();
+            var modifyAuthorizers = providers.GetServices<IBlmEntry>().OfType<IAuthorizeModify<T>>();
+            var results = new List<AuthorizationResult>();
 
             foreach (var authorizer in modifyAuthorizers)
             {
-                var auth = (IAuthorizeModify<T>)authorizer;
-                results.Add(await auth.CanModifyAsync(originalEntity, modifiedEntity, context));
+                results.Add(await authorizer.CanModifyAsync(originalEntity, modifiedEntity, context));
             }
             return results;
         }
 
-        public static async Task<System.Collections.Generic.IEnumerable<AuthorizationResult>> RemoveAsync<T>(T entity, IContextInfo context)
+        internal static async Task<IEnumerable<AuthorizationResult>> RemoveAsync<T>(
+            T entity, 
+            IContextInfo context,
+            IServiceProvider providers)
         {
-            var removeAuthorizers = Loader.GetEntriesFor<IAuthorizeRemove<T>>();
+            var removeAuthorizers = providers.GetServices<IBlmEntry>().OfType<IAuthorizeRemove<T>>();
 
-            List<AuthorizationResult> results = new List<AuthorizationResult>();
+            var results = new List<AuthorizationResult>();
 
             foreach (var authorizer in removeAuthorizers)
             {
-                var auth = (IAuthorizeRemove<T>)authorizer;
-                results.Add(await auth.CanRemoveAsync(entity, context));
+                results.Add(await authorizer.CanRemoveAsync(entity, context));
             }
             return results;
         }

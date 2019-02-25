@@ -1,11 +1,4 @@
-﻿using BLM.NetStandard;
-using BLM.NetStandard.Attributes;
-using BLM.NetStandard.Exceptions;
-using BLM.NetStandard.Extensions;
-using BLM.NetStandard.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,9 +6,28 @@ using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
 
-namespace BLM.EF7
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+
+using FuryTech.BLM.NetStandard;
+using FuryTech.BLM.NetStandard.Attributes;
+using FuryTech.BLM.NetStandard.Exceptions;
+using FuryTech.BLM.NetStandard.Extensions;
+using FuryTech.BLM.NetStandard.Interfaces;
+
+namespace FuryTech.BLM.EntityFrameworkCore
 {
-    public class EfRepository<T> : IRepository<T>, IEfRepository where T : class, new()
+    public class EfRepository<T, TDbContext> : EfRepository<T>
+        where T : class, new()
+        where TDbContext : DbContext
+    {
+        public EfRepository(IServiceProvider serviceProvider) : base(typeof(TDbContext), serviceProvider)
+        {
+        }
+    }
+
+    public class EfRepository<T> : IRepository<T>, IEfRepository
+        where T : class, new()
     {
         private readonly DbContext _dbcontext;
         private readonly DbSet<T> _dbset;
@@ -24,23 +36,29 @@ namespace BLM.EF7
 
         private readonly Dictionary<string, IEfRepository> _childRepositories = new Dictionary<string, IEfRepository>();
 
+        private readonly IServiceProvider _serviceProvider;
+
         /// <summary>
         /// If there are inherited objets, which have LogicalDeleteAttribue-s on it, we throw an exception
         /// </summary>
         public bool IgnoreLogicalDeleteError { get; set; } = false;
 
-        public EfRepository(DbContext db, bool disposeDbContextOnDispose = true)
+        public EfRepository(Type dbContextType, IServiceProvider serviceProvider)
+            : this((DbContext)serviceProvider.GetService(dbContextType), serviceProvider)
         {
-            _dbcontext = db;
-            _dbset = db.Set<T>();
+        }
+
+        public EfRepository(DbContext dbContext, IServiceProvider serviceProvider)
+        {
+            _dbcontext = dbContext;
+            _dbset = _dbcontext.Set<T>();
             _type = typeof(T);
-            _disposeDbContextOnDispose = disposeDbContextOnDispose;
-            // TODO: What about the inherited classes? 
+            _serviceProvider = serviceProvider;
         }
 
         private EfContextInfo GetContextInfo(IIdentity user)
         {
-            return new EfContextInfo(user, _dbcontext);
+            return new EfContextInfo(user, _dbcontext, _serviceProvider);
         }
 
         private IEfRepository GetChildRepositoryFor(EntityEntry entry)
@@ -57,9 +75,8 @@ namespace BLM.EF7
                 return _childRepositories[repoKey];
             }
 
-            var childRepositoryType = typeof(EfRepository<>).MakeGenericType(type);
-            var childRepo = (IEfRepository) Activator.CreateInstance(childRepositoryType, _dbcontext, false);
-            return childRepo;
+            var childRepositoryType = typeof(EfRepository<,>).MakeGenericType(type, _dbcontext.GetType());
+            return (IEfRepository)_serviceProvider.GetService(childRepositoryType);
         }
 
         #region Static things
@@ -102,10 +119,10 @@ namespace BLM.EF7
 
         private async Task<AuthorizationResult> AuthorizeAddAsync(IIdentity usr, T newEntity)
         {
-            var authResult = (await Authorize.CreateAsync(newEntity, GetContextInfo(usr))).CreateAggregateResult();
+            var authResult = (await Authorize.CreateAsync(newEntity, GetContextInfo(usr), _serviceProvider)).CreateAggregateResult();
             if (!authResult.HasSucceed)
             {
-                await Listen.CreateFailedAsync(newEntity, GetContextInfo(usr));
+                await Listen.CreateFailedAsync(newEntity, GetContextInfo(usr), _serviceProvider);
                 _dbcontext.Entry(newEntity).State = EntityState.Detached;
             }
 
@@ -148,12 +165,12 @@ namespace BLM.EF7
 
         public IQueryable<T> Entities(IIdentity user)
         {
-            return Authorize.Collection(_dbset, GetContextInfo(user));
+            return Authorize.Collection(_dbset, GetContextInfo(user), _serviceProvider);
         }
 
         public async Task<IQueryable<T>> EntitiesAsync(IIdentity user)
         {
-            var result = await Authorize.CollectionAsync(_dbset, GetContextInfo(user));
+            var result = await Authorize.CollectionAsync(_dbset, GetContextInfo(user), _serviceProvider);
             return result as IQueryable<T>;
         }
 
@@ -177,10 +194,10 @@ namespace BLM.EF7
             await Task.Factory.StartNew(() => { _dbset.RemoveRange(items); });
         }
 
-        private AuthorizationResult AuthorizeEntityChange(IIdentity user, EntityEntry ent)
-        {
-            return AuthorizeEntityChangeAsync(user, ent).Result;
-        }
+        //private AuthorizationResult AuthorizeEntityChange(IIdentity user, EntityEntry ent)
+        //{
+        //    return AuthorizeEntityChangeAsync(user, ent).Result;
+        //}
 
         public async Task<AuthorizationResult> AuthorizeEntityChangeAsync(IIdentity user, EntityEntry ent)
         {
@@ -194,25 +211,25 @@ namespace BLM.EF7
                 switch (ent.State)
                 {
                     case EntityState.Added:
-                        var interpreted = Interpret.BeforeCreate(ent.Entity as T, GetContextInfo(user));
-                        return (await Authorize.CreateAsync(interpreted, GetContextInfo(user))).CreateAggregateResult();
+                        var interpreted = Interpret.BeforeCreate(ent.Entity as T, GetContextInfo(user), _serviceProvider);
+                        return (await Authorize.CreateAsync(interpreted, GetContextInfo(user), _serviceProvider)).CreateAggregateResult();
 
                     case EntityState.Modified:
                         var original = CreateWithValues(ent.OriginalValues);
                         var modified = CreateWithValues(ent.CurrentValues);
                         var modifiedInterpreted =
-                            Interpret.BeforeModify((T) original, (T) modified, GetContextInfo(user));
+                            Interpret.BeforeModify((T)original, (T)modified, GetContextInfo(user), _serviceProvider);
                         foreach (var property in ent.CurrentValues.Properties)
                         {
                             ent.CurrentValues[property.Name] = modifiedInterpreted.GetType().GetProperty(property.Name)
                                 ?.GetValue(modifiedInterpreted, null);
                         }
 
-                        return (await Authorize.ModifyAsync((T) original, modifiedInterpreted, GetContextInfo(user)))
+                        return (await Authorize.ModifyAsync((T)original, modifiedInterpreted, GetContextInfo(user), _serviceProvider))
                             .CreateAggregateResult();
                     case EntityState.Deleted:
                         return (await Authorize.RemoveAsync(
-                                (T) CreateWithValues(ent.OriginalValues, ent.Entity.GetType()), GetContextInfo(user)))
+                                (T)CreateWithValues(ent.OriginalValues, ent.Entity.GetType()), GetContextInfo(user), _serviceProvider))
                             .CreateAggregateResult();
                     default:
                         return AuthorizationResult.Fail("The entity state is invalid", ent.Entity);
@@ -239,7 +256,7 @@ namespace BLM.EF7
             {
                 var entity = Activator.CreateInstance(type);
 
-                Debug.WriteLine(values.ToObject());
+                //Debug.WriteLine(values.ToObject());
                 foreach (var p in values.Properties)
                 {
                     var name = p.Name;
@@ -278,12 +295,18 @@ namespace BLM.EF7
                 {
                     if (entityChange.State == EntityState.Modified)
                     {
-                        await Listen.ModificationFailedAsync(CreateWithValues(entityChange.OriginalValues),
-                            entityChange.Entity as T, GetContextInfo(user));
+                        await Listen.ModificationFailedAsync(
+                            CreateWithValues(entityChange.OriginalValues),
+                            entityChange.Entity as T,
+                            GetContextInfo(user),
+                            _serviceProvider);
                     }
                     else if (entityChange.State == EntityState.Deleted)
                     {
-                        await Listen.RemoveFailedAsync(CreateWithValues(entityChange.OriginalValues), contextInfo);
+                        await Listen.RemoveFailedAsync(
+                            CreateWithValues(entityChange.OriginalValues),
+                            contextInfo,
+                            _serviceProvider);
                     }
 
                     throw new AuthorizationFailedException(authResult);
@@ -342,20 +365,30 @@ namespace BLM.EF7
             //added.Where(a=>(a) is T).Cast<T>().Select(async a => await Listen.CreatedAsync(a, contextInfo));
             foreach (var addedEntry in added.Where(a => (a) is T).Cast<T>())
             {
-                await Listen.CreatedAsync(addedEntry, contextInfo);
+                await Listen.CreatedAsync(
+                    addedEntry,
+                    contextInfo,
+                    _serviceProvider);
             }
 
             //var t2 = modified.Where(a => a is Tuple<T,T>).Cast<Tuple<T,T>>().Select(async a =>await Listen.ModifiedAsync((a).Item1, (a).Item2, contextInfo));
             foreach (var modifiedEntry in modified.Where(a => a.Item1 is T && a.Item2 is T)
                 .Cast<Tuple<object, object>>())
             {
-                await Listen.ModifiedAsync(modifiedEntry.Item1 as T, modifiedEntry.Item2 as T, contextInfo);
+                await Listen.ModifiedAsync(
+                    modifiedEntry.Item1 as T,
+                    modifiedEntry.Item2 as T,
+                    contextInfo,
+                    _serviceProvider);
             }
 
             //var t3 = removed.Where(a => a is T).Cast<T>().Select(async a => await Listen.RemovedAsync((a), contextInfo));
             foreach (var removedEntry in removed.Where(a => a is T).Cast<T>())
             {
-                await Listen.RemovedAsync(removedEntry, contextInfo);
+                await Listen.RemovedAsync(
+                    removedEntry,
+                    contextInfo,
+                    _serviceProvider);
             }
         }
 
@@ -397,7 +430,7 @@ namespace BLM.EF7
 
         public IRepository<T2> GetChildRepositoryFor<T2>() where T2 : class
         {
-            return (IRepository<T2>) GetChildRepositoryFor(typeof(T2));
+            return (IRepository<T2>)GetChildRepositoryFor(typeof(T2));
         }
     }
 }

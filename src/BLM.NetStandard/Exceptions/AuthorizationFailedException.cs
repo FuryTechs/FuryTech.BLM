@@ -1,4 +1,4 @@
-﻿namespace BLM.NetStandard.Exceptions
+﻿namespace FuryTech.BLM.NetStandard.Exceptions
 {
     public class AuthorizationFailedException : BLMException
     {

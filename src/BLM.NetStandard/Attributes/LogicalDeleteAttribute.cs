@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BLM.NetStandard.Attributes
+namespace FuryTech.BLM.NetStandard.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, Inherited = true)]
     public class LogicalDeleteAttribute : Attribute

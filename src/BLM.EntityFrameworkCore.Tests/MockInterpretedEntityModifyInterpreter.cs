@@ -1,7 +1,7 @@
-﻿using BLM.NetStandard;
-using BLM.NetStandard.Interfaces;
+﻿using FuryTech.BLM.NetStandard;
+using FuryTech.BLM.NetStandard.Interfaces;
 
-namespace BLM.EF7.Tests
+namespace FuryTech.BLM.EntityFrameworkCore.Tests
 {
     public class MockInterpretedEntityModifyInterpreter : InterpretBeforeModify<MockInterpretedEntity>
     {

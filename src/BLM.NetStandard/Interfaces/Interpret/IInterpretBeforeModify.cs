@@ -1,4 +1,4 @@
-﻿namespace BLM.NetStandard.Interfaces.Interpret
+﻿namespace FuryTech.BLM.NetStandard.Interfaces.Interpret
 {
     internal interface IInterpretBeforeModify : IBlmEntry
     {

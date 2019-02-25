@@ -1,4 +1,4 @@
-﻿namespace BLM.NetStandard.Tests
+﻿namespace FuryTech.BLM.NetStandard.Tests
 {
     public class MockImplementedEntity : IMockEntity
     {

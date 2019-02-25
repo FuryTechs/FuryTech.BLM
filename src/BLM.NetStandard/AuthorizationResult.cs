@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BLM.NetStandard
+namespace FuryTech.BLM.NetStandard
 {
     public class AuthorizationResult
     {

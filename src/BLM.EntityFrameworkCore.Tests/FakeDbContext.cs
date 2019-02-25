@@ -1,15 +1,16 @@
-﻿using BLM.NetStandard.Tests;
+﻿using FuryTech.BLM.NetStandard.Tests;
 using Microsoft.EntityFrameworkCore;
+using System;
+using Xunit;
 
-namespace BLM.EF7.Tests
+namespace FuryTech.BLM.EntityFrameworkCore.Tests
 {
     public class FakeDbContext : DbContext
     {
-        public FakeDbContext(DbContextOptions options) : base(options)
+        public FakeDbContext(DbContextOptions options): base(options)
         {
-
         }
-
+        
         /// <summary>
         /// In EFCore 1.x there is no automated inheritance, only if we're providing it
         /// </summary>

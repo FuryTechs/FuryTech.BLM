@@ -2,14 +2,15 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using BLM.NetStandard.Interfaces;
-using BLM.NetStandard.Extensions;
+using FuryTech.BLM.NetStandard.Interfaces;
+using FuryTech.BLM.NetStandard.Extensions;
 using System.Security.Principal;
+using Xunit;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
-namespace BLM.NetStandard.Tests
+namespace FuryTech.BLM.NetStandard.Tests
 {
-    [TestClass]
     public class AuthorizerTests
     {
         private readonly MockEntity _valid = new MockEntity()
@@ -54,47 +55,62 @@ namespace BLM.NetStandard.Tests
             IsVisible = false
         };
 
+        private readonly IServiceProvider serviceProvider;
+
+        public AuthorizerTests()
+        {
+            var srvCollection = new ServiceCollection();
+            srvCollection.AddSingleton<IBlmEntry, MockCollectionAuthorizer>();
+            srvCollection.AddSingleton<IBlmEntry, MockCollectionAuthorizer2>();
+            srvCollection.AddSingleton<IBlmEntry, MockCreateAuthorizer>();
+            srvCollection.AddSingleton<IBlmEntry, MockInterfaceAuthorizer>();
+            srvCollection.AddSingleton<IBlmEntry, MockModifyAuthorizer>();
+            srvCollection.AddSingleton<IBlmEntry, MockRemoveAuthorizer>();
+            serviceProvider = srvCollection.BuildServiceProvider();
+
+        }
+
         readonly IContextInfo _ctx = new GenericContextInfo(new GenericIdentity("gallayb"));
 
-        [TestMethod]
+        [Fact]
         public async Task CreateSuccess()
         {
-            Assert.IsTrue((await Authorize.CreateAsync(_valid, _ctx)).HasSucceeded());
+            Assert.True((await Authorize.CreateAsync(_valid, _ctx, serviceProvider)).HasSucceeded());
         }
 
-        [TestMethod]
+        [Fact]
         public async Task CreateFail()
         {
-            Assert.IsFalse((await Authorize.CreateAsync(_invalid, _ctx)).HasSucceeded());
+            Assert.False((await Authorize.CreateAsync(_invalid, _ctx, serviceProvider)).HasSucceeded());
         }
 
-        [TestMethod]
+        [Fact]
         public async Task Modify()
         {
-            Assert.IsTrue((await Authorize.ModifyAsync(_valid, _valid, _ctx)).HasSucceeded());
+            Assert.True((await Authorize.ModifyAsync(_valid, _valid, _ctx, serviceProvider)).HasSucceeded());
 
         }
 
-        [TestMethod]
+        [Fact]
         public async Task ModifyFails()
         {
-            Assert.IsFalse((await Authorize.ModifyAsync(_invalid, _invalid, _ctx)).HasSucceeded());
+            Assert.False((await Authorize.ModifyAsync(_invalid, _invalid, _ctx, serviceProvider)).HasSucceeded());
         }
 
-        [TestMethod]
+        [Fact]
         public async Task Remove()
         {
-            Assert.IsTrue((await Authorize.RemoveAsync(_valid, _ctx)).HasSucceeded());
+            Assert.True((await Authorize.RemoveAsync(_valid, _ctx, serviceProvider)).HasSucceeded());
 
         }
 
-        [TestMethod]
+        [Fact]
         public async Task RemoveFails()
         {
-            Assert.IsFalse((await Authorize.RemoveAsync(_invalid, _ctx)).HasSucceeded());
+            Assert.False((await Authorize.RemoveAsync(_invalid, _ctx, serviceProvider)).HasSucceeded());
         }
 
-        [TestMethod]
+        [Fact]
         public void Collection()
         {
             var list = new List<MockEntity>()
@@ -102,56 +118,56 @@ namespace BLM.NetStandard.Tests
                 _valid, _invalid, _invisible
             }.AsQueryable();
 
-            var authorizedCollection = Authorize.Collection(list, _ctx);
+            var authorizedCollection = Authorize.Collection(list, _ctx, serviceProvider);
 
-            Assert.IsTrue(authorizedCollection.All(a => a.IsVisible && a.IsVisible2));
+            Assert.True(authorizedCollection.All(a => a.IsVisible && a.IsVisible2));
         }
 
-        [TestMethod]
+        [Fact]
         public async Task InterfacedCreate()
         {
-            var result = await Authorize.CreateAsync(_validMockImplementedEntity, _ctx);
-            Assert.IsTrue(result.HasSucceeded());
+            var result = await Authorize.CreateAsync(_validMockImplementedEntity, _ctx, serviceProvider);
+            Assert.True(result.HasSucceeded());
         }
 
-        [TestMethod]
+        [Fact]
         public async Task InterfacedCreateFail()
         {
-            var result = await Authorize.CreateAsync(_invalidMockImplementedEntity, _ctx);
-            Assert.IsFalse(result.HasSucceeded());
+            var result = await Authorize.CreateAsync(_invalidMockImplementedEntity, _ctx, serviceProvider);
+            Assert.False(result.HasSucceeded());
         }
 
 
-        [TestMethod]
+        [Fact]
         public async Task InterfacedModify()
         {
-            var result = await Authorize.ModifyAsync(_validMockImplementedEntity, _validMockImplementedEntity, _ctx);
-            Assert.IsTrue(result.HasSucceeded());
+            var result = await Authorize.ModifyAsync(_validMockImplementedEntity, _validMockImplementedEntity, _ctx, serviceProvider);
+            Assert.True(result.HasSucceeded());
         }
 
-        [TestMethod]
+        [Fact]
         public async Task InterfacedModifyFail()
         {
-            var result = await Authorize.ModifyAsync(_validMockImplementedEntity, _invalidMockImplementedEntity, _ctx);
-            Assert.IsFalse(result.HasSucceeded());
+            var result = await Authorize.ModifyAsync(_validMockImplementedEntity, _invalidMockImplementedEntity, _ctx, serviceProvider);
+            Assert.False(result.HasSucceeded());
         }
 
 
-        [TestMethod]
+        [Fact]
         public async Task InterfacedRemove()
         {
-            var result = await Authorize.RemoveAsync(_validMockImplementedEntity, _ctx);
-            Assert.IsTrue(result.HasSucceeded());
+            var result = await Authorize.RemoveAsync(_validMockImplementedEntity, _ctx, serviceProvider);
+            Assert.True(result.HasSucceeded());
         }
 
-        [TestMethod]
+        [Fact]
         public async Task InterfacedRemovefail()
         {
-            var result = await Authorize.RemoveAsync(_invalidMockImplementedEntity, _ctx);
-            Assert.IsFalse(result.HasSucceeded());
+            var result = await Authorize.RemoveAsync(_invalidMockImplementedEntity, _ctx, serviceProvider);
+            Assert.False(result.HasSucceeded());
         }
 
-        [TestMethod]
+        [Fact]
         public async Task InterfacedCollection()
         {
             var collection = new List<MockImplementedEntity>()
@@ -161,8 +177,8 @@ namespace BLM.NetStandard.Tests
                 _invisibleMockImplementedEntity
             };
 
-            var authorized = await Authorize.CollectionAsync(collection.AsQueryable(), _ctx);
-            Assert.IsTrue(authorized.Any(a=>a.IsVisible));
+            var authorized = await Authorize.CollectionAsync(collection.AsQueryable(), _ctx, serviceProvider);
+            Assert.True(authorized.Any(a => a.IsVisible));
 
         }
 

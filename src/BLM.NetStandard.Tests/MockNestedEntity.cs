@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BLM.NetStandard.Tests
+namespace FuryTech.BLM.NetStandard.Tests
 {
     public class MockNestedEntity
     {

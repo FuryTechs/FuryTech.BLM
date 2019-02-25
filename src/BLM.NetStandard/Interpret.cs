@@ -1,20 +1,27 @@
-﻿using System.Linq;
-using BLM.NetStandard.Interfaces;
-using BLM.NetStandard.Interfaces.Interpret;
+﻿using System;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using FuryTech.BLM.NetStandard.Interfaces;
+using FuryTech.BLM.NetStandard.Interfaces.Interpret;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace BLM.NetStandard
+[assembly: InternalsVisibleTo("BLM.NetStandard.Tests")]
+[assembly: InternalsVisibleTo("BLM.EntityFrameworkCore")]
+[assembly: InternalsVisibleTo("BLM.EntityFrameworkCore.Tests")]
+
+namespace FuryTech.BLM.NetStandard
 {
-    public static class Interpret
+    internal static class Interpret
     {
-        public static T BeforeCreate<T>(T entity, IContextInfo context)
+        public static T BeforeCreate<T>(T entity, IContextInfo context, IServiceProvider serviceProvider)
         {
-            var createInterpreters = Loader.GetEntriesFor<IInterpretBeforeCreate<T, T>>();
+            var createInterpreters = serviceProvider.GetServices<IBlmEntry>().OfType<IInterpretBeforeCreate<T, T>>();
             return createInterpreters.Cast<IInterpretBeforeCreate>().Aggregate(entity, (current, intr) => (T)intr.DoInterpret(current, context));
         }
 
-        public static T BeforeModify<T>(T originalEntity, T modifiedEntity, IContextInfo context)
+        public static T BeforeModify<T>(T originalEntity, T modifiedEntity, IContextInfo context, IServiceProvider serviceProvider)
         {
-            var modifyInterpreters = Loader.GetEntriesFor<IInterpretBeforeModify<T, T>>();
+            var modifyInterpreters = serviceProvider.GetServices<IBlmEntry>().OfType<IInterpretBeforeModify<T, T>>();
             return modifyInterpreters.Cast<IInterpretBeforeModify>().Aggregate(modifiedEntity, (current, intr) => (T)intr.DoInterpret(originalEntity, current, context));
         }
     }

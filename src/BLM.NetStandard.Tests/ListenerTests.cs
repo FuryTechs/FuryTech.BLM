@@ -1,17 +1,20 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BLM.NetStandard.Interfaces;
-using BLM.NetStandard.Interfaces.Listen;
 using System.Security.Principal;
+
+using Xunit;
+
+using FuryTech.BLM.NetStandard.Interfaces;
+using FuryTech.BLM.NetStandard.Interfaces.Listen;
+using Microsoft.Extensions.DependencyInjection;
 
 #pragma warning disable 1998
 #pragma warning disable IDE1006 // Naming Styles
 // ReSharper disable UnusedMember.Global
 // ReSharper disable StaticMemberInGenericType
 
-namespace BLM.NetStandard.Tests
+namespace FuryTech.BLM.NetStandard.Tests
 {
     #region GENERIC Listener
     public class Listener<T> : IListenCreated<T>, IListenCreateFailed<T>,
@@ -102,7 +105,6 @@ namespace BLM.NetStandard.Tests
     public class ObjectListener : Listener<object> { }
 
 
-    [TestClass]
     public class ListenerTests
     {
 
@@ -113,132 +115,143 @@ namespace BLM.NetStandard.Tests
         };
         GenericContextInfo ctx = new GenericContextInfo(new GenericIdentity("gallayb"));
 
-        [TestMethod]
+        protected readonly IServiceProvider _serviceProvider;
+
+        public ListenerTests()
+        {
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton<IBlmEntry, MockListener>();
+            serviceCollection.AddSingleton<IBlmEntry, MockListener2>();
+            serviceCollection.AddSingleton<IBlmEntry, ObjectListener>();
+            _serviceProvider = serviceCollection.BuildServiceProvider();
+        }
+
+        [Fact]
         public async Task Created()
         {
             MockListener.Reset();
-            await Listen.CreatedAsync(ent, ctx);
+            await Listen.CreatedAsync(ent, ctx, _serviceProvider);
 
-            Assert.IsTrue(MockListener.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
+            Assert.True(MockListener.WasOnCreatedCalled);
+            Assert.False(MockListener.WasOnCreationValidationFailedCalled);
+            Assert.False(MockListener.WasOnModifiedCalled);
+            Assert.False(MockListener.WasOnModificationFailedCalled);
+            Assert.False(MockListener.WasOnDeletedCalled);
+            Assert.False(MockListener.WasOnDeletionFailedCalled);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task CreateFailed()
         {
             MockListener.Reset();
-            await Listen.CreateFailedAsync(ent, ctx);
+            await Listen.CreateFailedAsync(ent, ctx, _serviceProvider);
 
-            Assert.IsFalse(MockListener.WasOnCreatedCalled);
-            Assert.IsTrue(MockListener.WasOnCreationValidationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
+            Assert.False(MockListener.WasOnCreatedCalled);
+            Assert.True(MockListener.WasOnCreationValidationFailedCalled);
+            Assert.False(MockListener.WasOnModifiedCalled);
+            Assert.False(MockListener.WasOnModificationFailedCalled);
+            Assert.False(MockListener.WasOnDeletedCalled);
+            Assert.False(MockListener.WasOnDeletionFailedCalled);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task Modified()
         {
             MockListener.Reset();
             ObjectListener.Reset();
 
-            await Listen.ModifiedAsync(ent, ent2, ctx);
+            await Listen.ModifiedAsync(ent, ent2, ctx, _serviceProvider);
 
-            Assert.IsFalse(MockListener.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
-            Assert.IsTrue(MockListener.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
+            Assert.False(MockListener.WasOnCreatedCalled);
+            Assert.False(MockListener.WasOnCreationValidationFailedCalled);
+            Assert.True(MockListener.WasOnModifiedCalled);
+            Assert.False(MockListener.WasOnModificationFailedCalled);
+            Assert.False(MockListener.WasOnDeletedCalled);
+            Assert.False(MockListener.WasOnDeletionFailedCalled);
 
-            Assert.IsTrue(MockListener.EntitesWereNotTheSameOnCalling.HasValue && MockListener.EntitesWereNotTheSameOnCalling.Value);
+            Assert.True(MockListener.EntitesWereNotTheSameOnCalling.HasValue && MockListener.EntitesWereNotTheSameOnCalling.Value);
         }
 
         /// <summary>
         /// Test the 3 different modify listeners, all of them need to run, and we pass two different entities into them
         /// </summary>
-        [TestMethod]
+        [Fact]
         public async Task MultipleModifiedListeners()
         {
             MockListener.Reset();
             MockListener2.Reset();
             ObjectListener.Reset();
 
-            await Listen.ModifiedAsync(ent, ent2, ctx);
+            await Listen.ModifiedAsync(ent, ent2, ctx, _serviceProvider);
 
-            Assert.IsFalse(MockListener.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
-            Assert.IsTrue(MockListener.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
+            Assert.False(MockListener.WasOnCreatedCalled);
+            Assert.False(MockListener.WasOnCreationValidationFailedCalled);
+            Assert.True(MockListener.WasOnModifiedCalled);
+            Assert.False(MockListener.WasOnModificationFailedCalled);
+            Assert.False(MockListener.WasOnDeletedCalled);
+            Assert.False(MockListener.WasOnDeletionFailedCalled);
 
-            Assert.IsFalse(MockListener2.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener2.WasOnCreationValidationFailedCalled);
-            Assert.IsTrue(MockListener2.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener2.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener2.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener2.WasOnDeletionFailedCalled);
+            Assert.False(MockListener2.WasOnCreatedCalled);
+            Assert.False(MockListener2.WasOnCreationValidationFailedCalled);
+            Assert.True(MockListener2.WasOnModifiedCalled);
+            Assert.False(MockListener2.WasOnModificationFailedCalled);
+            Assert.False(MockListener2.WasOnDeletedCalled);
+            Assert.False(MockListener2.WasOnDeletionFailedCalled);
 
-            Assert.IsFalse(ObjectListener.WasOnCreatedCalled);
-            Assert.IsFalse(ObjectListener.WasOnCreationValidationFailedCalled);
-            Assert.IsTrue(ObjectListener.WasOnModifiedCalled);
-            Assert.IsFalse(ObjectListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(ObjectListener.WasOnDeletedCalled);
-            Assert.IsFalse(ObjectListener.WasOnDeletionFailedCalled);
+            Assert.False(ObjectListener.WasOnCreatedCalled);
+            Assert.False(ObjectListener.WasOnCreationValidationFailedCalled);
+            Assert.True(ObjectListener.WasOnModifiedCalled);
+            Assert.False(ObjectListener.WasOnModificationFailedCalled);
+            Assert.False(ObjectListener.WasOnDeletedCalled);
+            Assert.False(ObjectListener.WasOnDeletionFailedCalled);
 
-            Assert.IsTrue(MockListener.EntitesWereNotTheSameOnCalling.HasValue && MockListener.EntitesWereNotTheSameOnCalling.Value);
-            Assert.IsTrue(MockListener2.EntitesWereNotTheSameOnCalling.HasValue && MockListener2.EntitesWereNotTheSameOnCalling.Value);
-            Assert.IsTrue(ObjectListener.EntitesWereNotTheSameOnCalling.HasValue && ObjectListener.EntitesWereNotTheSameOnCalling.Value);
+            Assert.True(MockListener.EntitesWereNotTheSameOnCalling.HasValue && MockListener.EntitesWereNotTheSameOnCalling.Value);
+            Assert.True(MockListener2.EntitesWereNotTheSameOnCalling.HasValue && MockListener2.EntitesWereNotTheSameOnCalling.Value);
+            Assert.True(ObjectListener.EntitesWereNotTheSameOnCalling.HasValue && ObjectListener.EntitesWereNotTheSameOnCalling.Value);
         }
 
         /// <summary>
         /// Only the object modify listener should run, because we pass two (different) objects into the listener
         /// </summary>
-        [TestMethod]
+        [Fact]
         public async Task MultipleModifiedListeners_TestInheritance()
         {
             MockListener.Reset();
             MockListener2.Reset();
             ObjectListener.Reset();
 
-            await Listen.ModifiedAsync(new object(), new { sajt = true }, ctx);
+            await Listen.ModifiedAsync(new object(), new { sajt = true }, ctx, _serviceProvider);
 
-            Assert.IsFalse(MockListener.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
+            Assert.False(MockListener.WasOnCreatedCalled);
+            Assert.False(MockListener.WasOnCreationValidationFailedCalled);
+            Assert.False(MockListener.WasOnModifiedCalled);
+            Assert.False(MockListener.WasOnModificationFailedCalled);
+            Assert.False(MockListener.WasOnDeletedCalled);
+            Assert.False(MockListener.WasOnDeletionFailedCalled);
 
-            Assert.IsFalse(MockListener2.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener2.WasOnCreationValidationFailedCalled);
-            Assert.IsFalse(MockListener2.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener2.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener2.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener2.WasOnDeletionFailedCalled);
+            Assert.False(MockListener2.WasOnCreatedCalled);
+            Assert.False(MockListener2.WasOnCreationValidationFailedCalled);
+            Assert.False(MockListener2.WasOnModifiedCalled);
+            Assert.False(MockListener2.WasOnModificationFailedCalled);
+            Assert.False(MockListener2.WasOnDeletedCalled);
+            Assert.False(MockListener2.WasOnDeletionFailedCalled);
 
-            Assert.IsFalse(ObjectListener.WasOnCreatedCalled);
-            Assert.IsFalse(ObjectListener.WasOnCreationValidationFailedCalled);
-            Assert.IsTrue(ObjectListener.WasOnModifiedCalled);
-            Assert.IsFalse(ObjectListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(ObjectListener.WasOnDeletedCalled);
-            Assert.IsFalse(ObjectListener.WasOnDeletionFailedCalled);
-
-            Assert.IsNull(MockListener.EntitesWereNotTheSameOnCalling);
-            Assert.IsNull(MockListener2.EntitesWereNotTheSameOnCalling);
-            Assert.IsTrue(ObjectListener.EntitesWereNotTheSameOnCalling.HasValue && ObjectListener.EntitesWereNotTheSameOnCalling.Value);
+            Assert.False(ObjectListener.WasOnCreatedCalled);
+            Assert.False(ObjectListener.WasOnCreationValidationFailedCalled);
+            Assert.True(ObjectListener.WasOnModifiedCalled);
+            Assert.False(ObjectListener.WasOnModificationFailedCalled);
+            Assert.False(ObjectListener.WasOnDeletedCalled);
+            Assert.False(ObjectListener.WasOnDeletionFailedCalled);
+            
+            Assert.Null(MockListener.EntitesWereNotTheSameOnCalling);
+            Assert.Null(MockListener2.EntitesWereNotTheSameOnCalling);
+            Assert.True(ObjectListener.EntitesWereNotTheSameOnCalling.HasValue && ObjectListener.EntitesWereNotTheSameOnCalling.Value);
         }
 
         /// <summary>
         /// A little loadtest like something for check the performance is OK
         /// </summary>
-        [TestMethod]
+        [Fact]
         public async Task LoadTest()
         {
             MockListener.Reset();
@@ -247,82 +260,82 @@ namespace BLM.NetStandard.Tests
 
             var start = DateTime.Now;
 
-            List<Task> tasks = new List<Task>();
+            var tasks = new List<Task>();
 
-            for (int i = 0; i < 500000; i++)
+            for (var i = 0; i < 500000; i++)
             {
-                tasks.Add(Listen.ModifiedAsync(ent, ent, ctx));
+                tasks.Add(Listen.ModifiedAsync(ent, ent, ctx, _serviceProvider));
             }
 
             Task.WaitAll(tasks.ToArray());
 
             var time = DateTime.Now.Subtract(start).TotalMilliseconds;
 
-            Assert.IsTrue(time < 1500, "time < 1500");
+            Assert.True(time < 1500, "time < 1500");
 
-            Assert.IsFalse(MockListener.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
-            Assert.IsTrue(MockListener.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
+            Assert.False(MockListener.WasOnCreatedCalled);
+            Assert.False(MockListener.WasOnCreationValidationFailedCalled);
+            Assert.True(MockListener.WasOnModifiedCalled);
+            Assert.False(MockListener.WasOnModificationFailedCalled);
+            Assert.False(MockListener.WasOnDeletedCalled);
+            Assert.False(MockListener.WasOnDeletionFailedCalled);
 
-            Assert.IsFalse(MockListener2.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener2.WasOnCreationValidationFailedCalled);
-            Assert.IsTrue(MockListener2.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener2.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener2.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener2.WasOnDeletionFailedCalled);
+            Assert.False(MockListener2.WasOnCreatedCalled);
+            Assert.False(MockListener2.WasOnCreationValidationFailedCalled);
+            Assert.True(MockListener2.WasOnModifiedCalled);
+            Assert.False(MockListener2.WasOnModificationFailedCalled);
+            Assert.False(MockListener2.WasOnDeletedCalled);
+            Assert.False(MockListener2.WasOnDeletionFailedCalled);
 
 
-            Assert.IsFalse(ObjectListener.WasOnCreatedCalled);
-            Assert.IsFalse(ObjectListener.WasOnCreationValidationFailedCalled);
-            Assert.IsTrue(ObjectListener.WasOnModifiedCalled);
-            Assert.IsFalse(ObjectListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(ObjectListener.WasOnDeletedCalled);
-            Assert.IsFalse(ObjectListener.WasOnDeletionFailedCalled);
+            Assert.False(ObjectListener.WasOnCreatedCalled);
+            Assert.False(ObjectListener.WasOnCreationValidationFailedCalled);
+            Assert.True(ObjectListener.WasOnModifiedCalled);
+            Assert.False(ObjectListener.WasOnModificationFailedCalled);
+            Assert.False(ObjectListener.WasOnDeletedCalled);
+            Assert.False(ObjectListener.WasOnDeletionFailedCalled);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task ModificationFailed()
         {
             MockListener.Reset();
-            await Listen.ModificationFailedAsync(ent, ent, ctx);
+            await Listen.ModificationFailedAsync(ent, ent, ctx, _serviceProvider);
 
-            Assert.IsFalse(MockListener.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnModifiedCalled);
-            Assert.IsTrue(MockListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
+            Assert.False(MockListener.WasOnCreatedCalled);
+            Assert.False(MockListener.WasOnCreationValidationFailedCalled);
+            Assert.False(MockListener.WasOnModifiedCalled);
+            Assert.True(MockListener.WasOnModificationFailedCalled);
+            Assert.False(MockListener.WasOnDeletedCalled);
+            Assert.False(MockListener.WasOnDeletionFailedCalled);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task Removed()
         {
             MockListener.Reset();
-            await Listen.RemovedAsync(ent, ctx);
+            await Listen.RemovedAsync(ent, ctx, _serviceProvider);
 
-            Assert.IsFalse(MockListener.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
-            Assert.IsTrue(MockListener.WasOnDeletedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletionFailedCalled);
+            Assert.False(MockListener.WasOnCreatedCalled);
+            Assert.False(MockListener.WasOnCreationValidationFailedCalled);
+            Assert.False(MockListener.WasOnModifiedCalled);
+            Assert.False(MockListener.WasOnModificationFailedCalled);
+            Assert.True(MockListener.WasOnDeletedCalled);
+            Assert.False(MockListener.WasOnDeletionFailedCalled);
         }
 
-        [TestMethod]
+        [Fact]
         public async Task RemoveFailed()
         {
             MockListener.Reset();
-            await Listen.RemoveFailedAsync(ent, ctx);
+            await Listen.RemoveFailedAsync(ent, ctx, _serviceProvider);
 
-            Assert.IsFalse(MockListener.WasOnCreatedCalled);
-            Assert.IsFalse(MockListener.WasOnCreationValidationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnModifiedCalled);
-            Assert.IsFalse(MockListener.WasOnModificationFailedCalled);
-            Assert.IsFalse(MockListener.WasOnDeletedCalled);
-            Assert.IsTrue(MockListener.WasOnDeletionFailedCalled);
+            Assert.False(MockListener.WasOnCreatedCalled);
+            Assert.False(MockListener.WasOnCreationValidationFailedCalled);
+            Assert.False(MockListener.WasOnModifiedCalled);
+            Assert.False(MockListener.WasOnModificationFailedCalled);
+            Assert.False(MockListener.WasOnDeletedCalled);
+            Assert.True(MockListener.WasOnDeletionFailedCalled);
         }
     }
 }

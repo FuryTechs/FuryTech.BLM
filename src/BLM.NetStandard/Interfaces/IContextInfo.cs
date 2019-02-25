@@ -2,7 +2,7 @@
 using System.Security.Principal;
 using System.Threading.Tasks;
 
-namespace BLM.NetStandard.Interfaces
+namespace FuryTech.BLM.NetStandard.Interfaces
 {
     public interface IContextInfo
     {

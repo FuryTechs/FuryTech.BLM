@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace BLM.NetStandard.Extensions
+namespace FuryTech.BLM.NetStandard.Extensions
 {
     public static class AuthoriaztionResultExtension
     {

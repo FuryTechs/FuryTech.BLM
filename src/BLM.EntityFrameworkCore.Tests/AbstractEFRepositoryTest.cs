@@ -1,38 +1,69 @@
 ﻿using System;
 using System.Security.Principal;
-using BLM.NetStandard.Tests;
+
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace BLM.EF7.Tests
+using Xunit;
+
+using FuryTech.BLM.NetStandard.Tests;
+using Xunit.Abstractions;
+using System.Reflection;
+using System.Collections.Generic;
+using FuryTech.BLM.NetStandard.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace FuryTech.BLM.EntityFrameworkCore.Tests
 {
-    [TestClass]
-    public class AbstractEfRepositoryTest
+    public class AbstractEfRepositoryTest: IDisposable
     {
-        protected FakeDbContext _db;
-        protected EfRepository<MockEntity> _repo;
-        protected EfRepository<MockNestedEntity> _repoNested;
-        protected EfRepository<MockInterpretedEntity> _repoInterpreted;
         protected IIdentity _identity;
-        
-        // Needed to proper DB name generation
-        public TestContext TestContext { get; set; }
 
-        [TestInitialize]
-        public void Init()
+        protected IServiceCollection _serviceCollection;
+        protected IServiceProvider _serviceProvider;
+
+        static IServiceCollection InitializeServiceCollection(ITestOutputHelper output)
+        {
+            var type = output.GetType();
+            var testMember = type.GetField("test", BindingFlags.Instance | BindingFlags.NonPublic);
+            var test = (ITest)testMember.GetValue(output);
+            var name = $"{test.DisplayName}.{test.TestCase}-{Guid.NewGuid()}";
+
+            var coll = new ServiceCollection();
+
+            coll.AddDbContext<FakeDbContext>(o =>
+            {
+                o.UseInMemoryDatabase(name);
+            });
+
+            coll.AddBLMEFCore<FakeDbContext>();
+            coll.AddSingleton<IBlmEntry, MockCollectionAuthorizer>();
+            coll.AddSingleton<IBlmEntry, MockCollectionAuthorizer2>();
+            coll.AddSingleton<IBlmEntry, MockCreateAuthorizer>();
+            coll.AddSingleton<IBlmEntry, MockInterfaceAuthorizer>();
+            coll.AddSingleton<IBlmEntry, MockModifyAuthorizer>();
+            coll.AddSingleton<IBlmEntry, MockRemoveAuthorizer>();
+            coll.AddSingleton<IBlmEntry, MockInterpretedEntityCreateInterpreter>();
+            coll.AddSingleton<IBlmEntry, MockInterpretedEntityModifyInterpreter>();
+            coll.AddScoped<IBlmEntry, EfChangeListener>();
+            return coll;
+        }
+
+        public void Dispose()
+        {
+            var dbContext = _serviceProvider.GetService<FakeDbContext>();
+            dbContext.MockEntities.RemoveRange(dbContext.MockEntities);
+            dbContext.MockInterpretedEntities.RemoveRange(dbContext.MockInterpretedEntities);
+            dbContext.MockNestedEntities.RemoveRange(dbContext.MockNestedEntities);
+
+        }
+
+        public AbstractEfRepositoryTest(ITestOutputHelper output)
         {
             /// In EFCore 1.x there is no transient InMemory db, so we'll need to generate spearated db-s for testing.
             /// In EFCore 2.x there will be a TransientInMemoryDatabase, so we'll have to use that later.
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder();
-            dbContextOptionsBuilder.UseInMemoryDatabase($"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}-{Guid.NewGuid()}");
-            //var dbContextOptionsBuilder = InMemoryDbContextOptionsExtensions.UseTransientInMemoryDatabase(new DbContextOptionsBuilder(new DbContextOptions<FakeDbContext>()));
 
-
-            _db = new FakeDbContext(dbContextOptionsBuilder.Options);
-
-            _repo = new EfRepository<MockEntity>(_db);
-            _repoNested = new EfRepository<MockNestedEntity>(_db);
-            _repoInterpreted = new EfRepository<MockInterpretedEntity>(_db);
+            _serviceCollection = InitializeServiceCollection(output);
+            _serviceProvider = _serviceCollection.BuildServiceProvider();
             _identity = new GenericIdentity("gallayb");
 
             EfChangeListener.Reset();
@@ -75,13 +106,6 @@ namespace BLM.EF7.Tests
                 IsVisible = true,
                 IsVisible2 = true
             };
-        }
-
-        [TestCleanup]
-        public virtual void Cleanup()
-        {
-            _repo?.Dispose();
-            _db?.Dispose();
         }
 
         protected MockEntity Entity1 { get; set; }

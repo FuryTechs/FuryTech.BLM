@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace BLM.NetStandard.Interfaces.Authorize
+namespace FuryTech.BLM.NetStandard.Interfaces.Authorize
 {
     internal interface IAuthorizeRemove<in T> : IBlmEntry
     {

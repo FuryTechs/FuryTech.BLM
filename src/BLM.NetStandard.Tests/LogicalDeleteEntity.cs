@@ -1,6 +1,6 @@
-using BLM.NetStandard.Attributes;
+using FuryTech.BLM.NetStandard.Attributes;
 
-namespace BLM.NetStandard.Tests
+namespace FuryTech.BLM.NetStandard.Tests
 {
     public class LogicalDeleteEntity : MockEntity
     {

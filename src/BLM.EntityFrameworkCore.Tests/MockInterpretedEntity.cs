@@ -1,4 +1,4 @@
-﻿namespace BLM.EF7.Tests
+﻿namespace FuryTech.BLM.EntityFrameworkCore.Tests
 {
     public enum MockInterpretedValue
     {

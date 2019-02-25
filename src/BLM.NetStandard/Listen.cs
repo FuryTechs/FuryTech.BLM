@@ -1,94 +1,139 @@
-﻿using System.Threading.Tasks;
-using BLM.NetStandard.Interfaces;
-using BLM.NetStandard.Interfaces.Listen;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using FuryTech.BLM.NetStandard.Interfaces;
+using FuryTech.BLM.NetStandard.Interfaces.Listen;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace BLM.NetStandard
+namespace FuryTech.BLM.NetStandard
 {
-    public static class Listen
+    internal static class Listen
     {
-        public static async Task CreatedAsync<T>(T entity, IContextInfo context)
+        internal static async Task CreatedAsync<T>(
+            T entity,
+            IContextInfo context,
+            IServiceProvider serviceProvider
+        )
         {
-            var createListeners = Loader.GetEntriesFor<IListenCreated<T>>();
+            var createListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenCreated<T>>();
             foreach (var createListener in createListeners)
             {
                 await ((IListenCreated<T>)createListener).OnCreatedAsync(entity, context);
             }
         }
 
-        public static void Created<T>(T entity, IContextInfo context)
+        internal static void Created<T>(
+            T entity,
+            IContextInfo context,
+            IServiceProvider serviceProvider)
         {
-            CreatedAsync<T>(entity, context).Wait();
+            CreatedAsync(entity, context, serviceProvider).Wait();
         }
 
-        public static async Task CreateFailedAsync<T>(T entity, IContextInfo context)
+        internal static async Task CreateFailedAsync<T>(
+            T entity,
+            IContextInfo context,
+            IServiceProvider serviceProvider
+            )
         {
-            var createFailListeners = Loader.GetEntriesFor<IListenCreateFailed<T>>();
+            var createFailListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenCreateFailed<T>>();
             foreach (var listener in createFailListeners)
             {
                 await ((IListenCreateFailed<T>)listener).OnCreateFailedAsync(entity, context);
             }
         }
 
-        public static void CreateFailed<T>(T entity, IContextInfo context)
+        internal static void CreateFailed<T>(
+            T entity,
+            IContextInfo context,
+            IServiceProvider serviceProvider)
         {
-            CreateFailedAsync(entity, context).Wait();
+            CreateFailedAsync(entity, context, serviceProvider).Wait();
         }
 
-        public static async Task ModifiedAsync<T>(T original, T modified, IContextInfo context)
+        internal static async Task ModifiedAsync<T>(
+            T original,
+            T modified,
+            IContextInfo context,
+            IServiceProvider serviceProvider)
         {
 
-            var modifyListeners = Loader.GetEntriesFor<IListenModified<T>>();
+            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenModified<T>>();
             foreach (var listener in modifyListeners)
             {
                 await ((IListenModified<T>)listener).OnModifiedAsync(original, modified, context);
             }
         }
 
-        public static void Modified<T>(T original, T modified, IContextInfo context)
+        internal static void Modified<T>(
+            T original,
+            T modified,
+            IContextInfo context,
+            IServiceProvider serviceProvider)
         {
-            ModifiedAsync(original, modified, context).Wait();
+            ModifiedAsync(original, modified, context, serviceProvider).Wait();
         }
 
-        public static async Task ModificationFailedAsync<T>(T original, T modified, IContextInfo context)
+        internal static async Task ModificationFailedAsync<T>(
+            T original,
+            T modified,
+            IContextInfo context,
+            IServiceProvider serviceProvider)
         {
-            var modifyListeners = Loader.GetEntriesFor<IListenModificationFailed<T>>();
+            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenModificationFailed<T>>();
             foreach (var listener in modifyListeners)
             {
-                await ((IListenModificationFailed<T>)listener).OnModificationFailedAsync(original, modified, context);
+                await listener.OnModificationFailedAsync(original, modified, context);
             }
         }
 
-        public static void ModificationFailed<T>(T original, T modified, IContextInfo context)
+        internal static void ModificationFailed<T>(
+            T original,
+            T modified,
+            IContextInfo context,
+            IServiceProvider serviceProvider)
         {
-            ModificationFailedAsync(original, modified, context).Wait();
+            ModificationFailedAsync(original, modified, context, serviceProvider).Wait();
         }
 
-        public static async Task RemovedAsync<T>(T entity, IContextInfo context)
+        internal static async Task RemovedAsync<T>(
+            T entity,
+            IContextInfo context,
+            IServiceProvider serviceProvider)
         {
-            var modifyListeners = Loader.GetEntriesFor<IListenRemoved<T>>();
+            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenRemoved<T>>();
             foreach (var listener in modifyListeners)
             {
                 await ((IListenRemoved<T>)listener).OnRemovedAsync(entity, context);
             }
         }
 
-        public static void Removed<T>(T entity, IContextInfo context)
+        internal static void Removed<T>(
+            T entity,
+            IContextInfo context,
+            IServiceProvider serviceProvider)
         {
-            RemovedAsync(entity, context).Wait();
+            RemovedAsync(entity, context, serviceProvider).Wait();
         }
 
-        public static async Task RemoveFailedAsync<T>(T entity, IContextInfo context)
+        internal static async Task RemoveFailedAsync<T>(
+            T entity,
+            IContextInfo context,
+            IServiceProvider serviceProvider)
         {
-            var modifyListeners = Loader.GetEntriesFor<IListenRemoveFailed<T>>();
+            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenRemoveFailed<T>>();
             foreach (var listener in modifyListeners)
             {
-                await ((IListenRemoveFailed<T>)listener).OnRemoveFailedAsync(entity, context);
+                await listener.OnRemoveFailedAsync(entity, context);
             }
         }
 
-        public static void RemoveFailed<T>(T entity, IContextInfo context)
+        internal static void RemoveFailed<T>(
+            T entity,
+            IContextInfo context,
+            IServiceProvider serviceProvider)
         {
-            RemoveFailedAsync(entity, context).Wait();
+            RemoveFailedAsync(entity, context, serviceProvider).Wait();
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using BLM.NetStandard.Interfaces;
+using FuryTech.BLM.NetStandard.Interfaces;
 
-namespace BLM.NetStandard.Tests
+namespace FuryTech.BLM.NetStandard.Tests
 {
     public class MockCreateAuthorizer : AuthorizeCreate<MockEntity> {
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously

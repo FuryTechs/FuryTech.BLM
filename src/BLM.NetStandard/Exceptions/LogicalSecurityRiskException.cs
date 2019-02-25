@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BLM.NetStandard.Exceptions
+namespace FuryTech.BLM.NetStandard.Exceptions
 {
     public class LogicalSecurityRiskException : BLMException
     {

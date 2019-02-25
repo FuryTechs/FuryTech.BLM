@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BLM.NetStandard.Interfaces;
-using BLM.NetStandard.Tests;
+using FuryTech.BLM.NetStandard.Interfaces;
+using FuryTech.BLM.NetStandard.Tests;
 
-namespace BLM.EF7.Tests
+namespace FuryTech.BLM.EntityFrameworkCore.Tests
 {
     public class EfChangeListener : Listener<MockEntity>
     {

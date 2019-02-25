@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using BLM.NetStandard;
+using FuryTech.BLM.NetStandard;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace BLM.EF7
+namespace FuryTech.BLM.EntityFrameworkCore
 {
     public interface IEfRepository : IDisposable
     {
