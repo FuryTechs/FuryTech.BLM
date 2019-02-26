@@ -20,7 +20,7 @@ namespace FuryTechs.BLM.NetStandard
             var collectionAuthorizers = providers.GetServices<IBlmEntry>().GetBlmAuthorizers<IAuthorizeCollection<T, T>>();
             foreach (var collectionAuthorizer in collectionAuthorizers)
             {
-                entities = (await ((IAuthorizeCollection<T, T>)collectionAuthorizer).AuthorizeCollectionAsync(entities, context)).Cast<T>();
+                entities = (await ((IAuthorizeCollection)collectionAuthorizer).AuthorizeCollectionAsync(entities, context)).Cast<T>();
             }
 
             return entities;
