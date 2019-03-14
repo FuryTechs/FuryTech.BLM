@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Security.Principal;
-using System.Threading.Tasks;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-
+﻿using FuryTechs.BLM.EntityFrameworkCore.Identity;
 using FuryTechs.BLM.NetStandard;
 using FuryTechs.BLM.NetStandard.Attributes;
 using FuryTechs.BLM.NetStandard.Exceptions;
 using FuryTechs.BLM.NetStandard.Extensions;
 using FuryTechs.BLM.NetStandard.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace FuryTechs.BLM.EntityFrameworkCore
 {
@@ -29,8 +28,8 @@ namespace FuryTechs.BLM.EntityFrameworkCore
     public class EfRepository<T> : IRepository<T>, IEfRepository
         where T : class, new()
     {
-        private readonly DbContext _dbcontext;
-        private readonly DbSet<T> _dbset;
+        private readonly DbContext _dbContext;
+        private readonly DbSet<T> _dbSet;
         private readonly Type _type;
         private readonly bool _disposeDbContextOnDispose;
 
@@ -44,21 +43,21 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         public bool IgnoreLogicalDeleteError { get; set; } = false;
 
         public EfRepository(Type dbContextType, IServiceProvider serviceProvider)
-            : this((DbContext)serviceProvider.GetService(dbContextType), serviceProvider)
+            : this((DbContext) serviceProvider.GetService(dbContextType), serviceProvider)
         {
         }
 
         public EfRepository(DbContext dbContext, IServiceProvider serviceProvider)
         {
-            _dbcontext = dbContext;
-            _dbset = _dbcontext.Set<T>();
+            _dbContext = dbContext;
+            _dbSet = _dbContext.Set<T>();
             _type = typeof(T);
             _serviceProvider = serviceProvider;
         }
 
         private EfContextInfo GetContextInfo(IIdentity user)
         {
-            return new EfContextInfo(user, _dbcontext, _serviceProvider);
+            return new EfContextInfo(user, _dbContext, _serviceProvider);
         }
 
         private IEfRepository GetChildRepositoryFor(EntityEntry entry)
@@ -75,8 +74,8 @@ namespace FuryTechs.BLM.EntityFrameworkCore
                 return _childRepositories[repoKey];
             }
 
-            var childRepositoryType = typeof(EfRepository<,>).MakeGenericType(type, _dbcontext.GetType());
-            return (IEfRepository)_serviceProvider.GetService(childRepositoryType);
+            var childRepositoryType = typeof(EfRepository<,>).MakeGenericType(type, _dbContext.GetType());
+            return (IEfRepository) _serviceProvider.GetService(childRepositoryType);
         }
 
         #region Static things
@@ -119,34 +118,55 @@ namespace FuryTechs.BLM.EntityFrameworkCore
 
         private async Task<AuthorizationResult> AuthorizeAddAsync(IIdentity usr, T newEntity)
         {
-            var authResult = (await Authorize.CreateAsync(newEntity, GetContextInfo(usr), _serviceProvider)).CreateAggregateResult();
+            var authResult = (await Authorize.CreateAsync(newEntity, GetContextInfo(usr), _serviceProvider))
+                .CreateAggregateResult();
             if (!authResult.HasSucceed)
             {
                 await Listen.CreateFailedAsync(newEntity, GetContextInfo(usr), _serviceProvider);
-                _dbcontext.Entry(newEntity).State = EntityState.Detached;
+                _dbContext.Entry(newEntity).State = EntityState.Detached;
             }
 
             return authResult;
         }
 
-        public void Add(IIdentity user, T newItem)
+        public void Add(T newItem, IIdentity user = null)
         {
-            AddAsync(user, newItem).Wait();
+            if (user == null)
+            {
+                user = _serviceProvider.GetService<IIdentityResolver>().GetIdentity();
+            }
+
+            AddAsync(newItem, user).Wait();
         }
 
-        public async Task AddAsync(IIdentity user, T newItem)
+        public async Task AddAsync(T newItem, IIdentity user = null)
         {
-            await Task.Factory.StartNew(() => { _dbset.Add(newItem); });
+            if (user == null)
+            {
+                user = _serviceProvider.GetService<IIdentityResolver>().GetIdentity();
+            }
+
+            await Task.Factory.StartNew(() => { _dbSet.Add(newItem); });
         }
 
-        public void AddRange(IIdentity user, IEnumerable<T> newItems)
+        public void AddRange(IEnumerable<T> newItems, IIdentity user = null)
         {
-            AddRangeAsync(user, newItems).Wait();
+            if (user == null)
+            {
+                user = _serviceProvider.GetService<IIdentityResolver>().GetIdentity();
+            }
+
+            AddRangeAsync(newItems, user).Wait();
         }
 
-        public async Task AddRangeAsync(IIdentity user, IEnumerable<T> newItems)
+        public async Task AddRangeAsync(IEnumerable<T> newItems, IIdentity user)
         {
-            await Task.Factory.StartNew(() => { _dbset.AddRange(newItems); });
+            if (user == null)
+            {
+                user = _serviceProvider.GetService<IIdentityResolver>().GetIdentity();
+            }
+
+            await Task.Factory.StartNew(() => { _dbSet.AddRange(newItems); });
         }
 
 
@@ -159,77 +179,91 @@ namespace FuryTechs.BLM.EntityFrameworkCore
 
             if (_disposeDbContextOnDispose)
             {
-                _dbcontext?.Dispose();
+                _dbContext?.Dispose();
             }
         }
 
-        public IQueryable<T> Entities(IIdentity user)
+        public IQueryable<T> Entities(IIdentity user = null)
         {
-            return Authorize.Collection(_dbset, GetContextInfo(user), _serviceProvider);
+            if (user == null)
+            {
+                user = _serviceProvider.GetService<IIdentityResolver>().GetIdentity();
+            }
+
+            return Authorize.Collection(_dbSet, GetContextInfo(user), _serviceProvider);
         }
 
-        public async Task<IQueryable<T>> EntitiesAsync(IIdentity user)
+        public async Task<IQueryable<T>> EntitiesAsync(IIdentity user = null)
         {
-            var result = await Authorize.CollectionAsync(_dbset, GetContextInfo(user), _serviceProvider);
+            if (user == null)
+            {
+                user = _serviceProvider.GetService<IIdentityResolver>().GetIdentity();
+            }
+
+            var result = await Authorize.CollectionAsync(_dbSet, GetContextInfo(user), _serviceProvider);
             return result as IQueryable<T>;
         }
 
-        public void Remove(IIdentity usr, T item)
+        public void Remove(T item, IIdentity usr = null)
         {
-            RemoveAsync(usr, item).Wait();
+            RemoveAsync(item, usr ?? _serviceProvider.GetService<IIdentityResolver>().GetIdentity()).Wait();
         }
 
-        public async Task RemoveAsync(IIdentity user, T item)
+        public async Task RemoveAsync(T item, IIdentity user = null)
         {
-            await Task.Factory.StartNew(() => { _dbset.Remove(item); });
+            await Task.Factory.StartNew(() => { _dbSet.Remove(item); });
         }
 
-        public void RemoveRange(IIdentity usr, IEnumerable<T> items)
+        public void RemoveRange(IEnumerable<T> items, IIdentity usr = null)
         {
-            RemoveRangeAsync(usr, items).Wait();
+            RemoveRangeAsync(items, usr ?? _serviceProvider.GetService<IIdentityResolver>().GetIdentity()).Wait();
         }
 
-        public async Task RemoveRangeAsync(IIdentity user, IEnumerable<T> items)
+        public async Task RemoveRangeAsync(IEnumerable<T> items, IIdentity usr)
         {
-            await Task.Factory.StartNew(() => { _dbset.RemoveRange(items); });
+            await Task.Factory.StartNew(() => { _dbSet.RemoveRange(items); });
         }
 
-        //private AuthorizationResult AuthorizeEntityChange(IIdentity user, EntityEntry ent)
-        //{
-        //    return AuthorizeEntityChangeAsync(user, ent).Result;
-        //}
-
-        public async Task<AuthorizationResult> AuthorizeEntityChangeAsync(IIdentity user, EntityEntry ent)
+        public async Task<AuthorizationResult> AuthorizeEntityChangeAsync(EntityEntry ent, IIdentity usr = null)
         {
+            if (usr == null)
+            {
+                usr = _serviceProvider.GetService<IIdentityResolver>().GetIdentity();
+            }
+
             if (ent.State == EntityState.Unchanged || ent.State == EntityState.Detached)
             {
                 return AuthorizationResult.Success();
             }
 
-            if (ent.Entity is T)
+            if (ent.Entity is T variable)
             {
                 switch (ent.State)
                 {
                     case EntityState.Added:
-                        var interpreted = Interpret.BeforeCreate(ent.Entity as T, GetContextInfo(user), _serviceProvider);
-                        return (await Authorize.CreateAsync(interpreted, GetContextInfo(user), _serviceProvider)).CreateAggregateResult();
+                        var interpreted =
+                            Interpret.BeforeCreate(variable, GetContextInfo(usr), _serviceProvider);
+                        return (await Authorize.CreateAsync(interpreted, GetContextInfo(usr), _serviceProvider))
+                            .CreateAggregateResult();
 
                     case EntityState.Modified:
                         var original = CreateWithValues(ent.OriginalValues);
                         var modified = CreateWithValues(ent.CurrentValues);
                         var modifiedInterpreted =
-                            Interpret.BeforeModify((T)original, (T)modified, GetContextInfo(user), _serviceProvider);
+                            Interpret.BeforeModify((T) original, (T) modified, GetContextInfo(usr), _serviceProvider);
                         foreach (var property in ent.CurrentValues.Properties)
                         {
                             ent.CurrentValues[property.Name] = modifiedInterpreted.GetType().GetProperty(property.Name)
                                 ?.GetValue(modifiedInterpreted, null);
                         }
 
-                        return (await Authorize.ModifyAsync((T)original, modifiedInterpreted, GetContextInfo(user), _serviceProvider))
+                        return (await Authorize.ModifyAsync((T) original, modifiedInterpreted, GetContextInfo(usr),
+                                _serviceProvider))
                             .CreateAggregateResult();
                     case EntityState.Deleted:
                         return (await Authorize.RemoveAsync(
-                                (T)CreateWithValues(ent.OriginalValues, ent.Entity.GetType()), GetContextInfo(user), _serviceProvider))
+                                (T) CreateWithValues(ent.OriginalValues, variable.GetType()), GetContextInfo(usr),
+                                _serviceProvider))
                             .CreateAggregateResult();
                     default:
                         return AuthorizationResult.Fail("The entity state is invalid", ent.Entity);
@@ -237,7 +271,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             }
             else
             {
-                return await GetChildRepositoryFor(ent).AuthorizeEntityChangeAsync(user, ent);
+                return await GetChildRepositoryFor(ent).AuthorizeEntityChangeAsync(ent, usr);
             }
         }
 
@@ -276,21 +310,26 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             }
         }
 
-        public void SaveChanges(IIdentity user)
+        public void SaveChanges(IIdentity user = null)
         {
             SaveChangesAsync(user).Wait();
         }
 
-        public async Task SaveChangesAsync(IIdentity user)
+        public async Task SaveChangesAsync(IIdentity user = null)
         {
+            if (user == null)
+            {
+                user = _serviceProvider.GetService<IIdentityResolver>().GetIdentity();
+            }
+
             var contextInfo = GetContextInfo(user);
 
-            _dbcontext.ChangeTracker.DetectChanges();
-            var entries = _dbcontext.ChangeTracker.Entries().ToList();
+            _dbContext.ChangeTracker.DetectChanges();
+            var entries = _dbContext.ChangeTracker.Entries().ToList();
 
-            foreach (var entityChange in _dbcontext.ChangeTracker.Entries())
+            foreach (var entityChange in _dbContext.ChangeTracker.Entries())
             {
-                var authResult = await AuthorizeEntityChangeAsync(user, entityChange);
+                var authResult = await AuthorizeEntityChangeAsync(entityChange, user);
                 if (!authResult.HasSucceed)
                 {
                     if (entityChange.State == EntityState.Modified)
@@ -341,7 +380,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
                 }
             }
 
-            await _dbcontext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
             await DistributeToListenersAsync(added, contextInfo, modified, removed);
         }
 
@@ -394,7 +433,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
 
         public void SetEntityState(T entity, EntityState newState)
         {
-            _dbcontext.Entry(entity).State = newState;
+            _dbContext.Entry(entity).State = newState;
         }
 
         private static object SelectCurrent(EntityEntry a, Type type = null)
@@ -425,12 +464,12 @@ namespace FuryTechs.BLM.EntityFrameworkCore
 
         public EntityState GetEntityState(T entity)
         {
-            return _dbcontext.Entry(entity).State;
+            return _dbContext.Entry(entity).State;
         }
 
         public IRepository<T2> GetChildRepositoryFor<T2>() where T2 : class
         {
-            return (IRepository<T2>)GetChildRepositoryFor(typeof(T2));
+            return (IRepository<T2>) GetChildRepositoryFor(typeof(T2));
         }
     }
 }

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace FuryTechs.BLM.NetStandard.Interfaces
 {
-
     public interface IRepository
     {
         void SaveChanges(IIdentity user);
@@ -15,21 +14,20 @@ namespace FuryTechs.BLM.NetStandard.Interfaces
 
     public interface IRepository<T> : IRepository<T, T> where T : class
     {
-
     }
 
-    public interface IRepository<in TInput, out TOutput> : IDisposable, IRepository where TInput : class where TOutput: class
+    public interface IRepository<in TInput, out TOutput> : IDisposable, IRepository
+        where TInput : class where TOutput : class
     {
-        IQueryable<TOutput> Entities(IIdentity user);
-        void Add(IIdentity user, TInput newItem);
-        Task AddAsync(IIdentity user, TInput newItem);
-        void AddRange(IIdentity user, IEnumerable<TInput> newItems);
-        Task AddRangeAsync(IIdentity user, IEnumerable<TInput> newItems);
-        void Remove(IIdentity usr, TInput item);
-        Task RemoveAsync(IIdentity usr, TInput item);
-        void RemoveRange(IIdentity usr, IEnumerable<TInput> items);
-        Task RemoveRangeAsync(IIdentity usr, IEnumerable<TInput> items);
-        IRepository<T2> GetChildRepositoryFor<T2>() where T2: class;
+        IQueryable<TOutput> Entities(IIdentity user = null);
+        void Add(TInput newItem, IIdentity user = null);
+        Task AddAsync(TInput newItem, IIdentity user = null);
+        void AddRange(IEnumerable<TInput> newItems, IIdentity user = null);
+        Task AddRangeAsync(IEnumerable<TInput> newItems, IIdentity user = null);
+        void Remove(TInput item, IIdentity user = null);
+        Task RemoveAsync(TInput item, IIdentity user = null);
+        void RemoveRange(IEnumerable<TInput> items, IIdentity user = null);
+        Task RemoveRangeAsync(IEnumerable<TInput> items, IIdentity user = null);
+        IRepository<T2> GetChildRepositoryFor<T2>() where T2 : class;
     }
-
 }

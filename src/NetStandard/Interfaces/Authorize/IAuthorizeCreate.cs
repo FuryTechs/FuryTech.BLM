@@ -11,6 +11,5 @@ namespace FuryTechs.BLM.NetStandard.Interfaces.Authorize
         /// <param name="ctx">The insertion context info</param>
         /// <returns>If the entity can be inserted</returns>
         Task<AuthorizationResult> CanCreateAsync(T entity, IContextInfo ctx);
-
     }
 }

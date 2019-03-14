@@ -14,24 +14,29 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         [Fact]
         public async Task TestCreateInterpret()
         {
-            var _repoInterpreted = (EfRepository<MockInterpretedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockInterpretedEntity, FakeDbContext>));
+            var _repoInterpreted =
+                (EfRepository<MockInterpretedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockInterpretedEntity, FakeDbContext>));
 
 
-            await _repoInterpreted.AddAsync(_identity, new MockInterpretedEntity()
+            await _repoInterpreted.AddAsync(new MockInterpretedEntity()
             {
                 MockInterpretedValue = MockInterpretedValue.Default
-            });
+            }, _identity);
             await _repoInterpreted.SaveChangesAsync(_identity);
 
             Assert.Equal(1, _repoInterpreted.Entities(_identity).Count());
-            Assert.Equal(MockInterpretedValue.CreateInterpreted, _repoInterpreted.Entities(_identity).FirstOrDefault().MockInterpretedValue);
+            Assert.Equal(MockInterpretedValue.CreateInterpreted,
+                _repoInterpreted.Entities(_identity).FirstOrDefault().MockInterpretedValue);
         }
 
         [Fact]
         public async Task TestModifyInterpret()
         {
-            var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
-            var _repoInterpreted = (EfRepository<MockInterpretedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockInterpretedEntity, FakeDbContext>));
+            var _db = (FakeDbContext) _serviceProvider.GetService(typeof(FakeDbContext));
+            var _repoInterpreted =
+                (EfRepository<MockInterpretedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockInterpretedEntity, FakeDbContext>));
 
             _db.MockInterpretedEntities.Add(new MockInterpretedEntity()
             {
@@ -44,7 +49,8 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
             await _repoInterpreted.SaveChangesAsync(_identity);
 
             Assert.Equal(1, _repoInterpreted.Entities(_identity).Count());
-            Assert.Equal(MockInterpretedValue.ModifyInterpreted, _repoInterpreted.Entities(_identity).FirstOrDefault().MockInterpretedValue);
+            Assert.Equal(MockInterpretedValue.ModifyInterpreted,
+                _repoInterpreted.Entities(_identity).FirstOrDefault().MockInterpretedValue);
         }
     }
 }

@@ -9,10 +9,14 @@ namespace FuryTechs.BLM.EntityFrameworkCore
 {
     public interface IEfRepository : IDisposable
     {
-        Task<AuthorizationResult> AuthorizeEntityChangeAsync(IIdentity user, EntityEntry ent);
+        Task<AuthorizationResult> AuthorizeEntityChangeAsync(EntityEntry ent, IIdentity usr = null);
 
-        Task DistributeToListenersAsync(List<object> added, EfContextInfo contextInfo, List<Tuple<object, object>> modified,
-            List<object> removed, bool isChildRepository);
-
+        Task DistributeToListenersAsync(
+            List<object> added, 
+            EfContextInfo contextInfo,
+            List<Tuple<object, object>> modified,
+            List<object> removed,
+            bool isChildRepository
+        );
     }
 }

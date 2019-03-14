@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
 using Xunit;
-
 using FuryTechs.BLM.NetStandard.Exceptions;
 using FuryTechs.BLM.NetStandard.Tests;
 using Xunit.Abstractions;
@@ -13,8 +11,6 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
 {
     public class ReferenceInsertTests : AbstractEfRepositoryTest
     {
-
-
         protected MockEntity ValidEntity = new MockEntity()
         {
             Id = 1,
@@ -29,7 +25,6 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
             IsValid = true,
             IsVisible = true,
             IsVisible2 = true
-
         };
 
         protected MockEntity InvalidEntity = new MockEntity()
@@ -47,89 +42,103 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         [Fact]
         public async Task AddOneWithoutNesting()
         {
-            var _repoNested = (EfRepository<MockNestedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+            var _repoNested =
+                (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
 
-            await _repoNested.AddAsync(_identity, new MockNestedEntity());
+            await _repoNested.AddAsync(new MockNestedEntity(), _identity);
             await _repoNested.SaveChangesAsync(_identity);
-
         }
 
         [Fact]
         public async Task AddOneWithSingleNestingExisting()
         {
-            var _repoNested = (EfRepository<MockNestedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockNestedEntity, FakeDbContext>));
-            await _repoNested.AddAsync(_identity, new MockNestedEntity()
+            var _repoNested =
+                (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+            await _repoNested.AddAsync(new MockNestedEntity()
             {
-                MockEntities = new List<MockEntity> { ValidEntity }
-            });
+                MockEntities = new List<MockEntity> {ValidEntity}
+            }, _identity);
             await _repoNested.SaveChangesAsync(_identity);
         }
 
         [Fact]
         public async Task AddTwoWithSingleNestingExisting()
         {
-            var _repoNested = (EfRepository<MockNestedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockNestedEntity, FakeDbContext>));
-            await _repoNested.AddAsync(_identity, new MockNestedEntity()
+            var _repoNested =
+                (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+            await _repoNested.AddAsync(new MockNestedEntity()
             {
-                MockEntities = new List<MockEntity> { ValidEntity, ValidEntity2 }
-            });
+                MockEntities = new List<MockEntity> {ValidEntity, ValidEntity2}
+            }, _identity);
             await _repoNested.SaveChangesAsync(_identity);
-
         }
 
         [Fact]
         public async Task AddOneInvalidNestingExisting()
         {
-            var _repoNested = (EfRepository<MockNestedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockNestedEntity, FakeDbContext>));
-            await _repoNested.AddAsync(_identity, new MockNestedEntity()
+            var _repoNested =
+                (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+            await _repoNested.AddAsync(new MockNestedEntity()
             {
-                MockEntities = new List<MockEntity> { InvalidEntity }
-            });
+                MockEntities = new List<MockEntity> {InvalidEntity}
+            }, _identity);
             await Assert.ThrowsAsync<AuthorizationFailedException>(() => _repoNested.SaveChangesAsync(_identity));
         }
 
         [Fact]
         public async Task AddOneValidAndOneInvalidNestingExisting()
         {
-            var _repoNested = (EfRepository<MockNestedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockNestedEntity, FakeDbContext>));
-            await _repoNested.AddAsync(_identity, new MockNestedEntity()
+            var _repoNested =
+                (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+            await _repoNested.AddAsync(new MockNestedEntity()
             {
-                MockEntities = new List<MockEntity> { ValidEntity, InvalidEntity }
-            });
+                MockEntities = new List<MockEntity> {ValidEntity, InvalidEntity}
+            }, _identity);
             await Assert.ThrowsAsync<AuthorizationFailedException>(() => _repoNested.SaveChangesAsync(_identity));
         }
 
         [Fact]
         public async Task AddOneDeepInsert()
         {
-            var _repoNested = (EfRepository<MockNestedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockNestedEntity, FakeDbContext>));
-            await _repoNested.AddAsync(_identity, new MockNestedEntity()
+            var _repoNested =
+                (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+            await _repoNested.AddAsync(new MockNestedEntity()
             {
-                MockEntities = new List<MockEntity> { new MockEntity { IsValid = true } }
-            });
+                MockEntities = new List<MockEntity> {new MockEntity {IsValid = true}}
+            }, _identity);
             await _repoNested.SaveChangesAsync(_identity);
         }
 
         [Fact]
         public async Task AddTwoDeepInsert()
         {
-            var _repoNested = (EfRepository<MockNestedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockNestedEntity, FakeDbContext>));
-            await _repoNested.AddAsync(_identity, new MockNestedEntity()
+            var _repoNested =
+                (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+            await _repoNested.AddAsync(new MockNestedEntity()
             {
-                MockEntities = new List<MockEntity> { new MockEntity { IsValid = true }, new MockEntity { IsValid = true } }
-            });
+                MockEntities = new List<MockEntity> {new MockEntity {IsValid = true}, new MockEntity {IsValid = true}}
+            }, _identity);
             await _repoNested.SaveChangesAsync(_identity);
         }
 
         [Fact]
         public async Task AddOneInvalidDeepInsert()
         {
-            var _repoNested = (EfRepository<MockNestedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockNestedEntity, FakeDbContext>));
-            var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
-            await _repoNested.AddAsync(_identity, new MockNestedEntity()
+            var _repoNested =
+                (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+            var _db = (FakeDbContext) _serviceProvider.GetService(typeof(FakeDbContext));
+            await _repoNested.AddAsync(new MockNestedEntity()
             {
-                MockEntities = new List<MockEntity> { new MockEntity { IsValid = true }, new MockEntity { IsValid = false } }
-            });
+                MockEntities = new List<MockEntity> {new MockEntity {IsValid = true}, new MockEntity {IsValid = false}}
+            }, _identity);
 
             await Assert.ThrowsAsync<AuthorizationFailedException>(() => _repoNested.SaveChangesAsync(_identity));
             Assert.Equal(0, _db.MockEntities.Count());
@@ -139,10 +148,13 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         [Fact]
         public async Task ModifyOneDeepInsertTest()
         {
-            var _repoNested = (EfRepository<MockNestedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockNestedEntity, FakeDbContext>));
-            var _repo = (EfRepository<MockEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockEntity, FakeDbContext>));
+            var _repoNested =
+                (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+            var _repo = (EfRepository<MockEntity, FakeDbContext>) _serviceProvider.GetService(
+                typeof(EfRepository<MockEntity, FakeDbContext>));
 
-            await _repoNested.AddAsync(_identity, new MockNestedEntity()
+            await _repoNested.AddAsync(new MockNestedEntity()
             {
                 Id = 1,
                 MockEntities = new List<MockEntity>
@@ -155,7 +167,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
                         IsVisible2 = true
                     }
                 }
-            });
+            }, _identity);
             await _repoNested.SaveChangesAsync(_identity);
 
             var first = _repo.Entities(_identity).First();
@@ -167,16 +179,18 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         [Fact]
         public async Task AddOneValidAndOneInvalidDeepInsert()
         {
-            var _repoNested = (EfRepository<MockNestedEntity, FakeDbContext>)_serviceProvider.GetService(typeof(EfRepository<MockNestedEntity, FakeDbContext>));
-            var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
+            var _repoNested =
+                (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
+                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+            var _db = (FakeDbContext) _serviceProvider.GetService(typeof(FakeDbContext));
 
-            await _repoNested.AddAsync(_identity, new MockNestedEntity()
+            await _repoNested.AddAsync(new MockNestedEntity()
             {
                 MockEntities = new List<MockEntity>
                 {
-                    new MockEntity { IsValid = true }, new MockEntity { IsValid = false }
+                    new MockEntity {IsValid = true}, new MockEntity {IsValid = false}
                 }
-            });
+            }, _identity);
 
             await Assert.ThrowsAsync<AuthorizationFailedException>(() => _repoNested.SaveChangesAsync(_identity));
             Assert.Equal(0, _db.MockEntities.Count());
