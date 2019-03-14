@@ -1,4 +1,5 @@
 ﻿using FuryTechs.BLM.EntityFrameworkCore;
+using FuryTechs.BLM.EntityFrameworkCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -8,25 +9,27 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Add BLMEFCore as a resolvable 
         /// </summary>
-        /// <typeparam name="TDbContext"></typeparam>
         /// <param name="services"></param>
-        public static void AddBLMEFCore(this IServiceCollection services)
+        public static void AddBlmEfCore(this IServiceCollection services)
         {
             services.AddScoped(typeof(EfRepository<,>));
         }
 
         /// <summary>
-        /// To resolve EfRepository<EntityType> with one generic, this method will add your <typeparamref name="TDbContext"/> class a `DbContext`.
+        /// To resolve EfRepository<![CDATA[<EntityType>]]> with one generic, this method will add your <typeparamref name="TDbContext"/> class a `DbContext`.
         /// Use this if you have only one DbContext type in your project.
         /// </summary>
         /// <typeparam name="TDbContext">Database context</typeparam>
         /// <param name="services">Service collection</param>
-        public static void AddBLMEFCoreDefaultDbContext<TDbContext>(this IServiceCollection services)
+        /// <param name="identityResolver">(optional) Identity resolver implementation. If null, you have to provide identity everywhere in the code, or register it for yourself</param>
+        public static void AddBlmEfCoreDefaultDbContext<TDbContext>(this IServiceCollection services, IIdentityResolver identityResolver = null)
             where TDbContext : DbContext
         {
-            services.AddBLMEFCore();
+            services.AddBlmEfCore();
+            services.AddScoped<IIdentityResolver>((p) => identityResolver);
             services.AddScoped(typeof(EfRepository<>));
             services.AddScoped<DbContext, TDbContext>();
         }
+
     }
 }

@@ -271,7 +271,7 @@ namespace FuryTechs.BLM.NetStandard.Tests
 
             var time = DateTime.Now.Subtract(start).TotalMilliseconds;
 
-            Assert.True(time < 1500, "time < 1500");
+            Assert.True(time < 3000, "time < 3000");
 
             Assert.False(MockListener.WasOnCreatedCalled);
             Assert.False(MockListener.WasOnCreationValidationFailedCalled);

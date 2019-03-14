@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FuryTechs.BLM.NetStandard.Extensions;
 using FuryTechs.BLM.NetStandard.Interfaces;
 using FuryTechs.BLM.NetStandard.Interfaces.Listen;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,10 +16,10 @@ namespace FuryTechs.BLM.NetStandard
             IServiceProvider serviceProvider
         )
         {
-            var createListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenCreated<T>>();
+            var createListeners = serviceProvider.GetServices<IBlmEntry>().GetBlmAuthorizers<IListenCreated<T>>();
             foreach (var createListener in createListeners)
             {
-                await createListener.OnCreatedAsync(entity, context);
+                await ((IListenCreated<T>)createListener).OnCreatedAsync(entity, context);
             }
         }
 
@@ -36,10 +37,10 @@ namespace FuryTechs.BLM.NetStandard
             IServiceProvider serviceProvider
             )
         {
-            var createFailListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenCreateFailed<T>>();
+            var createFailListeners = serviceProvider.GetServices<IBlmEntry>().GetBlmAuthorizers<IListenCreateFailed<T>>();
             foreach (var listener in createFailListeners)
             {
-                await listener.OnCreateFailedAsync(entity, context);
+                await ((IListenCreateFailed<T>)listener).OnCreateFailedAsync(entity, context);
             }
         }
 
@@ -57,11 +58,10 @@ namespace FuryTechs.BLM.NetStandard
             IContextInfo context,
             IServiceProvider serviceProvider)
         {
-
-            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenModified<T>>();
+            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().GetBlmAuthorizers<IListenModified<T>>();
             foreach (var listener in modifyListeners)
             {
-                await listener.OnModifiedAsync(original, modified, context);
+                await ((IListenModified<T>)listener).OnModifiedAsync(original, modified, context);
             }
         }
 
@@ -80,10 +80,10 @@ namespace FuryTechs.BLM.NetStandard
             IContextInfo context,
             IServiceProvider serviceProvider)
         {
-            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenModificationFailed<T>>();
+            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().GetBlmAuthorizers<IListenModificationFailed<T>>();
             foreach (var listener in modifyListeners)
             {
-                await listener.OnModificationFailedAsync(original, modified, context);
+                await ((IListenModificationFailed<T>)listener).OnModificationFailedAsync(original, modified, context);
             }
         }
 
@@ -101,10 +101,10 @@ namespace FuryTechs.BLM.NetStandard
             IContextInfo context,
             IServiceProvider serviceProvider)
         {
-            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenRemoved<T>>();
+            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().GetBlmAuthorizers<IListenRemoved<T>>();
             foreach (var listener in modifyListeners)
             {
-                await listener.OnRemovedAsync(entity, context);
+                await ((IListenRemoved<T>)listener).OnRemovedAsync(entity, context);
             }
         }
 
@@ -121,10 +121,10 @@ namespace FuryTechs.BLM.NetStandard
             IContextInfo context,
             IServiceProvider serviceProvider)
         {
-            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().OfType<IListenRemoveFailed<T>>();
+            var modifyListeners = serviceProvider.GetServices<IBlmEntry>().GetBlmAuthorizers<IListenRemoveFailed<T>>();
             foreach (var listener in modifyListeners)
             {
-                await listener.OnRemoveFailedAsync(entity, context);
+                await ((IListenRemoveFailed<T>)listener).OnRemoveFailedAsync(entity, context);
             }
         }
 

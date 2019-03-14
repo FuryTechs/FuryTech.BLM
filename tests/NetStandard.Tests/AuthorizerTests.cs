@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
+﻿using FuryTechs.BLM.NetStandard.Extensions;
 using FuryTechs.BLM.NetStandard.Interfaces;
-using FuryTechs.BLM.NetStandard.Extensions;
-using System.Security.Principal;
-using Xunit;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Principal;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace FuryTechs.BLM.NetStandard.Tests
 {
@@ -38,6 +37,33 @@ namespace FuryTechs.BLM.NetStandard.Tests
             IsVisible2 = true
         };
 
+        private readonly MockGenericIntEntity _validGenericInt = new MockGenericIntEntity()
+        {
+            Id = 1,
+            IsValid = true,
+            IsVisible = true,
+            IsVisible2 = true
+
+        };
+
+        private readonly MockGenericIntEntity _invalidGenericInt = new MockGenericIntEntity()
+        {
+            Id = 2,
+            IsValid = false,
+            IsVisible = true,
+            IsVisible2 = false
+        };
+
+        private readonly MockGenericIntEntity _invisibleGenericInt = new MockGenericIntEntity()
+        {
+            Id = 3,
+            IsValid = true,
+            IsVisible = false,
+            IsVisible2 = true
+        };
+
+
+
         private readonly MockImplementedEntity _validMockImplementedEntity = new MockImplementedEntity()
         {
             IsValid = true,
@@ -60,6 +86,10 @@ namespace FuryTechs.BLM.NetStandard.Tests
         public AuthorizerTests()
         {
             var srvCollection = new ServiceCollection();
+            srvCollection.AddSingleton<IBlmEntry, MockGenericIntAuthorizer1>();
+            srvCollection.AddSingleton<IBlmEntry, MockGenericGuidAuthorizer1>();
+            srvCollection.AddSingleton<IBlmEntry, MockGenericIntAuthorizer2>();
+            srvCollection.AddSingleton<IBlmEntry, MockGenericGuidAuthorizer2>();
             srvCollection.AddSingleton<IBlmEntry, MockCollectionAuthorizer>();
             srvCollection.AddSingleton<IBlmEntry, MockCollectionAuthorizer2>();
             srvCollection.AddSingleton<IBlmEntry, MockCreateAuthorizer>();
@@ -70,7 +100,7 @@ namespace FuryTechs.BLM.NetStandard.Tests
 
         }
 
-        readonly IContextInfo _ctx = new GenericContextInfo(new GenericIdentity("gallayb"));
+        private readonly IContextInfo _ctx = new GenericContextInfo(new GenericIdentity("gallayb"));
 
         [Fact]
         public async Task CreateSuccess()
@@ -122,6 +152,21 @@ namespace FuryTechs.BLM.NetStandard.Tests
 
             Assert.True(authorizedCollection.All(a => a.IsVisible && a.IsVisible2));
         }
+
+
+        [Fact]
+        public void GenericCollection()
+        {
+            var list = new List<MockGenericEntity<int>>()
+            {
+                _validGenericInt, _invalidGenericInt, _invisibleGenericInt
+            }.AsQueryable();
+
+            var authorizedCollection = Authorize.Collection(list, _ctx, serviceProvider);
+
+            Assert.True(authorizedCollection.All(a => a.IsVisible && a.IsVisible2));
+        }
+
 
         [Fact]
         public async Task InterfacedCreate()
