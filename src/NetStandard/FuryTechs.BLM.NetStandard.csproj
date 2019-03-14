@@ -5,21 +5,21 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>FuryTechs.BLM.NetStandard</PackageId>
     <Authors>FuryTechs</Authors>
-    <Description>FuryTech Business Layer Management tools for .NET Standard 1.5</Description>
+    <Description>FuryTech Business Layer Management tools for .NET Standard 2.0</Description>
     <Product>FuryTechs.BLM.NetStandard</Product>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
-    <Version>2.0.9</Version>
-    <PackageLicense>https://github.com/FuryTechs/FuryTech.BLM/blob/master/License.md</PackageLicense>
+    <Version>2.0.10</Version>
     <PackageProjectUrl>https://github.com/FuryTechs/FuryTech.BLM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/FuryTechs/FuryTech.BLM</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <AssemblyName>FuryTechs.BLM.NetStandard</AssemblyName>
     <RootNamespace>FuryTechs.BLM.NetStandard</RootNamespace>
+    <PackageLicense>MIT</PackageLicense>
+    <PackageLicenseUrl>https://github.com/FuryTechs/FuryTech.BLM/blob/master/License.md</PackageLicenseUrl>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
-    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

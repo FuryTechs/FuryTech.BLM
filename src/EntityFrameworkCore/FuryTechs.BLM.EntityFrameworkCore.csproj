@@ -1,14 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\NetStandard\FuryTechs.BLM.NetStandard.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <ApplicationIcon />
@@ -18,12 +9,23 @@
     <Authors>FuryTechs</Authors>
     <Product>FuryTechs.BLM.EntityFrameworkCore</Product>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.0.9</Version>
-    <AssemblyVersion>2.0.9.0</AssemblyVersion>
+    <Version>2.0.10</Version>
+    <AssemblyVersion>2.0.10.0</AssemblyVersion>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/FuryTechs/FuryTech.BLM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/FuryTechs/FuryTech.BLM</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <PackageLicense>https://github.com/FuryTechs/FuryTech.BLM/blob/master/License.md</PackageLicense>
+    <PackageLicense>MIT</PackageLicense>
+    <PackageLicenseUrl>https://github.com/FuryTechs/FuryTech.BLM/blob/master/License.md</PackageLicenseUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NetStandard\FuryTechs.BLM.NetStandard.csproj" />
+  </ItemGroup>
 
 </Project>
