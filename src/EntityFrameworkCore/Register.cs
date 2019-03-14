@@ -26,9 +26,13 @@ namespace Microsoft.Extensions.DependencyInjection
             where TDbContext : DbContext
         {
             services.AddBlmEfCore();
-            services.AddScoped<IIdentityResolver>((p) => identityResolver);
             services.AddScoped(typeof(EfRepository<>));
             services.AddScoped<DbContext, TDbContext>();
+
+            if (identityResolver != null)
+            {
+                services.AddScoped<IIdentityResolver>((p) => identityResolver);
+            }
         }
 
     }
