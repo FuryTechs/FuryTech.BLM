@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using FuryTechs.BLM.NetStandard.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using FuryTechs.BLM.EntityFrameworkCore.Identity;
 
 namespace FuryTechs.BLM.EntityFrameworkCore.Tests
 {
@@ -45,6 +46,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
             coll.AddSingleton<IBlmEntry, MockInterpretedEntityCreateInterpreter>();
             coll.AddSingleton<IBlmEntry, MockInterpretedEntityModifyInterpreter>();
             coll.AddScoped<IBlmEntry, EfChangeListener>();
+            coll.AddScoped<IIdentityResolver, MockIdentityResolver>();
             return coll;
         }
 

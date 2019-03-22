@@ -1,0 +1,143 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FuryTechs.BLM.EntityFrameworkCore</name>
+    </assembly>
+    <members>
+        <member name="P:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.IgnoreLogicalDeleteError">
+            <summary>
+            If there are inherited objets, which have LogicalDeleteAttribue-s on it, we throw an exception
+            </summary>
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.#ctor(System.Type,System.IServiceProvider)">
+            <summary>
+            Initializes a new instance from the EfRepository with the given type parameter
+            </summary>
+            <param name="dbContextType">Type of the database context</param>
+            <param name="serviceProvider">Service provider</param>
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.#ctor(Microsoft.EntityFrameworkCore.DbContext,System.IServiceProvider)">
+            <summary>
+            Initializes a new instance from the EfRepository with the given type parameter
+            </summary>
+            <param name="dbContext">DbContext instance</param>
+            <param name="serviceProvider">Service provider</param>
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.GetLogicalDeleteProperty(System.Type)">
+            <summary>
+            Check the given type if it has an LogicalDeleteAttribute on any property, and returns with the first property it founds (or null)
+            </summary>
+            <param name="type">Checked type</param>
+            <returns></returns>
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.Add(`0,System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.AddAsync(`0,System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.AddRange(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.AddRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.Entities(System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.EntitiesAsync(System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.Remove(`0,System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.RemoveAsync(`0,System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.RemoveRange(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.RemoveRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.AuthorizeEntityChangeAsync(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry,System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.SaveChanges(System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.SaveChangesAsync(System.Security.Principal.IIdentity)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.DistributeToListenersAsync(System.Collections.Generic.List{System.Object},FuryTechs.BLM.EntityFrameworkCore.EfContextInfo,System.Collections.Generic.List{System.Tuple{System.Object,System.Object}},System.Collections.Generic.List{System.Object},System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.SetEntityState(`0,Microsoft.EntityFrameworkCore.EntityState)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.GetEntityState(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.GetChildRepositoryFor``1">
+            <inheritdoc />
+        </member>
+        <member name="T:FuryTechs.BLM.EntityFrameworkCore.Identity.IIdentityResolver">
+            <summary>
+            Interface which can resolve the User's Identity
+            </summary>
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.Identity.IIdentityResolver.GetIdentity">
+            <summary>
+            Gets the user's identity
+            </summary>
+            <returns>User's identity</returns>
+        </member>
+        <member name="T:FuryTechs.BLM.EntityFrameworkCore.IEfRepository">
+            <summary>
+            Interface for EfRepositoeries
+            </summary>
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.IEfRepository.AuthorizeEntityChangeAsync(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry,System.Security.Principal.IIdentity)">
+            <summary>
+            Main handler to authorize the entity changes
+            </summary>
+            <param name="entity">Entity</param>
+            <param name="user">User who initiated the operations</param>
+            <returns></returns>
+        </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.IEfRepository.DistributeToListenersAsync(System.Collections.Generic.List{System.Object},FuryTechs.BLM.EntityFrameworkCore.EfContextInfo,System.Collections.Generic.List{System.Tuple{System.Object,System.Object}},System.Collections.Generic.List{System.Object},System.Boolean)">
+            <summary>
+            
+            </summary>
+            <param name="added"></param>
+            <param name="contextInfo"></param>
+            <param name="modified"></param>
+            <param name="removed"></param>
+            <param name="isChildRepository"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Microsoft.Extensions.DependencyInjection.Register">
+            <summary>
+            This class contains the extension methods to add Blm EfCore to IServiceCollection
+            </summary>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.Register.AddBlmEfCore(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Add BLMEFCore as a resolvable 
+            </summary>
+            <param name="services"></param>
+        </member>
+        <member name="M:Microsoft.Extensions.DependencyInjection.Register.AddBlmEfCoreDefaultDbContext``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,FuryTechs.BLM.EntityFrameworkCore.Identity.IIdentityResolver)">
+            <summary>
+            To resolve EfRepository<![CDATA[<EntityType>]]> with one generic, this method will add your <typeparamref name="TDbContext"/> class a `DbContext`.
+            Use this if you have only one DbContext type in your project.
+            </summary>
+            <typeparam name="TDbContext">Database context</typeparam>
+            <param name="services">Service collection</param>
+            <param name="identityResolver">(optional) Identity resolver implementation. If null, you have to provide identity everywhere in the code, or register it for yourself</param>
+        </member>
+    </members>
+</doc>

@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
+    /// <summary>
+    /// This class contains the extension methods to add Blm EfCore to IServiceCollection
+    /// </summary>
     public static class Register
     {
         /// <summary>

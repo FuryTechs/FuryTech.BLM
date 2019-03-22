@@ -1,0 +1,309 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FuryTechs.BLM.NetStandard</name>
+    </assembly>
+    <members>
+        <member name="M:FuryTechs.BLM.NetStandard.AuthorizeCollection`1.AuthorizeCollectionAsync(System.Linq.IQueryable{`0},FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Authorizes a collection to be read
+            </summary>
+            <param name="entities">The full entity set</param>
+            <param name="ctx">The collection context info</param>
+            <returns>The authorized entities</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.AuthorizeCollection`1.AuthorizeCollectionAsync(System.Linq.IQueryable,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Authorizes a collection to be read
+            </summary>
+            <param name="entities">The full entity set</param>
+            <param name="ctx">The collection context info</param>
+            <returns>The authorized entities</returns>
+        </member>
+        <member name="T:FuryTechs.BLM.NetStandard.AuthorizeCRUD`1">
+            <summary>
+            Abstract class to authorize user for CRUD operations
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.AuthorizeCRUD`1.CanCreateAsync(`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Authorizes user if it can create the entity
+            </summary>
+            <param name="entity">Entity to create</param>
+            <param name="ctx">Context information</param>
+            <returns>Authorization result (deny/accept)</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.AuthorizeCRUD`1.CanModifyAsync(`0,`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Authorizes user if it can update the entity
+            </summary>
+            <param name="originalEntity">Original entity</param>
+            <param name="modifiedEntity">Modified entity</param>
+            <param name="ctx">Context information</param>
+            <returns>Authorization result (deny/accept)</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.AuthorizeCRUD`1.CanRemoveAsync(`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Authorizes user if it can delete the entity
+            </summary>
+            <param name="entity">Entity to delete</param>
+            <param name="ctx">Context information</param>
+            <returns>Authorization result (deny/accept)</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Authorize.IAuthorizeCollection.AuthorizeCollectionAsync(System.Linq.IQueryable,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Authorizes a collection to be read
+            </summary>
+            <param name="entities">The full entity set</param>
+            <param name="ctx">The collection context info</param>
+            <returns>The authorized entities</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Authorize.IAuthorizeCollection`2.AuthorizeCollectionAsync(System.Linq.IQueryable{`0},FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Authorizes a collection to be read
+            </summary>
+            <param name="entities">The full entity set</param>
+            <param name="ctx">The collection context info</param>
+            <returns>The authorized entities</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Authorize.IAuthorizeCreate`1.CanCreateAsync(`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Authorizes an Insert operation
+            </summary>
+            <param name="entity">The entity to be inserted</param>
+            <param name="ctx">The insertion context info</param>
+            <returns>If the entity can be inserted</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Authorize.IAuthorizeModify`1.CanModifyAsync(`0,`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Authorizes an update / modify operation
+            </summary>
+            <param name="originalEntity">The original entity</param>
+            <param name="modifiedEntity">The modified entity</param>
+            <param name="ctx">The insertion context info</param>
+            <returns>If the entity can be updated / modified</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Authorize.IAuthorizeRemove`1.CanRemoveAsync(`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Authorizes a remove operation
+            </summary>
+            <param name="entity">The entity to be removed</param>
+            <param name="ctx">The remove context info</param>
+            <returns>If the entity can be removed or not</returns>
+        </member>
+        <member name="P:FuryTechs.BLM.NetStandard.Interfaces.IContextInfo.Identity">
+            <summary>
+            The user identity
+            </summary>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IContextInfo.GetFullEntitySet``1">
+            <summary>
+            Get full the full queryable entity set
+            </summary>
+            <typeparam name="T">The entity type parameter</typeparam>
+            <returns>The full queryable entity set</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IContextInfo.GetAuthorizedEntitySetAsync``1">
+            <summary>
+            Get full the authorized queryable entity set
+            </summary>
+            <typeparam name="T">The entity type parameter</typeparam>
+            <returns>The authorized queryable entity set</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Interpret.IInterpretBeforeCreate.DoInterpret(System.Object,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Possibility to interpret an entity on creation before saving into the DB
+            </summary>
+            <param name="entity">The entity to be created</param>
+            <param name="context">The creation context</param>
+            <returns>The interpreted entity to be created</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Interpret.IInterpretBeforeCreate`2.DoInterpret(`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Possibility to interpret an entity on creation before saving into the DB
+            </summary>
+            <param name="entity">The entity to be created</param>
+            <param name="context">The creation context</param>
+            <returns>The interpreted entity to be created</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Interpret.IInterpretBeforeModify.DoInterpret(System.Object,System.Object,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Possibility to interpret an entity on modification before saving into the DB
+            </summary>
+            <param name="originalEntity"></param>
+            <param name="modifiedEntity"></param>
+            <param name="context"></param>
+            <returns>The entity to be modified</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Interpret.IInterpretBeforeModify`2.DoInterpret(`0,`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Possibility to interpret an entity on modification before saving into the DB
+            </summary>
+            <param name="originalEntity"></param>
+            <param name="modifiedEntity"></param>
+            <param name="context"></param>
+            <returns>The entity to be modified</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository.SaveChanges(System.Security.Principal.IIdentity)">
+            <summary>
+            Saves the changes
+            </summary>
+            <param name="user"></param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository.SaveChangesAsync(System.Security.Principal.IIdentity)">
+            <summary>
+            Save the changes asynchronously
+            </summary>
+            <param name="user">User who has done the changes</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.Entities(System.Security.Principal.IIdentity)">
+            <summary>
+            Gets the entity set which is visible to the provided user
+            </summary>
+            <param name="user">User who tries to operate with the entity set</param>
+            <returns>Query object</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.Add(`0,System.Security.Principal.IIdentity)">
+            <summary>
+            Add a new entity to the repository in the name of the provided user
+            </summary>
+            <param name="newItem">Entity</param>
+            <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.AddAsync(`0,System.Security.Principal.IIdentity)">
+            <summary>
+            Add a new entity to the repository in the name of the provided user
+            </summary>
+            <param name="newItem">Entity</param>
+            <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.AddRange(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+            <summary>
+            Add multiple entities to the repository in the name of the provided user
+            </summary>
+            <param name="newItem">Entity</param>
+            <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.AddRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+            <summary>
+            Add multiple entities to the repository in the name of the provided user
+            </summary>
+            <param name="newItem">Entity</param>
+            <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.Remove(`0,System.Security.Principal.IIdentity)">
+            <summary>
+            Removes an entity from the repository. The operation will be done by the provided user.
+            </summary>
+            <param name="newItem">Entity</param>
+            <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.RemoveAsync(`0,System.Security.Principal.IIdentity)">
+            <summary>
+            Removes an entity from the repository. The operation will be done by the provided user.
+            </summary>
+            <param name="newItem">Entity</param>
+            <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.RemoveRange(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+            <summary>
+            Removes multiple entities from the repository. The operation will be done by the provided user.
+            </summary>
+            <param name="newItem">Entity</param>
+            <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.RemoveRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+            <summary>
+            Removes multiple entities from the repository. The operation will be done by the provided user.
+            </summary>
+            <param name="newItem">Entity</param>
+            <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.GetChildRepositoryFor``1">
+            <summary>
+            Resolves the child repository for the given type parameter
+            </summary>
+            <typeparam name="T2">Navigation property type</typeparam>
+            <returns>Child repository</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Listen.IListenCreated`1.OnCreatedAsync(`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Triggered after the entity is validated, created and saved succesfully in the DB.
+            </summary>
+            <param name="entity">The created entity</param>
+            <param name="context">The creation context</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Listen.IListenCreateFailed`1.OnCreateFailedAsync(`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Triggered, when entity creation fails due validation in the Business Logic
+            </summary>
+            <param name="entity">The entity which has failed to create</param>
+            <param name="context">The creation context</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Listen.IListenModificationFailed`1.OnModificationFailedAsync(`0,`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Triggered when an entity modification has been failed due validation in the Business Layer
+            </summary>
+            <param name="originalEntity">The DbEntityEntry for the update.</param>
+            <param name="modifiedEntity">The entity which has been failed to modify</param>
+            <param name="context">The modification context</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Listen.IListenModified`1.OnModifiedAsync(`0,`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Triggered after an already existing entity is modified, validated and saved succesfully in the DB.
+            </summary>
+            <param name="originalEntity">The DbEntityEntry for the update.</param>
+            <param name="modifiedEntity">The succesfully modified entity</param>
+            <param name="context">The modification context</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Listen.IListenRemoved`1.OnRemovedAsync(`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Triggered after successfully validating and removing an entity.
+            </summary>
+            <param name="entity">The removed entity (with original properties).</param>
+            <param name="}}">The context info.</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Listen.IListenRemoveFailed`1.OnRemoveFailedAsync(`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Triggered when an entity remove failed due validation in the Business Layer
+            </summary>
+            <param name="entity">The entity which has been failed to remove</param>
+            <param name="context">The removal context</param>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.InterpretBeforeCreate`1.DoInterpret(`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Possibility to interpret an entity on creation before saving into the DB
+            </summary>
+            <param name="entity">The entity to be created</param>
+            <param name="context">The creation context</param>
+            <returns>The interpreted entity to be created</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.InterpretBeforeCreate`1.DoInterpret(System.Object,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Possibility to interpret an entity on creation before saving into the DB
+            </summary>
+            <param name="entity">The entity to be created</param>
+            <param name="context">The creation context</param>
+            <returns>The interpreted entity to be created</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.InterpretBeforeModify`1.DoInterpret(`0,`0,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Possibility to interpret an entity on modification before saving into the DB
+            </summary>
+            <param name="originalEntity"></param>
+            <param name="modifiedEntity"></param>
+            <param name="context"></param>
+            <returns>The entity to be modified</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.InterpretBeforeModify`1.DoInterpret(System.Object,System.Object,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
+            <summary>
+            Possibility to interpret an entity on modification before saving into the DB
+            </summary>
+            <param name="originalEntity"></param>
+            <param name="modifiedEntity"></param>
+            <param name="context"></param>
+            <returns>The entity to be modified</returns>
+        </member>
+    </members>
+</doc>

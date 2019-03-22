@@ -8,7 +8,7 @@
     <Description>FuryTech Business Layer Management tools for .NET Standard 2.0</Description>
     <Product>FuryTechs.BLM.NetStandard</Product>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
-    <Version>2.0.10</Version>
+    <Version>2.0.12</Version>
     <PackageProjectUrl>https://github.com/FuryTechs/FuryTech.BLM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/FuryTechs/FuryTech.BLM</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
@@ -16,6 +16,10 @@
     <RootNamespace>FuryTechs.BLM.NetStandard</RootNamespace>
     <PackageLicense>MIT</PackageLicense>
     <PackageLicenseUrl>https://github.com/FuryTechs/FuryTech.BLM/blob/master/License.md</PackageLicenseUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>FuryTechs.BLM.NetStandard.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

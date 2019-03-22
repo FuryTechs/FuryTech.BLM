@@ -42,11 +42,21 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         /// </summary>
         public bool IgnoreLogicalDeleteError { get; set; } = false;
 
+        /// <summary>
+        /// Initializes a new instance from the EfRepository with the given type parameter
+        /// </summary>
+        /// <param name="dbContextType">Type of the database context</param>
+        /// <param name="serviceProvider">Service provider</param>
         public EfRepository(Type dbContextType, IServiceProvider serviceProvider)
             : this((DbContext) serviceProvider.GetService(dbContextType), serviceProvider)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance from the EfRepository with the given type parameter
+        /// </summary>
+        /// <param name="dbContext">DbContext instance</param>
+        /// <param name="serviceProvider">Service provider</param>
         public EfRepository(DbContext dbContext, IServiceProvider serviceProvider)
         {
             _dbContext = dbContext;
@@ -129,6 +139,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             return authResult;
         }
 
+        /// <inheritdoc />
         public void Add(T newItem, IIdentity user = null)
         {
             if (user == null)
@@ -139,6 +150,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             AddAsync(newItem, user).Wait();
         }
 
+        /// <inheritdoc />
         public async Task AddAsync(T newItem, IIdentity user = null)
         {
             if (user == null)
@@ -149,6 +161,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             await Task.Factory.StartNew(() => { _dbSet.Add(newItem); });
         }
 
+        /// <inheritdoc />
         public void AddRange(IEnumerable<T> newItems, IIdentity user = null)
         {
             if (user == null)
@@ -159,6 +172,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             AddRangeAsync(newItems, user).Wait();
         }
 
+        /// <inheritdoc />
         public async Task AddRangeAsync(IEnumerable<T> newItems, IIdentity user)
         {
             if (user == null)
@@ -170,6 +184,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         }
 
 
+        /// <inheritdoc />
         public void Dispose()
         {
             foreach (var childRepo in _childRepositories)
@@ -183,6 +198,8 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             }
         }
 
+        /// <inheritdoc />
+
         public IQueryable<T> Entities(IIdentity user = null)
         {
             if (user == null)
@@ -193,6 +210,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             return Authorize.Collection(_dbSet, GetContextInfo(user), _serviceProvider);
         }
 
+        /// <inheritdoc />
         public async Task<IQueryable<T>> EntitiesAsync(IIdentity user = null)
         {
             if (user == null)
@@ -204,26 +222,31 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             return result as IQueryable<T>;
         }
 
+        /// <inheritdoc />
         public void Remove(T item, IIdentity usr = null)
         {
             RemoveAsync(item, usr ?? _serviceProvider.GetService<IIdentityResolver>().GetIdentity()).Wait();
         }
 
+        /// <inheritdoc />
         public async Task RemoveAsync(T item, IIdentity user = null)
         {
             await Task.Factory.StartNew(() => { _dbSet.Remove(item); });
         }
 
+        /// <inheritdoc />
         public void RemoveRange(IEnumerable<T> items, IIdentity usr = null)
         {
             RemoveRangeAsync(items, usr ?? _serviceProvider.GetService<IIdentityResolver>().GetIdentity()).Wait();
         }
 
+        /// <inheritdoc />
         public async Task RemoveRangeAsync(IEnumerable<T> items, IIdentity usr)
         {
             await Task.Factory.StartNew(() => { _dbSet.RemoveRange(items); });
         }
 
+        /// <inheritdoc />
         public async Task<AuthorizationResult> AuthorizeEntityChangeAsync(EntityEntry ent, IIdentity usr = null)
         {
             if (usr == null)
@@ -310,11 +333,13 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             }
         }
 
+        /// <inheritdoc />
         public void SaveChanges(IIdentity user = null)
         {
             SaveChangesAsync(user).Wait();
         }
 
+        /// <inheritdoc />
         public async Task SaveChangesAsync(IIdentity user = null)
         {
             if (user == null)
@@ -384,6 +409,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             await DistributeToListenersAsync(added, contextInfo, modified, removed);
         }
 
+        /// <inheritdoc />
         public async Task DistributeToListenersAsync(List<object> added, EfContextInfo contextInfo,
             List<Tuple<object, object>> modified, List<object> removed, bool isChildRepository = false)
         {
@@ -431,6 +457,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             }
         }
 
+        /// <inheritdoc />
         public void SetEntityState(T entity, EntityState newState)
         {
             _dbContext.Entry(entity).State = newState;
@@ -462,11 +489,13 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             return (new Tuple<object, object>(SelectOriginal(a, type), SelectCurrent(a, type)));
         }
 
+        /// <inheritdoc />
         public EntityState GetEntityState(T entity)
         {
             return _dbContext.Entry(entity).State;
         }
 
+        /// <inheritdoc />
         public IRepository<T2> GetChildRepositoryFor<T2>() where T2 : class
         {
             return (IRepository<T2>) GetChildRepositoryFor(typeof(T2));
