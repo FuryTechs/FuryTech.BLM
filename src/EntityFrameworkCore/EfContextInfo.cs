@@ -8,22 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FuryTechs.BLM.EntityFrameworkCore
 {
-    public class EfContextInfo<TEntity> : EfContextInfo, IContextInfo<TEntity>
-    {
-        public Type EntityType => typeof(TEntity);
-
-        public EfContextInfo(IIdentity identity, DbContext ctx, IServiceProvider serviceProvider): base(identity, ctx, serviceProvider)
-        {
-
-        }
-
-    }
-
-    public class EfContextInfo : IContextInfo
+    public class EfContextInfo<TEntity> : IContextInfo
     {
 
         private readonly DbContext _dbcontext;
         private readonly IServiceProvider _serviceProvider;
+        public Type EntityType => typeof(TEntity);
 
         public EfContextInfo(IIdentity identity, DbContext ctx, IServiceProvider serviceProvider)
         {
@@ -41,12 +31,12 @@ namespace FuryTechs.BLM.EntityFrameworkCore
 
         public IQueryable<T> GetAuthorizedEntitySet<T>() where T : class
         {
-            return Authorize.Collection(_dbcontext.Set<T>(), new EfContextInfo(Identity, _dbcontext, _serviceProvider), _serviceProvider);
+            return Authorize.Collection(_dbcontext.Set<T>(), new EfContextInfo<TEntity>(Identity, _dbcontext, _serviceProvider), _serviceProvider);
         }
 
         public async Task<IQueryable<T>> GetAuthorizedEntitySetAsync<T>() where T : class
         {
-            return await Authorize.CollectionAsync(_dbcontext.Set<T>(), new EfContextInfo(Identity, _dbcontext, _serviceProvider), _serviceProvider);
+            return await Authorize.CollectionAsync(_dbcontext.Set<T>(), new EfContextInfo<TEntity>(Identity, _dbcontext, _serviceProvider), _serviceProvider);
         }
     }
 }

@@ -14,6 +14,9 @@ namespace FuryTechs.BLM.NetStandard
         }
 
         public IIdentity Identity { get; }
+
+        public Type EntityType => throw new NotImplementedException();
+
         public IQueryable<T> GetFullEntitySet<T>() where T : class
         {
             throw new NotImplementedException();

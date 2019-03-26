@@ -218,7 +218,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task CtxAuthorizedEntitySet()
         {
             var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
-            var ctx = new EfContextInfo(_identity, _db, _serviceProvider);
+            var ctx = new EfContextInfo<MockEntity>(_identity, _db, _serviceProvider);
 
             _db.Set<MockEntity>().AddRange(new List<MockEntity>()
                 {ValidEntity, InvalidEntity, InvisibleEntity, InvisibleEntity2});
@@ -232,7 +232,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
 
-            var ctx = new EfContextInfo(_identity, _db, _serviceProvider);
+            var ctx = new EfContextInfo<MockEntity>(_identity, _db, _serviceProvider);
 
             _db.Set<MockEntity>().AddRange(new List<MockEntity>()
                 {ValidEntity, InvalidEntity, InvisibleEntity, InvisibleEntity2});
