@@ -65,9 +65,9 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             _serviceProvider = serviceProvider;
         }
 
-        private EfContextInfo GetContextInfo(IIdentity user)
+        private EfContextInfo<T> GetContextInfo(IIdentity user)
         {
-            return new EfContextInfo(user, _dbContext, _serviceProvider);
+            return new EfContextInfo<T>(user, _dbContext, _serviceProvider);
         }
 
         private IEfRepository GetChildRepositoryFor(EntityEntry entry)
@@ -410,7 +410,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         }
 
         /// <inheritdoc />
-        public async Task DistributeToListenersAsync(List<object> added, EfContextInfo contextInfo,
+        public async Task DistributeToListenersAsync(List<object> added, IContextInfo contextInfo,
             List<Tuple<object, object>> modified, List<object> removed, bool isChildRepository = false)
         {
             if (!isChildRepository)

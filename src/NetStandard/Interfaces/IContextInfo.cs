@@ -1,9 +1,19 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
 
 namespace FuryTechs.BLM.NetStandard.Interfaces
 {
+    public interface IContextInfo<T>
+    {
+        /// <summary>
+        /// Exposes the type of the entity. 
+        /// If you use interfaces, you can check which type of entity fetch is in progress.
+        /// </summary>
+        Type EntityType { get; }
+    }
+
     public interface IContextInfo
     {
         /// <summary>
@@ -24,5 +34,6 @@ namespace FuryTechs.BLM.NetStandard.Interfaces
         /// <typeparam name="T">The entity type parameter</typeparam>
         /// <returns>The authorized queryable entity set</returns>
         Task<IQueryable<T>> GetAuthorizedEntitySetAsync<T>() where T : class;
+
     }
 }

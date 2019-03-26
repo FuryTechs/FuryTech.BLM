@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using FuryTechs.BLM.NetStandard;
+using FuryTechs.BLM.NetStandard.Interfaces;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace FuryTechs.BLM.EntityFrameworkCore
@@ -31,7 +32,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         /// <returns></returns>
         Task DistributeToListenersAsync(
             List<object> added,
-            EfContextInfo contextInfo,
+            IContextInfo contextInfo,
             List<Tuple<object, object>> modified,
             List<object> removed,
             bool isChildRepository

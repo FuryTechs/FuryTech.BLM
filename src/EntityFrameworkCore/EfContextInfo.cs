@@ -8,6 +8,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FuryTechs.BLM.EntityFrameworkCore
 {
+    public class EfContextInfo<TEntity> : EfContextInfo, IContextInfo<TEntity>
+    {
+        public Type EntityType => typeof(TEntity);
+
+        public EfContextInfo(IIdentity identity, DbContext ctx, IServiceProvider serviceProvider): base(identity, ctx, serviceProvider)
+        {
+
+        }
+
+    }
+
     public class EfContextInfo : IContextInfo
     {
 
@@ -22,6 +33,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         }
 
         public IIdentity Identity { get; }
+
         public IQueryable<T> GetFullEntitySet<T>() where T : class
         {
             return _dbcontext.Set<T>();
