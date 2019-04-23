@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
@@ -352,29 +353,38 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             _dbContext.ChangeTracker.DetectChanges();
             var entries = _dbContext.ChangeTracker.Entries().ToList();
 
-            foreach (var entityChange in _dbContext.ChangeTracker.Entries())
+            //foreach (var entityChange in _dbContext.ChangeTracker.Entries())
+            for (var i = entries.Count - 1; i >= 0; i--)
             {
+                var entityChange = entries[i];
                 var authResult = await AuthorizeEntityChangeAsync(entityChange, user);
-                if (!authResult.HasSucceed)
+                if (authResult.HasSucceed) continue;
+                switch (entityChange.State)
                 {
-                    if (entityChange.State == EntityState.Modified)
-                    {
+                    case EntityState.Modified:
                         await Listen.ModificationFailedAsync(
                             CreateWithValues(entityChange.OriginalValues),
                             entityChange.Entity as T,
                             GetContextInfo(user),
                             _serviceProvider);
-                    }
-                    else if (entityChange.State == EntityState.Deleted)
-                    {
+                        break;
+                    case EntityState.Deleted:
                         await Listen.RemoveFailedAsync(
                             CreateWithValues(entityChange.OriginalValues),
                             contextInfo,
                             _serviceProvider);
-                    }
-
-                    throw new AuthorizationFailedException(authResult);
+                        break;
+                    case EntityState.Detached:
+                        break;
+                    case EntityState.Unchanged:
+                        break;
+                    case EntityState.Added:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
+
+                throw new AuthorizationFailedException(authResult);
             }
 
             // Added should be updated after saving changes for get the ID of the newly created entity
