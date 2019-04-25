@@ -49,7 +49,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         /// <param name="dbContextType">Type of the database context</param>
         /// <param name="serviceProvider">Service provider</param>
         public EfRepository(Type dbContextType, IServiceProvider serviceProvider)
-            : this((DbContext) serviceProvider.GetService(dbContextType), serviceProvider)
+            : this((DbContext)serviceProvider.GetService(dbContextType), serviceProvider)
         {
         }
 
@@ -86,7 +86,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             }
 
             var childRepositoryType = typeof(EfRepository<,>).MakeGenericType(type, _dbContext.GetType());
-            return (IEfRepository) _serviceProvider.GetService(childRepositoryType);
+            return (IEfRepository)_serviceProvider.GetService(childRepositoryType);
         }
 
         #region Static things
@@ -274,19 +274,19 @@ namespace FuryTechs.BLM.EntityFrameworkCore
                         var original = CreateWithValues(ent.OriginalValues);
                         var modified = CreateWithValues(ent.CurrentValues);
                         var modifiedInterpreted =
-                            Interpret.BeforeModify((T) original, (T) modified, GetContextInfo(usr), _serviceProvider);
+                            Interpret.BeforeModify((T)original, (T)modified, GetContextInfo(usr), _serviceProvider);
                         foreach (var property in ent.CurrentValues.Properties)
                         {
                             ent.CurrentValues[property.Name] = modifiedInterpreted.GetType().GetProperty(property.Name)
                                 ?.GetValue(modifiedInterpreted, null);
                         }
 
-                        return (await Authorize.ModifyAsync((T) original, modifiedInterpreted, GetContextInfo(usr),
+                        return (await Authorize.ModifyAsync((T)original, modifiedInterpreted, GetContextInfo(usr),
                                 _serviceProvider))
                             .CreateAggregateResult();
                     case EntityState.Deleted:
                         return (await Authorize.RemoveAsync(
-                                (T) CreateWithValues(ent.OriginalValues, variable.GetType()), GetContextInfo(usr),
+                                (T)CreateWithValues(ent.OriginalValues, variable.GetType()), GetContextInfo(usr),
                                 _serviceProvider))
                             .CreateAggregateResult();
                     default:
@@ -340,21 +340,12 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             SaveChangesAsync(user).Wait();
         }
 
-        /// <inheritdoc />
-        public async Task SaveChangesAsync(IIdentity user = null)
+        private async Task<List<EntityEntry>> AuthorizeChanges(IIdentity user, IContextInfo contextInfo)
         {
-            if (user == null)
-            {
-                user = _serviceProvider.GetService<IIdentityResolver>().GetIdentity();
-            }
-
-            var contextInfo = GetContextInfo(user);
-
             _dbContext.ChangeTracker.DetectChanges();
             var entries = _dbContext.ChangeTracker.Entries().ToList();
 
-            //foreach (var entityChange in _dbContext.ChangeTracker.Entries())
-            for (var i = entries.Count - 1; i >= 0; i--)
+            for (var i = 0; i < entries.Count; i++)
             {
                 var entityChange = entries[i];
                 var authResult = await AuthorizeEntityChangeAsync(entityChange, user);
@@ -383,9 +374,29 @@ namespace FuryTechs.BLM.EntityFrameworkCore
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-
                 throw new AuthorizationFailedException(authResult);
             }
+
+            _dbContext.ChangeTracker.DetectChanges();
+
+            var compareEntriesCount = _dbContext.ChangeTracker.Entries().Count();
+            if (compareEntriesCount != entries.Count)
+            {
+                return await AuthorizeChanges(user, contextInfo);
+            }
+
+            return entries;
+        }
+
+        /// <inheritdoc />
+        public async Task SaveChangesAsync(IIdentity user = null)
+        {
+            if (user == null)
+            {
+                user = _serviceProvider.GetService<IIdentityResolver>().GetIdentity();
+            }
+            var contextInfo = GetContextInfo(user);
+            var entries = await AuthorizeChanges(user, contextInfo);
 
             // Added should be updated after saving changes for get the ID of the newly created entity
             var added = entries.Where(a => a.State == EntityState.Added).Select(a => a.Entity).ToList();
@@ -508,7 +519,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         /// <inheritdoc />
         public IRepository<T2> GetChildRepositoryFor<T2>() where T2 : class
         {
-            return (IRepository<T2>) GetChildRepositoryFor(typeof(T2));
+            return (IRepository<T2>)GetChildRepositoryFor(typeof(T2));
         }
     }
 }
