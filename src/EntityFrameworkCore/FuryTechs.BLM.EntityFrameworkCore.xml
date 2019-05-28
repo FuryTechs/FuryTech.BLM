@@ -23,6 +23,9 @@
             <param name="dbContext">DbContext instance</param>
             <param name="serviceProvider">Service provider</param>
         </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.GetChildRepositoryFor``1">
+            <inheritdoc />
+        </member>
         <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.GetLogicalDeleteProperty(System.Type)">
             <summary>
             Check the given type if it has an LogicalDeleteAttribute on any property, and returns with the first property it founds (or null)
@@ -72,16 +75,13 @@
         <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.SaveChangesAsync(System.Security.Principal.IIdentity)">
             <inheritdoc />
         </member>
-        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.DistributeToListenersAsync(System.Collections.Generic.List{System.Object},FuryTechs.BLM.EntityFrameworkCore.EfContextInfo,System.Collections.Generic.List{System.Tuple{System.Object,System.Object}},System.Collections.Generic.List{System.Object},System.Boolean)">
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.DistributeToListenersAsync(System.Collections.Generic.List{System.Object},FuryTechs.BLM.NetStandard.Interfaces.IContextInfo,System.Collections.Generic.List{System.Tuple{System.Object,System.Object}},System.Collections.Generic.List{System.Object},System.Boolean)">
             <inheritdoc />
         </member>
         <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.SetEntityState(`0,Microsoft.EntityFrameworkCore.EntityState)">
             <inheritdoc />
         </member>
         <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.GetEntityState(`0)">
-            <inheritdoc />
-        </member>
-        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.GetChildRepositoryFor``1">
             <inheritdoc />
         </member>
         <member name="T:FuryTechs.BLM.EntityFrameworkCore.Identity.IIdentityResolver">
@@ -95,28 +95,12 @@
             </summary>
             <returns>User's identity</returns>
         </member>
-        <member name="T:FuryTechs.BLM.EntityFrameworkCore.IEfRepository">
-            <summary>
-            Interface for EfRepositoeries
-            </summary>
-        </member>
         <member name="M:FuryTechs.BLM.EntityFrameworkCore.IEfRepository.AuthorizeEntityChangeAsync(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry,System.Security.Principal.IIdentity)">
             <summary>
             Main handler to authorize the entity changes
             </summary>
             <param name="entity">Entity</param>
             <param name="user">User who initiated the operations</param>
-            <returns></returns>
-        </member>
-        <member name="M:FuryTechs.BLM.EntityFrameworkCore.IEfRepository.DistributeToListenersAsync(System.Collections.Generic.List{System.Object},FuryTechs.BLM.EntityFrameworkCore.EfContextInfo,System.Collections.Generic.List{System.Tuple{System.Object,System.Object}},System.Collections.Generic.List{System.Object},System.Boolean)">
-            <summary>
-            
-            </summary>
-            <param name="added"></param>
-            <param name="contextInfo"></param>
-            <param name="modified"></param>
-            <param name="removed"></param>
-            <param name="isChildRepository"></param>
             <returns></returns>
         </member>
         <member name="T:Microsoft.Extensions.DependencyInjection.Register">

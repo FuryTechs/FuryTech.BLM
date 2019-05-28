@@ -111,6 +111,12 @@
             <typeparam name="T">The entity type parameter</typeparam>
             <returns>The authorized queryable entity set</returns>
         </member>
+        <member name="P:FuryTechs.BLM.NetStandard.Interfaces.IContextInfo.EntityType">
+            <summary>
+            Exposes the type of the entity. 
+            If you use interfaces, you can check which type of entity fetch is in progress.
+            </summary>
+        </member>
         <member name="M:FuryTechs.BLM.NetStandard.Interfaces.Interpret.IInterpretBeforeCreate.DoInterpret(System.Object,FuryTechs.BLM.NetStandard.Interfaces.IContextInfo)">
             <summary>
             Possibility to interpret an entity on creation before saving into the DB
@@ -157,7 +163,25 @@
             </summary>
             <param name="user">User who has done the changes</param>
         </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository.DistributeToListenersAsync(System.Collections.Generic.List{System.Object},FuryTechs.BLM.NetStandard.Interfaces.IContextInfo,System.Collections.Generic.List{System.Tuple{System.Object,System.Object}},System.Collections.Generic.List{System.Object},System.Boolean)">
+            <summary>
+            
+            </summary>
+            <param name="added"></param>
+            <param name="contextInfo"></param>
+            <param name="modified"></param>
+            <param name="removed"></param>
+            <param name="isChildRepository"></param>
+            <returns></returns>
+        </member>
         <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.Entities(System.Security.Principal.IIdentity)">
+            <summary>
+            Gets the entity set which is visible to the provided user
+            </summary>
+            <param name="user">User who tries to operate with the entity set</param>
+            <returns>Query object</returns>
+        </member>
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.EntitiesAsync(System.Security.Principal.IIdentity)">
             <summary>
             Gets the entity set which is visible to the provided user
             </summary>
