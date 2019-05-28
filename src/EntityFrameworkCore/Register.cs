@@ -1,5 +1,6 @@
 ﻿using FuryTechs.BLM.EntityFrameworkCore;
 using FuryTechs.BLM.EntityFrameworkCore.Identity;
+using FuryTechs.BLM.NetStandard.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -15,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services"></param>
         public static void AddBlmEfCore(this IServiceCollection services)
         {
-            services.AddScoped(typeof(EfRepository<,>));
+            services.AddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
         }
 
         /// <summary>
@@ -29,7 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
             where TDbContext : DbContext
         {
             services.AddBlmEfCore();
-            services.AddScoped(typeof(EfRepository<>));
+            services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
             services.AddScoped<DbContext, TDbContext>();
 
             if (identityResolver != null)

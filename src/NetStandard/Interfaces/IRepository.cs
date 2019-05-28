@@ -6,9 +6,18 @@ using System.Threading.Tasks;
 
 namespace FuryTechs.BLM.NetStandard.Interfaces
 {
-    public interface IRepository
+
+    public interface IRepository<TEntityEntry> : IDisposable
     {
         /// <summary>
+        /// Main handler to authorize the entity changes
+        /// </summary>
+        /// <param name="entity">Entity</param>
+        /// <param name="user">User who initiated the operations</param>
+        /// <returns></returns>
+        Task<AuthorizationResult> AuthorizeEntityChangeAsync(TEntityEntry entity, IIdentity user = null);
+
+          /// <summary>
         /// Saves the changes
         /// </summary>
         /// <param name="user"></param>
@@ -19,21 +28,48 @@ namespace FuryTechs.BLM.NetStandard.Interfaces
         /// </summary>
         /// <param name="user">User who has done the changes</param>
         Task SaveChangesAsync(IIdentity user = null);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="added"></param>
+        /// <param name="contextInfo"></param>
+        /// <param name="modified"></param>
+        /// <param name="removed"></param>
+        /// <param name="isChildRepository"></param>
+        /// <returns></returns>
+        Task DistributeToListenersAsync(
+            List<object> added,
+            IContextInfo contextInfo,
+            List<Tuple<object, object>> modified,
+            List<object> removed,
+            bool isChildRepository
+        );
     }
 
-    public interface IRepository<T> : IRepository<T, T> where T : class
+
+    public interface IRepository<T, TEntityEntry> : IRepository<T, T, TEntityEntry> where T : class
     {
     }
 
-    public interface IRepository<in TInput, out TOutput> : IDisposable, IRepository
-        where TInput : class where TOutput : class
+    public interface IRepository<in TInput, TOutput, TEntityEntry> : IDisposable, IRepository<TEntityEntry>
+        where TInput : class
+        where TOutput : class
     {
+
         /// <summary>
         /// Gets the entity set which is visible to the provided user
         /// </summary>
         /// <param name="user">User who tries to operate with the entity set</param>
         /// <returns>Query object</returns>
         IQueryable<TOutput> Entities(IIdentity user = null);
+
+        /// <summary>
+        /// Gets the entity set which is visible to the provided user
+        /// </summary>
+        /// <param name="user">User who tries to operate with the entity set</param>
+        /// <returns>Query object</returns>
+        Task<IQueryable<TOutput>> EntitiesAsync(IIdentity user = null);
 
         /// <summary>
         /// Add a new entity to the repository in the name of the provided user
@@ -69,7 +105,7 @@ namespace FuryTechs.BLM.NetStandard.Interfaces
         /// <param name="newItem">Entity</param>
         /// <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
         void Remove(TInput item, IIdentity user = null);
-        
+
         /// <summary>
         /// Removes an entity from the repository. The operation will be done by the provided user.
         /// </summary>
@@ -96,6 +132,6 @@ namespace FuryTechs.BLM.NetStandard.Interfaces
         /// </summary>
         /// <typeparam name="T2">Navigation property type</typeparam>
         /// <returns>Child repository</returns>
-        IRepository<T2> GetChildRepositoryFor<T2>() where T2 : class;
+        IRepository<T2, TEntityEntry> GetChildRepositoryFor<T2>() where T2 : class;
     }
 }

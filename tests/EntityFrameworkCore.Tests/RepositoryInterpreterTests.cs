@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
+using FuryTechs.BLM.NetStandard.Interfaces;
+
 namespace FuryTechs.BLM.EntityFrameworkCore.Tests
 {
     public class RepositoryInterpreterTests : AbstractEfRepositoryTest
@@ -15,8 +17,8 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public async Task TestCreateInterpret()
         {
             var _repoInterpreted =
-                (EfRepository<MockInterpretedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockInterpretedEntity, FakeDbContext>));
+                (EfRepository<MockInterpretedEntity, FakeDbContext>)_serviceProvider.GetService(
+                    typeof(IRepository<MockInterpretedEntity, FakeDbContext>));
 
 
             await _repoInterpreted.AddAsync(new MockInterpretedEntity()
@@ -33,10 +35,10 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         [Fact]
         public async Task TestModifyInterpret()
         {
-            var _db = (FakeDbContext) _serviceProvider.GetService(typeof(FakeDbContext));
+            var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
             var _repoInterpreted =
-                (EfRepository<MockInterpretedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockInterpretedEntity, FakeDbContext>));
+                (EfRepository<MockInterpretedEntity, FakeDbContext>)_serviceProvider.GetService(
+                    typeof(IRepository<MockInterpretedEntity, FakeDbContext>));
 
             _db.MockInterpretedEntities.Add(new MockInterpretedEntity()
             {

@@ -26,7 +26,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         }
     }
 
-    public class EfRepository<T> : IRepository<T>, IEfRepository
+    public class EfRepository<T> : IRepository<T, EntityEntry>
         where T : class, new()
     {
         private readonly DbContext _dbContext;
@@ -34,7 +34,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         private readonly Type _type;
         private readonly bool _disposeDbContextOnDispose;
 
-        private readonly Dictionary<string, IEfRepository> _childRepositories = new Dictionary<string, IEfRepository>();
+        private readonly Dictionary<string, IRepository<EntityEntry>> _childRepositories = new Dictionary<string, IRepository<EntityEntry>>();
 
         private readonly IServiceProvider _serviceProvider;
 
@@ -71,13 +71,13 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             return new EfContextInfo<T>(user, _dbContext, _serviceProvider);
         }
 
-        private IEfRepository GetChildRepositoryFor(EntityEntry entry)
+        private IRepository<EntityEntry> GetChildRepositoryFor(EntityEntry entry)
         {
             var repoType = entry.Entity.GetType();
             return GetChildRepositoryFor(repoType);
         }
 
-        private IEfRepository GetChildRepositoryFor(Type type)
+        private IRepository<EntityEntry> GetChildRepositoryFor(Type type)
         {
             var repoKey = type.FullName;
             if (_childRepositories.ContainsKey(repoKey))
@@ -85,8 +85,8 @@ namespace FuryTechs.BLM.EntityFrameworkCore
                 return _childRepositories[repoKey];
             }
 
-            var childRepositoryType = typeof(EfRepository<,>).MakeGenericType(type, _dbContext.GetType());
-            return (IEfRepository)_serviceProvider.GetService(childRepositoryType);
+            var childRepositoryType = typeof(IRepository<,>).MakeGenericType(type, _dbContext.GetType());
+            return (IRepository<EntityEntry>)_serviceProvider.GetService(childRepositoryType);
         }
 
         #region Static things
@@ -517,9 +517,9 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         }
 
         /// <inheritdoc />
-        public IRepository<T2> GetChildRepositoryFor<T2>() where T2 : class
+        public IRepository<T2, EntityEntry> GetChildRepositoryFor<T2>() where T2 : class
         {
-            return (IRepository<T2>)GetChildRepositoryFor(typeof(T2));
+            return (IRepository<T2, EntityEntry>)GetChildRepositoryFor(typeof(T2));
         }
     }
 }

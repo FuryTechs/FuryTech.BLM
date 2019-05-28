@@ -1,9 +1,12 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+
 using Xunit;
 using Xunit.Abstractions;
+
 using FuryTechs.BLM.NetStandard.Tests;
 using FuryTechs.BLM.NetStandard.Exceptions;
+using FuryTechs.BLM.NetStandard.Interfaces;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
@@ -35,7 +38,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public async Task Add()
         {
             var _repo = (EfRepository<MockEntity>) _serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             await _add(_repo);
             Assert.Equal(2, _repo.Entities(_identity).Count());
         }
@@ -44,7 +47,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public async Task LogicalDelete_ALL_Throw_SecurityRiskException()
         {
             var _repo = (EfRepository<MockEntity>) _serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
 
             await _add(_repo);
 
@@ -58,7 +61,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public async Task LogicalDelete_MockEntity_NoException()
         {
             var _repo = (EfRepository<MockEntity>) _serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
 
             await _add(_repo);
             Assert.Equal(2, EfChangeListener.CreatedEntities.Count);
@@ -77,7 +80,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public async Task LogicalDelete_ALL_IgnoreLogicalDeleteAttributes_NoException()
         {
             var _repo = (EfRepository<MockEntity>) _serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
 
             await _add(_repo);
             Assert.Equal(2, EfChangeListener.CreatedEntities.Count);
@@ -98,7 +101,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var localRepository =
                 (EfRepository<LogicalDeleteEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<LogicalDeleteEntity, FakeDbContext>));
+                    typeof(IRepository<LogicalDeleteEntity, FakeDbContext>));
 
             await localRepository.AddAsync(Entity2, _identity);
             await localRepository.AddAsync(Entity3, _identity);
@@ -131,7 +134,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var localRepository =
                 (EfRepository<InheritedLogicalDeleteEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<InheritedLogicalDeleteEntity, FakeDbContext>));
+                    typeof(IRepository<InheritedLogicalDeleteEntity, FakeDbContext>));
 
             await localRepository.AddAsync(Entity4, _identity);
             await localRepository.AddAsync(Entity5, _identity);

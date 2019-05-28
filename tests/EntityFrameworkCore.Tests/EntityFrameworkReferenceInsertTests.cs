@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using FuryTechs.BLM.NetStandard.Interfaces;
 using FuryTechs.BLM.NetStandard.Exceptions;
 using FuryTechs.BLM.NetStandard.Tests;
 using Xunit.Abstractions;
@@ -44,7 +45,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _repoNested =
                 (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+                    typeof(IRepository<MockNestedEntity, FakeDbContext>));
 
             await _repoNested.AddAsync(new MockNestedEntity(), _identity);
             await _repoNested.SaveChangesAsync(_identity);
@@ -55,7 +56,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _repoNested =
                 (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+                    typeof(IRepository<MockNestedEntity, FakeDbContext>));
             await _repoNested.AddAsync(new MockNestedEntity()
             {
                 MockEntities = new List<MockEntity> {ValidEntity}
@@ -68,7 +69,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _repoNested =
                 (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+                    typeof(IRepository<MockNestedEntity, FakeDbContext>));
             await _repoNested.AddAsync(new MockNestedEntity()
             {
                 MockEntities = new List<MockEntity> {ValidEntity, ValidEntity2}
@@ -81,7 +82,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _repoNested =
                 (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+                    typeof(IRepository<MockNestedEntity, FakeDbContext>));
             await _repoNested.AddAsync(new MockNestedEntity()
             {
                 MockEntities = new List<MockEntity> {InvalidEntity}
@@ -94,7 +95,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _repoNested =
                 (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+                    typeof(IRepository<MockNestedEntity, FakeDbContext>));
             await _repoNested.AddAsync(new MockNestedEntity()
             {
                 MockEntities = new List<MockEntity> {ValidEntity, InvalidEntity}
@@ -107,7 +108,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _repoNested =
                 (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+                    typeof(IRepository<MockNestedEntity, FakeDbContext>));
             await _repoNested.AddAsync(new MockNestedEntity()
             {
                 MockEntities = new List<MockEntity> {new MockEntity {IsValid = true}}
@@ -120,7 +121,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _repoNested =
                 (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+                    typeof(IRepository<MockNestedEntity, FakeDbContext>));
             await _repoNested.AddAsync(new MockNestedEntity()
             {
                 MockEntities = new List<MockEntity> {new MockEntity {IsValid = true}, new MockEntity {IsValid = true}}
@@ -133,7 +134,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _repoNested =
                 (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+                    typeof(IRepository<MockNestedEntity, FakeDbContext>));
             var _db = (FakeDbContext) _serviceProvider.GetService(typeof(FakeDbContext));
             await _repoNested.AddAsync(new MockNestedEntity()
             {
@@ -150,9 +151,9 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _repoNested =
                 (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+                    typeof(IRepository<MockNestedEntity, FakeDbContext>));
             var _repo = (EfRepository<MockEntity, FakeDbContext>) _serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
 
             await _repoNested.AddAsync(new MockNestedEntity()
             {
@@ -181,7 +182,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         {
             var _repoNested =
                 (EfRepository<MockNestedEntity, FakeDbContext>) _serviceProvider.GetService(
-                    typeof(EfRepository<MockNestedEntity, FakeDbContext>));
+                    typeof(IRepository<MockNestedEntity, FakeDbContext>));
             var _db = (FakeDbContext) _serviceProvider.GetService(typeof(FakeDbContext));
 
             await _repoNested.AddAsync(new MockNestedEntity()

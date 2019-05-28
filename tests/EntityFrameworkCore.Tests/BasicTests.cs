@@ -5,6 +5,7 @@ using FuryTechs.BLM.NetStandard.Tests;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using FuryTechs.BLM.NetStandard.Exceptions;
+using FuryTechs.BLM.NetStandard.Interfaces;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -52,7 +53,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task Add()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
             await _repo.AddAsync(ValidEntity, _identity);
             await _repo.SaveChangesAsync(_identity);
@@ -63,7 +64,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task AddWithoutIdentity()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
             await _repo.AddAsync(ValidEntity);
             await _repo.SaveChangesAsync();
@@ -74,7 +75,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task AddFailure()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
             await _repo.AddAsync(InvalidEntity, _identity);
             await Assert.ThrowsAsync<AuthorizationFailedException>(async () => await _repo.SaveChangesAsync(_identity));
@@ -85,7 +86,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task AddFailureWithoutIdentity()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
             await _repo.AddAsync(InvalidEntity);
             await Assert.ThrowsAsync<AuthorizationFailedException>(async () => await _repo.SaveChangesAsync());
@@ -96,7 +97,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task AddRangeFail()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
             await _repo.AddRangeAsync(new List<MockEntity>() { ValidEntity, InvisibleEntity, InvalidEntity }, _identity);
             await Assert.ThrowsAsync<AuthorizationFailedException>(async () => await _repo.SaveChangesAsync(_identity));
@@ -107,7 +108,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task Modify()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             ValidEntity.Guid = Guid.NewGuid().ToString();
             await _repo.AddAsync(ValidEntity, _identity);
             await _repo.SaveChangesAsync(_identity);
@@ -126,7 +127,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task ModifyFailedAsync()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             await _repo.AddAsync(ValidEntity, _identity);
             await _repo.SaveChangesAsync(_identity);
 
@@ -140,7 +141,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task RemoveAsync()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             await _repo.AddAsync(ValidEntity, _identity);
             await _repo.SaveChangesAsync(_identity);
 
@@ -152,7 +153,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task RemoveRange()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
 
             await _repo.AddAsync(ValidEntity, _identity);
             await _repo.SaveChangesAsync(_identity);
@@ -167,7 +168,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task RemoveFailed()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
 
             _db.Set<MockEntity>().Add(InvalidEntity);
@@ -181,7 +182,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task RemoveRangeFailed()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
             var _db = (FakeDbContext)_serviceProvider.GetService(typeof(FakeDbContext));
 
             _db.Set<MockEntity>().Add(InvalidEntity);
@@ -198,7 +199,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
             try
             {
                 var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                    typeof(EfRepository<MockEntity, FakeDbContext>));
+                    typeof(IRepository<MockEntity, FakeDbContext>));
 
                 await _repo.AddRangeAsync(new List<MockEntity> { ValidEntity, InvisibleEntity, InvisibleEntity2 },
                     _identity);
@@ -245,7 +246,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task GetSetEntityState()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
 
             await _repo.AddAsync(ValidEntity, _identity);
             Assert.Equal(EntityState.Added, _repo.GetEntityState(ValidEntity));
@@ -257,7 +258,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         public virtual async Task SkipUnchangedEntities()
         {
             var _repo = (EfRepository<MockEntity>)_serviceProvider.GetService(
-                typeof(EfRepository<MockEntity, FakeDbContext>));
+                typeof(IRepository<MockEntity, FakeDbContext>));
 
             await _repo.AddAsync(ValidEntity, _identity);
             await _repo.SaveChangesAsync(_identity);
