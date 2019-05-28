@@ -26,7 +26,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         }
     }
 
-    public class EfRepository<T> : IRepository<T, EntityEntry>
+    public class EfRepository<T> : IRepository<T>, IEfRepository
         where T : class, new()
     {
         private readonly DbContext _dbContext;
@@ -34,7 +34,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
         private readonly Type _type;
         private readonly bool _disposeDbContextOnDispose;
 
-        private readonly Dictionary<string, IRepository<EntityEntry>> _childRepositories = new Dictionary<string, IRepository<EntityEntry>>();
+        private readonly Dictionary<string, IRepository> _childRepositories = new Dictionary<string, IRepository>();
 
         private readonly IServiceProvider _serviceProvider;
 
@@ -71,23 +71,35 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             return new EfContextInfo<T>(user, _dbContext, _serviceProvider);
         }
 
-        private IRepository<EntityEntry> GetChildRepositoryFor(EntityEntry entry)
+        #region Get child repositories
+        private IRepository GetChildRepositoryFor(EntityEntry entry)
         {
             var repoType = entry.Entity.GetType();
-            return GetChildRepositoryFor(repoType);
+            var mi = this.GetType().GetMethods().FirstOrDefault(x => x.Name == "GetChildRepositoryFor" && x.IsGenericMethod);
+            var genericMethod = mi.MakeGenericMethod(repoType);
+
+            return (IRepository)genericMethod.Invoke(this, null); ;
         }
 
-        private IRepository<EntityEntry> GetChildRepositoryFor(Type type)
+        private IRepository GetChildRepositoryFor(Type type)
         {
             var repoKey = type.FullName;
             if (_childRepositories.ContainsKey(repoKey))
             {
-                return _childRepositories[repoKey];
+                return (IRepository)_childRepositories[repoKey];
             }
 
             var childRepositoryType = typeof(IRepository<,>).MakeGenericType(type, _dbContext.GetType());
-            return (IRepository<EntityEntry>)_serviceProvider.GetService(childRepositoryType);
+            return (IRepository)_serviceProvider.GetService(childRepositoryType);
         }
+
+
+        /// <inheritdoc />
+        public IRepository<T2> GetChildRepositoryFor<T2>() where T2 : class
+        {
+            return (IRepository<T2>)GetChildRepositoryFor(typeof(T2));
+        }
+        #endregion
 
         #region Static things
 
@@ -295,7 +307,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             }
             else
             {
-                return await GetChildRepositoryFor(ent).AuthorizeEntityChangeAsync(ent, usr);
+                return await ((IEfRepository)GetChildRepositoryFor(ent)).AuthorizeEntityChangeAsync(ent, usr);
             }
         }
 
@@ -516,10 +528,5 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             return _dbContext.Entry(entity).State;
         }
 
-        /// <inheritdoc />
-        public IRepository<T2, EntityEntry> GetChildRepositoryFor<T2>() where T2 : class
-        {
-            return (IRepository<T2, EntityEntry>)GetChildRepositoryFor(typeof(T2));
-        }
     }
 }
