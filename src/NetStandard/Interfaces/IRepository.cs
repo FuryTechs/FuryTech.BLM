@@ -43,7 +43,7 @@ namespace FuryTechs.BLM.NetStandard.Interfaces
     {
     }
 
-    public interface IRepository<in TInput, TOutput> : IDisposable
+    public interface IRepository<in TInput, TOutput> : IDisposable, IRepository
         where TInput : class
         where TOutput : class
     {
