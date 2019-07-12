@@ -31,6 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddBlmEfCore();
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(EfRepository<>), typeof(EfRepository<>));
             services.AddScoped<DbContext, TDbContext>();
 
             if (identityResolver != null)
