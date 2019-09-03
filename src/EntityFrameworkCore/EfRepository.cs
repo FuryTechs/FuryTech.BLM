@@ -89,7 +89,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore
                 return (IRepository)_childRepositories[repoKey];
             }
 
-            var childRepositoryType = typeof(IRepository<,>).MakeGenericType(type, _dbContext.GetType());
+            var childRepositoryType = typeof(EfRepository<,>).MakeGenericType(type, _dbContext.GetType());
             return (IRepository)_serviceProvider.GetService(childRepositoryType);
         }
 

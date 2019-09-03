@@ -45,6 +45,12 @@
         <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.AddRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
             <inheritdoc />
         </member>
+        <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.Dispose(System.Boolean)">
+            <summary>
+            Dispose repository
+            </summary>
+            <param name="force">If <value>true</value>, it will dispose the DbContext also, otherwise it won't</param>
+        </member>
         <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.Dispose">
             <inheritdoc />
         </member>

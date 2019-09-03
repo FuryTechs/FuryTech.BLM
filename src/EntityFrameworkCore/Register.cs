@@ -17,6 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static void AddBlmEfCore(this IServiceCollection services)
         {
             services.AddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
+            services.AddScoped(typeof(EfRepository<,>), typeof(EfRepository<,>));
         }
 
         /// <summary>
@@ -31,7 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddBlmEfCore();
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-            services.AddScoped(typeof(EfRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(EfRepository<>));
             services.AddScoped<DbContext, TDbContext>();
 
             if (identityResolver != null)
