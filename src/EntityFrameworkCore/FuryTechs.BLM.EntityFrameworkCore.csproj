@@ -9,8 +9,8 @@
     <Authors>FuryTechs</Authors>
     <Product>FuryTechs.BLM.EntityFrameworkCore</Product>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.0.21</Version>
-    <AssemblyVersion>2.0.21.0</AssemblyVersion>
+    <Version>2.0.22</Version>
+    <AssemblyVersion>2.0.22.0</AssemblyVersion>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/FuryTechs/FuryTech.BLM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/FuryTechs/FuryTech.BLM</RepositoryUrl>
