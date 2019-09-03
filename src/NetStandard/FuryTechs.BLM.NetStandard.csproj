@@ -8,7 +8,7 @@
     <Description>FuryTech Business Layer Management tools for .NET Standard 2.0</Description>
     <Product>FuryTechs.BLM.NetStandard</Product>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
-    <Version>2.0.20</Version>
+    <Version>2.0.21</Version>
     <PackageProjectUrl>https://github.com/FuryTechs/FuryTech.BLM</PackageProjectUrl>
     <RepositoryUrl>https://github.com/FuryTechs/FuryTech.BLM</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>

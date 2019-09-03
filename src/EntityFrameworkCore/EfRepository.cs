@@ -196,19 +196,27 @@ namespace FuryTechs.BLM.EntityFrameworkCore
             await Task.Factory.StartNew(() => { _dbSet.AddRange(newItems); });
         }
 
-
-        /// <inheritdoc />
-        public void Dispose()
+        /// <summary>
+        /// Dispose repository
+        /// </summary>
+        /// <param name="force">If <value>true</value>, it will dispose the DbContext also, otherwise it won't</param>
+        public void Dispose(bool force)
         {
             foreach (var childRepo in _childRepositories)
             {
                 childRepo.Value?.Dispose();
             }
 
-            if (_disposeDbContextOnDispose)
+            if (_disposeDbContextOnDispose || force)
             {
                 _dbContext?.Dispose();
             }
+        }
+      
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(false);
         }
 
         /// <inheritdoc />
