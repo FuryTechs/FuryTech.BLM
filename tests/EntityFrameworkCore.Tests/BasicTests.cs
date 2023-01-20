@@ -13,7 +13,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
 {
     public class BasicTests : AbstractEfRepositoryTest
     {
-        protected MockEntity ValidEntity = new MockEntity()
+        protected MockEntity ValidEntity = new()
         {
             Id = 1,
             IsValid = true,
@@ -21,7 +21,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
             IsVisible2 = true
         };
 
-        protected MockEntity InvalidEntity = new MockEntity()
+        protected MockEntity InvalidEntity = new()
         {
             Id = 2,
             IsValid = false,
@@ -29,7 +29,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
             IsVisible2 = false
         };
 
-        protected MockEntity InvisibleEntity = new MockEntity()
+        protected MockEntity InvisibleEntity = new()
         {
             Id = 3,
             IsValid = true,
@@ -37,7 +37,7 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
             IsVisible2 = true
         };
 
-        protected MockEntity InvisibleEntity2 = new MockEntity()
+        protected MockEntity InvisibleEntity2 = new()
         {
             Id = 4,
             IsValid = true,

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace FuryTechs.BLM.EntityFrameworkCore
 {
-    public class EfRepository<T, TDbContext> : EfRepository<T>
+    public class EfRepository<T, TDbContext> : EfRepository<T>, IRepository<T, TDbContext>
         where T : class, new()
         where TDbContext : DbContext
     {

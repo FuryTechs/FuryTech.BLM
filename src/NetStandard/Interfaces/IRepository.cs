@@ -38,14 +38,8 @@ namespace FuryTechs.BLM.NetStandard.Interfaces
         );
     }
 
-
-    public interface IRepository<T> : IRepository<T, T> where T : class
-    {
-    }
-
-    public interface IRepository<in TInput, TOutput> : IDisposable, IRepository
-        where TInput : class
-        where TOutput : class
+    public interface IRepository<T> : IRepository
+        where T : class
     {
 
         /// <summary>
@@ -53,70 +47,70 @@ namespace FuryTechs.BLM.NetStandard.Interfaces
         /// </summary>
         /// <param name="user">User who tries to operate with the entity set</param>
         /// <returns>Query object</returns>
-        IQueryable<TOutput> Entities(IIdentity user = null);
+        IQueryable<T> Entities(IIdentity user = null);
 
         /// <summary>
         /// Gets the entity set which is visible to the provided user
         /// </summary>
         /// <param name="user">User who tries to operate with the entity set</param>
         /// <returns>Query object</returns>
-        Task<IQueryable<TOutput>> EntitiesAsync(IIdentity user = null);
+        Task<IQueryable<T>> EntitiesAsync(IIdentity user = null);
 
         /// <summary>
         /// Add a new entity to the repository in the name of the provided user
         /// </summary>
         /// <param name="newItem">Entity</param>
         /// <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
-        void Add(TInput newItem, IIdentity user = null);
+        void Add(T newItem, IIdentity user = null);
 
         /// <summary>
         /// Add a new entity to the repository in the name of the provided user
         /// </summary>
         /// <param name="newItem">Entity</param>
         /// <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
-        Task AddAsync(TInput newItem, IIdentity user = null);
+        Task AddAsync(T newItem, IIdentity user = null);
 
         /// <summary>
         /// Add multiple entities to the repository in the name of the provided user
         /// </summary>
         /// <param name="newItem">Entity</param>
         /// <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
-        void AddRange(IEnumerable<TInput> newItems, IIdentity user = null);
+        void AddRange(IEnumerable<T> newItems, IIdentity user = null);
 
         /// <summary>
         /// Add multiple entities to the repository in the name of the provided user
         /// </summary>
         /// <param name="newItem">Entity</param>
         /// <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
-        Task AddRangeAsync(IEnumerable<TInput> newItems, IIdentity user = null);
+        Task AddRangeAsync(IEnumerable<T> newItems, IIdentity user = null);
 
         /// <summary>
         /// Removes an entity from the repository. The operation will be done by the provided user.
         /// </summary>
         /// <param name="newItem">Entity</param>
         /// <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
-        void Remove(TInput item, IIdentity user = null);
+        void Remove(T item, IIdentity user = null);
 
         /// <summary>
         /// Removes an entity from the repository. The operation will be done by the provided user.
         /// </summary>
         /// <param name="newItem">Entity</param>
         /// <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
-        Task RemoveAsync(TInput item, IIdentity user = null);
+        Task RemoveAsync(T item, IIdentity user = null);
 
         /// <summary>
         /// Removes multiple entities from the repository. The operation will be done by the provided user.
         /// </summary>
         /// <param name="newItem">Entity</param>
         /// <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
-        void RemoveRange(IEnumerable<TInput> items, IIdentity user = null);
+        void RemoveRange(IEnumerable<T> items, IIdentity user = null);
 
         /// <summary>
         /// Removes multiple entities from the repository. The operation will be done by the provided user.
         /// </summary>
         /// <param name="newItem">Entity</param>
         /// <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
-        Task RemoveRangeAsync(IEnumerable<TInput> items, IIdentity user = null);
+        Task RemoveRangeAsync(IEnumerable<T> items, IIdentity user = null);
 
         /// <summary>
         /// Resolves the child repository for the given type parameter

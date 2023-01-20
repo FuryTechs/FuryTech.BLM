@@ -1,6 +1,7 @@
 ﻿using FuryTechs.BLM.NetStandard.Tests;
 using Microsoft.EntityFrameworkCore;
 using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Xunit;
 
 namespace FuryTechs.BLM.EntityFrameworkCore.Tests
@@ -17,9 +18,10 @@ namespace FuryTechs.BLM.EntityFrameworkCore.Tests
         /// <param name="mb"></param>
         protected override void OnModelCreating(ModelBuilder mb)
         {
-            base.OnModelCreating(mb);
             mb.Entity<LogicalDeleteEntity>().HasBaseType<MockEntity>();
             mb.Entity<InheritedLogicalDeleteEntity>().HasBaseType<MockEntity>();
+            mb.Entity<MockEntity>().Property("Discriminator")
+                .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Save);
         }
 
         public virtual DbSet<MockEntity> MockEntities { get; set; }
