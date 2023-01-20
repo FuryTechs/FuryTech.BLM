@@ -15,7 +15,7 @@
     <RepositoryUrl>https://github.com/FuryTechs/FuryTech.BLM</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <PackageLicense>MIT</PackageLicense>
-    <PackageLicenseUrl>https://github.com/FuryTechs/FuryTech.BLM/blob/master/License.md</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <PackageVersion>7.0.0</PackageVersion>
