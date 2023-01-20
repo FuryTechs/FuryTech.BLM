@@ -174,77 +174,77 @@
             <param name="isChildRepository"></param>
             <returns></returns>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.Entities(System.Security.Principal.IIdentity)">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.Entities(System.Security.Principal.IIdentity)">
             <summary>
             Gets the entity set which is visible to the provided user
             </summary>
             <param name="user">User who tries to operate with the entity set</param>
             <returns>Query object</returns>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.EntitiesAsync(System.Security.Principal.IIdentity)">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.EntitiesAsync(System.Security.Principal.IIdentity)">
             <summary>
             Gets the entity set which is visible to the provided user
             </summary>
             <param name="user">User who tries to operate with the entity set</param>
             <returns>Query object</returns>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.Add(`0,System.Security.Principal.IIdentity)">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.Add(`0,System.Security.Principal.IIdentity)">
             <summary>
             Add a new entity to the repository in the name of the provided user
             </summary>
             <param name="newItem">Entity</param>
             <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.AddAsync(`0,System.Security.Principal.IIdentity)">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.AddAsync(`0,System.Security.Principal.IIdentity)">
             <summary>
             Add a new entity to the repository in the name of the provided user
             </summary>
             <param name="newItem">Entity</param>
             <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.AddRange(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.AddRange(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
             <summary>
             Add multiple entities to the repository in the name of the provided user
             </summary>
             <param name="newItem">Entity</param>
             <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.AddRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.AddRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
             <summary>
             Add multiple entities to the repository in the name of the provided user
             </summary>
             <param name="newItem">Entity</param>
             <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.Remove(`0,System.Security.Principal.IIdentity)">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.Remove(`0,System.Security.Principal.IIdentity)">
             <summary>
             Removes an entity from the repository. The operation will be done by the provided user.
             </summary>
             <param name="newItem">Entity</param>
             <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.RemoveAsync(`0,System.Security.Principal.IIdentity)">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.RemoveAsync(`0,System.Security.Principal.IIdentity)">
             <summary>
             Removes an entity from the repository. The operation will be done by the provided user.
             </summary>
             <param name="newItem">Entity</param>
             <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.RemoveRange(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.RemoveRange(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
             <summary>
             Removes multiple entities from the repository. The operation will be done by the provided user.
             </summary>
             <param name="newItem">Entity</param>
             <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.RemoveRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.RemoveRangeAsync(System.Collections.Generic.IEnumerable{`0},System.Security.Principal.IIdentity)">
             <summary>
             Removes multiple entities from the repository. The operation will be done by the provided user.
             </summary>
             <param name="newItem">Entity</param>
             <param name="user">(optional) User; When not provided, it will be resolved somehow else</param>
         </member>
-        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`2.GetChildRepositoryFor``1">
+        <member name="M:FuryTechs.BLM.NetStandard.Interfaces.IRepository`1.GetChildRepositoryFor``1">
             <summary>
             Resolves the child repository for the given type parameter
             </summary>

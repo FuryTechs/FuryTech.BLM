@@ -15,7 +15,8 @@
     <RepositoryUrl>https://github.com/FuryTechs/FuryTech.BLM</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <PackageLicense>MIT</PackageLicense>
-    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <PackageVersion>7.0.0</PackageVersion>
@@ -32,6 +33,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NetStandard\FuryTechs.BLM.NetStandard.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\License.md" Pack="true" PackagePath="\">
+      <Link>License.md</Link>
+    </None>
+    <Content Include="..\..\README.md" Pack="true" PackagePath="\">
+      <Link>README.md</Link>
+    </Content>
   </ItemGroup>
 
 </Project>

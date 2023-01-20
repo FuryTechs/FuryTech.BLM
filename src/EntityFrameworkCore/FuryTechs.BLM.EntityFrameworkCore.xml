@@ -6,7 +6,7 @@
     <members>
         <member name="P:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.IgnoreLogicalDeleteError">
             <summary>
-            If there are inherited objets, which have LogicalDeleteAttribue-s on it, we throw an exception
+            If there are inherited objets, which have LogicalDeleteAttribute-s on it, we throw an exception
             </summary>
         </member>
         <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.#ctor(System.Type,System.IServiceProvider)">
@@ -85,10 +85,18 @@
             <inheritdoc />
         </member>
         <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.SetEntityState(`0,Microsoft.EntityFrameworkCore.EntityState)">
-            <inheritdoc />
+            <summary>
+            Sets the state of an entity
+            </summary>
+            <param name="entity">Entity to set</param>
+            <param name="newState">New entity state</param>
         </member>
         <member name="M:FuryTechs.BLM.EntityFrameworkCore.EfRepository`1.GetEntityState(`0)">
-            <inheritdoc />
+            <summary>
+            Gets the entity state
+            </summary>
+            <param name="entity">Entity to get it's state</param>
+            <returns>The state of the entity</returns>
         </member>
         <member name="T:FuryTechs.BLM.EntityFrameworkCore.Identity.IIdentityResolver">
             <summary>
