@@ -26,7 +26,6 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
       - name: Display dotnet version
         run: dotnet --version
-
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
