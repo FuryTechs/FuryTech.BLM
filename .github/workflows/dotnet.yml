@@ -24,7 +24,7 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
       - name: Display dotnet version
-        run: dotnet --version -r ${{ matrix.dotnet-version }}
+        run: dotnet --version
       - name: Restore dependencies
         run: dotnet restore -r ${{ matrix.dotnet-version }}
       - name: Build
