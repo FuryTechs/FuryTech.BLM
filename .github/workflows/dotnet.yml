@@ -15,8 +15,8 @@ jobs:
     strategy:
       matrix:
         dotnet-version:
-          - 6.x
-          - 7.x
+          - 6
+          - 7
     steps:
       - uses: actions/checkout@v3
       - name: Setup dotnet ${{ matrix.dotnet-version }}
@@ -24,10 +24,10 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
       - name: Display dotnet version
-        run: dotnet --version
+        run: dotnet --version -r ${{ matrix.dotnet-version }}
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore -r ${{ matrix.dotnet-version }}
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build --no-restore -r ${{ matrix.dotnet-version }}
       - name: Test
-        run: dotnet test
+        run: dotnet test -r ${{ matrix.dotnet-version }}
